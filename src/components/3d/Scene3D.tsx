@@ -20,6 +20,7 @@ const Scene3D = () => {
       setHasUsedToday(true);
       setFortune(savedFortune);
       setShowFortune(true);
+      setIsGlowing(true); // Keep the glow for completed readings
     }
   }, []);
 
@@ -30,7 +31,7 @@ const Scene3D = () => {
     setIsGlowing(true);
     setIsRotating(true);
 
-    // After 2 seconds, show fortune
+    // After 2.5 seconds, show fortune
     setTimeout(() => {
       const dailyFortune = getDailyFortune();
       setFortune(dailyFortune);
@@ -40,31 +41,41 @@ const Scene3D = () => {
 
       // Save to localStorage
       saveDailyFortune(dailyFortune);
-    }, 2000);
+    }, 2500);
   };
 
   return (
-    <div className="h-[600px] w-full relative">
+    <div className="h-[700px] w-full relative bg-gradient-to-b from-slate-900 via-purple-900 to-indigo-900">
       <Canvas
-        camera={{ position: [0, 0, 6], fov: 50 }}
+        camera={{ position: [0, 0, 7], fov: 45 }}
         className="rounded-3xl"
         shadows
       >
         <Suspense fallback={null}>
           <Environment preset="night" background={false} />
-          <fog attach="fog" args={['#0f0f23', 5, 50]} />
+          <fog attach="fog" args={['#0f0f23', 8, 60]} />
           
-          {/* Enhanced Lighting */}
-          <ambientLight intensity={0.2} color="#1e1b4b" />
+          {/* Enhanced atmospheric lighting */}
+          <ambientLight intensity={0.15} color="#1e1b4b" />
           <directionalLight 
-            position={[10, 10, 5]} 
-            intensity={0.8} 
+            position={[15, 15, 8]} 
+            intensity={0.4} 
             color="#6366f1"
+            castShadow
           />
-          <pointLight position={[-10, 5, -10]} intensity={0.5} color="#8b5cf6" />
+          <pointLight position={[-12, 8, -12]} intensity={0.3} color="#8b5cf6" />
+          <pointLight position={[8, -5, 10]} intensity={0.2} color="#ec4899" />
           
-          {/* Stars Background */}
-          <Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={0.5} />
+          {/* Enhanced starfield */}
+          <Stars 
+            radius={150} 
+            depth={80} 
+            count={3000} 
+            factor={6} 
+            saturation={0.2} 
+            fade 
+            speed={0.3} 
+          />
           
           {/* Fortune Ball */}
           <FortuneBall 
@@ -73,24 +84,27 @@ const Scene3D = () => {
             isRotating={isRotating}
           />
           
-          {/* Ground Plane with Contact Shadows */}
+          {/* Enhanced ground shadows */}
           <ContactShadows 
-            position={[0, -2, 0]} 
-            opacity={0.3} 
-            scale={10} 
-            blur={2} 
-            far={4} 
+            position={[0, -2.5, 0]} 
+            opacity={0.4} 
+            scale={15} 
+            blur={3} 
+            far={5}
+            color="#1e1b4b"
           />
           
           <OrbitControls
             enableZoom={true}
             enablePan={false}
-            autoRotate={!isRotating}
-            autoRotateSpeed={0.5}
-            maxPolarAngle={Math.PI / 1.8}
-            minPolarAngle={Math.PI / 6}
-            maxDistance={10}
-            minDistance={3}
+            autoRotate={!isRotating && !hasUsedToday}
+            autoRotateSpeed={0.3}
+            maxPolarAngle={Math.PI / 1.6}
+            minPolarAngle={Math.PI / 8}
+            maxDistance={12}
+            minDistance={4}
+            dampingFactor={0.05}
+            enableDamping
           />
         </Suspense>
       </Canvas>
