@@ -32,7 +32,7 @@ const Contact = () => {
               </CardHeader>
               <CardContent>
                 <a 
-                  href="tel:+918787665349" 
+                  href="tel:+917005498122" 
                   className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
                 >
                   +91 7005498122
@@ -51,12 +51,12 @@ const Contact = () => {
               </CardHeader>
               <CardContent>
                 <a 
-                  href="https://wa.me/918787665349" 
+                  href="https://wa.me/917005498122" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="text-2xl font-bold text-green-600 hover:text-green-700 transition-colors"
                 >
-                  +91 8787665349
+                  +91 7005498122
                 </a>
                 <p className="text-gray-600 mt-2">24/7 messaging support</p>
               </CardContent>
@@ -97,14 +97,14 @@ const Contact = () => {
                 <h4 className="font-semibold text-gray-900 mb-3">Quick Actions</h4>
                 <div className="space-y-3">
                   <a 
-                    href="tel:+918787665349" 
+                    href="tel:+917005498122" 
                     className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     <Phone className="w-4 h-4" />
                     Call Now
                   </a>
                   <a 
-                    href="https://wa.me/918787665349" 
+                    href="https://wa.me/917005498122" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
