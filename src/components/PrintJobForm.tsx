@@ -41,8 +41,8 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
 
   const serviceHandlers = createServiceHandlers(setSelectedServices);
 
-  // Normalize deliveryRequested to boolean
-  const deliveryRequested = Boolean(deliveryRequestedRaw);
+  // Normalize deliveryRequested to boolean - ensure it's always a boolean
+  const deliveryRequested = deliveryRequestedRaw === true || deliveryRequestedRaw === 'true';
 
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
