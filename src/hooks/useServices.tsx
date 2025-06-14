@@ -19,7 +19,8 @@ export const useServices = () => {
 
   const loadServices = async () => {
     try {
-      const { data, error } = await supabase
+      // Use any type to bypass TypeScript errors until types are updated
+      const { data, error } = await (supabase as any)
         .from('services')
         .select('*')
         .order('created_at', { ascending: true });
@@ -40,7 +41,7 @@ export const useServices = () => {
             name: 'Color Printing',
             description: 'Vibrant color printing for presentations, photos, and graphics',
             price: '₹5/page',
-            category: 'Printing'
+            category: 'Color'
           },
           {
             id: '3',
@@ -70,7 +71,7 @@ export const useServices = () => {
             name: 'Color Printing',
             description: 'Vibrant color printing for presentations, photos, and graphics',
             price: '₹5/page',
-            category: 'Printing'
+            category: 'Color'
           },
           {
             id: '3',
@@ -91,7 +92,7 @@ export const useServices = () => {
 
   const addService = async (service: Omit<Service, 'id' | 'created_at'>) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('services')
         .insert([service])
         .select()
@@ -129,7 +130,7 @@ export const useServices = () => {
 
   const updateService = async (id: string, updates: Omit<Service, 'id' | 'created_at'>) => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('services')
         .update(updates)
         .eq('id', id)
@@ -168,7 +169,7 @@ export const useServices = () => {
 
   const deleteService = async (id: string) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('services')
         .delete()
         .eq('id', id);
