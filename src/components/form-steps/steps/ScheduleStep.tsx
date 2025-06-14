@@ -16,7 +16,7 @@ interface ScheduleStepProps {
   onFormDataChange: (data: any) => void;
   canAccessDelivery: boolean;
   deliveryRequested: boolean;
-  onDeliveryRequestedChange: (requested: boolean) => void;
+  onDeliveryRequestedChange: (requested: boolean | string) => void;
 }
 
 const ScheduleStep = ({
