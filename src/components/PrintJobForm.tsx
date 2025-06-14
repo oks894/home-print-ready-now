@@ -44,6 +44,11 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
 
+  // Convert deliveryRequested to boolean if it's a string
+  const deliveryRequestedBoolean = typeof deliveryRequested === 'string' 
+    ? deliveryRequested === 'true' 
+    : Boolean(deliveryRequested);
+
   const handleSubmit = async () => {
     if (!canProceed()) {
       toast({
@@ -60,7 +65,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         files: files.length,
         selectedServices: selectedServices.length,
         totalAmount,
-        deliveryRequested
+        deliveryRequested: deliveryRequestedBoolean
       });
 
       const trackingId = await submitPrintJob(
@@ -68,7 +73,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         files,
         selectedServices,
         totalAmount,
-        deliveryRequested,
+        deliveryRequestedBoolean,
         canAccessDelivery
       );
       
@@ -91,11 +96,6 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     visible: { opacity: 1, x: 0, scale: 1 },
     exit: { opacity: 0, x: -100, scale: 0.95 }
   };
-
-  // Convert deliveryRequested to boolean if it's a string
-  const deliveryRequestedBoolean = typeof deliveryRequested === 'string' 
-    ? deliveryRequested === 'true' 
-    : Boolean(deliveryRequested);
 
   return (
     <section className="py-16 px-4 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
