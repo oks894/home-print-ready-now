@@ -1,12 +1,13 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, User, Clock, Settings, CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { usePrintJobSubmission } from '@/hooks/usePrintJobSubmission';
 import { useServices } from '@/hooks/useServices';
 import { useToast } from '@/hooks/use-toast';
-import { SelectedService } from '@/types/service';
+import { usePrintJobForm } from '@/hooks/usePrintJobForm';
+import { createServiceHandlers } from '@/utils/serviceHandlers';
+import { steps } from './form-steps/stepDefinitions';
 import StepProgress from './form-steps/StepProgress';
 import StepContent from './form-steps/StepContent';
 import NavigationButtons from './form-steps/NavigationButtons';
@@ -16,87 +17,32 @@ interface PrintJobFormProps {
 }
 
 const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [files, setFiles] = useState<File[]>([]);
-  const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
-  const [totalAmount, setTotalAmount] = useState(0);
-  const [canAccessDelivery, setCanAccessDelivery] = useState(false);
-  const [deliveryRequested, setDeliveryRequested] = useState<boolean>(false);
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    institute: '',
-    timeSlot: '',
-    notes: ''
-  });
+  const {
+    currentStep,
+    files,
+    selectedServices,
+    totalAmount,
+    canAccessDelivery,
+    deliveryRequested,
+    formData,
+    setFiles,
+    setSelectedServices,
+    setFormData,
+    handleNext,
+    handlePrevious,
+    canProceed,
+    resetForm,
+    handleDeliveryRequestedChange
+  } = usePrintJobForm();
 
   const { submitPrintJob, isSubmitting } = usePrintJobSubmission();
   const { services, isLoading: servicesLoading } = useServices();
   const { toast } = useToast();
 
+  const serviceHandlers = createServiceHandlers(setSelectedServices);
+
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
-
-  const steps = [
-    { 
-      id: 'upload', 
-      title: 'Upload Files', 
-      icon: FileText, 
-      description: 'Upload your documents',
-      color: 'from-blue-500 to-cyan-500'
-    },
-    { 
-      id: 'services', 
-      title: 'Select Services', 
-      icon: Settings, 
-      description: 'Choose printing options',
-      color: 'from-purple-500 to-pink-500'
-    },
-    { 
-      id: 'info', 
-      title: 'Your Details', 
-      icon: User, 
-      description: 'Contact information',
-      color: 'from-green-500 to-emerald-500'
-    },
-    { 
-      id: 'schedule', 
-      title: 'Schedule', 
-      icon: Clock, 
-      description: 'Pick up time',
-      color: 'from-orange-500 to-red-500'
-    },
-    { 
-      id: 'review', 
-      title: 'Review & Submit', 
-      icon: CheckCircle, 
-      description: 'Confirm your order',
-      color: 'from-indigo-500 to-purple-500'
-    }
-  ];
-
-  const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 0) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
-
-  const canProceed = () => {
-    switch (currentStep) {
-      case 0: return files.length > 0;
-      case 1: return selectedServices.length > 0;
-      case 2: return formData.name.trim() && formData.phone.trim();
-      case 3: return formData.timeSlot.trim();
-      case 4: return true;
-      default: return false;
-    }
-  };
 
   const handleSubmit = async () => {
     if (!canProceed()) {
@@ -128,20 +74,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
       
       if (trackingId) {
         onOrderSubmitted(trackingId);
-        
-        // Reset form with explicit boolean type
-        setCurrentStep(0);
-        setFiles([]);
-        setSelectedServices([]);
-        setFormData({
-          name: '',
-          phone: '',
-          institute: '',
-          timeSlot: '',
-          notes: ''
-        });
-        setDeliveryRequested(false);
-        setTotalAmount(0);
+        resetForm();
       }
     } catch (error) {
       console.error('Error submitting print job:', error);
@@ -153,50 +86,10 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     }
   };
 
-  const handleServiceAdd = (service: any, quantity = 1) => {
-    console.log('Adding service:', service, 'quantity:', quantity);
-    const basePrice = parseFloat(service.price.replace(/[₹\/\w\s]/g, '')) || 0;
-    const newService: SelectedService = { 
-      ...service, 
-      quantity, 
-      calculatedPrice: basePrice * quantity 
-    };
-    setSelectedServices(prev => [...prev, newService]);
-  };
-
-  const handleServiceUpdate = (serviceId: string, quantity: number) => {
-    console.log('Updating service:', serviceId, 'quantity:', quantity);
-    setSelectedServices(services => 
-      services.map(s => {
-        if (s.id === serviceId) {
-          const basePrice = parseFloat(s.price.replace(/[₹\/\w\s]/g, '')) || 0;
-          return { ...s, quantity, calculatedPrice: basePrice * quantity };
-        }
-        return s;
-      })
-    );
-  };
-
-  const handleServiceRemove = (serviceId: string) => {
-    console.log('Removing service:', serviceId);
-    setSelectedServices(services => services.filter(s => s.id !== serviceId));
-  };
-
-  useEffect(() => {
-    const total = selectedServices.reduce((sum, service) => sum + service.calculatedPrice, 0);
-    setTotalAmount(total);
-    setCanAccessDelivery(total >= 200);
-    console.log('Total amount updated:', total);
-  }, [selectedServices]);
-
   const stepVariants = {
     hidden: { opacity: 0, x: 100, scale: 0.95 },
     visible: { opacity: 1, x: 0, scale: 1 },
     exit: { opacity: 0, x: -100, scale: 0.95 }
-  };
-
-  const handleDeliveryRequestedChange = (requested: boolean) => {
-    setDeliveryRequested(requested);
   };
 
   return (
@@ -237,9 +130,9 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
                   onFilesChange={setFiles}
                   services={services}
                   selectedServices={selectedServices}
-                  onAddService={handleServiceAdd}
-                  onUpdateQuantity={handleServiceUpdate}
-                  onRemoveService={handleServiceRemove}
+                  onAddService={serviceHandlers.handleServiceAdd}
+                  onUpdateQuantity={serviceHandlers.handleServiceUpdate}
+                  onRemoveService={serviceHandlers.handleServiceRemove}
                   totalAmount={totalAmount}
                   canAccessDelivery={canAccessDelivery}
                   formData={formData}
