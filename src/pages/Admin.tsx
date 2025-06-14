@@ -1,9 +1,8 @@
-
 import { useState } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminTabs } from '@/components/admin/AdminTabs';
-import { useAdminData } from '@/components/admin/AdminData';
+import { useAdminData } from '@/hooks/useAdminData';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -1,10 +1,10 @@
-
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PrintJobsList } from '@/components/admin/PrintJobsList';
 import { JobDetails } from '@/components/admin/JobDetails';
 import { FeedbackList } from '@/components/admin/FeedbackList';
 import { ServicesManager } from '@/components/admin/ServicesManager';
 import { PrintJob } from '@/types/printJob';
+import { Feedback } from '@/types/admin';
 
 interface Feedback {
   id: string;

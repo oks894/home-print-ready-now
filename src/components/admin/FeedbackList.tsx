@@ -1,18 +1,8 @@
-
 import { MessageSquare, Star, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface Feedback {
-  id: string;
-  name: string;
-  email: string;
-  service: string;
-  comments: string;
-  rating: number;
-  timestamp: string;
-}
+import { Feedback } from '@/types/admin';
 
 interface FeedbackListProps {
   feedback: Feedback[];
