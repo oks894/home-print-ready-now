@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,7 @@ import CustomerForm from '@/components/CustomerForm';
 import TimeSlotSelector from '@/components/TimeSlotSelector';
 import SuccessMessage from '@/components/SuccessMessage';
 import Feedback from '@/components/Feedback';
+import TrackingPopup from '@/components/TrackingPopup';
 
 const Index = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -20,9 +22,24 @@ const Index = () => {
     notes: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [trackingId, setTrackingId] = useState('');
+  const [showTracking, setShowTracking] = useState(false);
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const generateTrackingId = () => {
+    return 'PR' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (files.length === 0) {
@@ -43,29 +60,54 @@ const Index = () => {
       return;
     }
 
-    // Store the print job data
-    const printJob = {
-      id: Date.now().toString(),
-      ...formData,
-      files: files.map(f => ({ name: f.name, size: f.size, type: f.type })),
-      timestamp: new Date().toISOString(),
-      status: 'pending'
-    };
+    try {
+      // Convert files to base64 for storage
+      const filesData = await Promise.all(
+        files.map(async (file) => ({
+          name: file.name,
+          size: file.size,
+          type: file.type,
+          data: await fileToBase64(file)
+        }))
+      );
 
-    const existingJobs = JSON.parse(localStorage.getItem('printJobs') || '[]');
-    localStorage.setItem('printJobs', JSON.stringify([...existingJobs, printJob]));
+      const newTrackingId = generateTrackingId();
+      
+      // Store the print job data
+      const printJob = {
+        id: Date.now().toString(),
+        trackingId: newTrackingId,
+        ...formData,
+        files: filesData,
+        timestamp: new Date().toISOString(),
+        status: 'pending'
+      };
 
-    setIsSubmitted(true);
-    toast({
-      title: "Print job submitted successfully!",
-      description: "You will receive a confirmation call shortly.",
-    });
+      const existingJobs = JSON.parse(localStorage.getItem('printJobs') || '[]');
+      localStorage.setItem('printJobs', JSON.stringify([...existingJobs, printJob]));
+
+      setTrackingId(newTrackingId);
+      setShowTracking(true);
+
+      toast({
+        title: "Print job submitted successfully!",
+        description: "Your tracking ID: " + newTrackingId,
+      });
+    } catch (error) {
+      toast({
+        title: "Error submitting print job",
+        description: "Please try again",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleNewOrder = () => {
     setIsSubmitted(false);
+    setShowTracking(false);
     setFiles([]);
     setFormData({ name: '', phone: '', institute: '', timeSlot: '', notes: '' });
+    setTrackingId('');
   };
 
   if (isSubmitted) {
@@ -125,6 +167,14 @@ const Index = () => {
 
       <Feedback />
       <Footer />
+
+      {showTracking && (
+        <TrackingPopup 
+          trackingId={trackingId} 
+          onClose={() => setShowTracking(false)}
+          onNewOrder={handleNewOrder}
+        />
+      )}
     </div>
   );
 };
