@@ -17,10 +17,8 @@ export const usePrintJobSubmission = () => {
   const { toast } = useToast();
 
   const generateTrackingId = (phone: string) => {
-    const cleanPhone = phone.replace(/\D/g, '');
-    const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
-    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-    return `${cleanPhone}${timestamp}${random}`;
+    // Use only the phone number as tracking ID (remove any non-digits)
+    return phone.replace(/\D/g, '');
   };
 
   const convertFilesToBase64 = async (files: File[]): Promise<Array<{ name: string; size: number; type: string; data: string }>> => {
@@ -111,7 +109,7 @@ export const usePrintJobSubmission = () => {
 
       toast({
         title: "Order Submitted!",
-        description: `Your tracking ID is ${newTrackingId}. Total: ₹${totalAmount.toFixed(2)}`,
+        description: `Your tracking phone number is ${newTrackingId}. Total: ₹${totalAmount.toFixed(2)}${totalAmount > 0 && selectedServices.some(s => s.quantity >= 50) ? ' (Bulk discount applied!)' : ''}`,
       });
 
       return newTrackingId;
