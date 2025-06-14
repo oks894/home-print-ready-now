@@ -1,4 +1,5 @@
 
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -121,7 +122,13 @@
 
   /* Improve touch targets for mobile */
   button, a, input, select, textarea {
-    @apply min-h-[44px] sm:min-h-auto;
+    @apply min-h-[44px];
+  }
+
+  @media (min-width: 640px) {
+    button, a, input, select, textarea {
+      min-height: auto;
+    }
   }
 
   /* Mobile typography improvements */
@@ -167,3 +174,4 @@
     @apply text-xl sm:text-2xl lg:text-3xl;
   }
 }
+
