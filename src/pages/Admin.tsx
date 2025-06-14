@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminTabs } from '@/components/admin/AdminTabs';
+import { NotificationManager } from '@/components/admin/NotificationManager';
 import { useAdminData } from '@/hooks/useAdminData';
 
 const Admin = () => {
@@ -43,6 +44,11 @@ const Admin = () => {
           {isLoading && (
             <div className="mt-2 text-sm text-blue-600">Loading data...</div>
           )}
+        </div>
+
+        {/* Add Notification Manager */}
+        <div className="mb-6">
+          <NotificationManager />
         </div>
 
         <AdminTabs
