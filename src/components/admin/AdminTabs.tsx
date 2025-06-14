@@ -1,0 +1,96 @@
+
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { PrintJobsList } from '@/components/admin/PrintJobsList';
+import { JobDetails } from '@/components/admin/JobDetails';
+import { FeedbackList } from '@/components/admin/FeedbackList';
+import { ServicesManager } from '@/components/admin/ServicesManager';
+
+interface PrintJob {
+  id: string;
+  tracking_id?: string;
+  name: string;
+  phone: string;
+  institute: string;
+  time_slot: string;
+  notes: string;
+  files: Array<{ name: string; size: number; type: string; data?: string }>;
+  timestamp: string;
+  status: 'pending' | 'printing' | 'ready' | 'completed';
+}
+
+interface Feedback {
+  id: string;
+  name: string;
+  email: string;
+  service: string;
+  comments: string;
+  rating: number;
+  timestamp: string;
+}
+
+interface AdminTabsProps {
+  printJobs: PrintJob[];
+  feedback: Feedback[];
+  selectedJob: PrintJob | null;
+  isLoading: boolean;
+  isRetrying: boolean;
+  onJobSelect: (job: PrintJob) => void;
+  onStatusUpdate: (jobId: string, status: PrintJob['status']) => void;
+  onDeleteJob: (jobId: string) => void;
+  onDeleteFeedback: (feedbackId: string) => void;
+}
+
+export const AdminTabs = ({
+  printJobs,
+  feedback,
+  selectedJob,
+  isLoading,
+  isRetrying,
+  onJobSelect,
+  onStatusUpdate,
+  onDeleteJob,
+  onDeleteFeedback
+}: AdminTabsProps) => {
+  return (
+    <Tabs defaultValue="jobs" className="space-y-6">
+      <TabsList>
+        <TabsTrigger value="jobs">Print Jobs ({printJobs.length})</TabsTrigger>
+        <TabsTrigger value="feedback">Feedback ({feedback.length})</TabsTrigger>
+        <TabsTrigger value="services">Services</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="jobs">
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <PrintJobsList
+              printJobs={printJobs}
+              selectedJob={selectedJob}
+              onJobSelect={onJobSelect}
+              isLoading={isLoading}
+              isRetrying={isRetrying}
+            />
+          </div>
+          <div>
+            <JobDetails
+              selectedJob={selectedJob}
+              onStatusUpdate={onStatusUpdate}
+              onDeleteJob={onDeleteJob}
+            />
+          </div>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="feedback">
+        <FeedbackList
+          feedback={feedback}
+          onDeleteFeedback={onDeleteFeedback}
+          isLoading={isLoading}
+        />
+      </TabsContent>
+
+      <TabsContent value="services">
+        <ServicesManager />
+      </TabsContent>
+    </Tabs>
+  );
+};
