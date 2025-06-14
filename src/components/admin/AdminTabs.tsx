@@ -1,8 +1,10 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PrintJobsList } from '@/components/admin/PrintJobsList';
 import { JobDetails } from '@/components/admin/JobDetails';
 import { FeedbackList } from '@/components/admin/FeedbackList';
 import { ServicesManager } from '@/components/admin/ServicesManager';
+import { NotificationManager } from '@/components/admin/NotificationManager';
 import { PrintJob } from '@/types/printJob';
 import { Feedback } from '@/types/admin';
 
@@ -35,6 +37,7 @@ export const AdminTabs = ({
         <TabsTrigger value="jobs">Print Jobs ({printJobs.length})</TabsTrigger>
         <TabsTrigger value="feedback">Feedback ({feedback.length})</TabsTrigger>
         <TabsTrigger value="services">Services</TabsTrigger>
+        <TabsTrigger value="notifications">Notifications</TabsTrigger>
       </TabsList>
 
       <TabsContent value="jobs">
@@ -68,6 +71,10 @@ export const AdminTabs = ({
 
       <TabsContent value="services">
         <ServicesManager />
+      </TabsContent>
+
+      <TabsContent value="notifications">
+        <NotificationManager />
       </TabsContent>
     </Tabs>
   );
