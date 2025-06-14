@@ -1,11 +1,26 @@
 
 import React from 'react';
-import { Truck, Phone, MessageCircle, FileText, Palette, Package, Camera } from 'lucide-react';
+import { FileText, Palette, Package, Camera, Truck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useServices } from '@/hooks/useServices';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
+const getServiceIcon = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'printing': return FileText;
+    case 'color': return Palette;
+    case 'delivery': return Truck;
+    case 'binding': return Package;
+    case 'photo': return Camera;
+    default: return FileText;
+  }
+};
+
 const Services = () => {
+  const { services, isLoading } = useServices();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col">
       <Header />
@@ -22,80 +37,42 @@ const Services = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            <Card className="text-center">
-              <CardHeader>
-                <FileText className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                <CardTitle>Document Printing</CardTitle>
-                <CardDescription>
-                  ₹3.5 per page (₹2.5 per page for 50+ pages)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  High-quality black & white printing for all your documents
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <Palette className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                <CardTitle>Color Printing</CardTitle>
-                <CardDescription>
-                  ₹5 per page
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Vibrant color printing for presentations, photos, and graphics
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <Camera className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                <CardTitle>Passport Printing</CardTitle>
-                <CardDescription>
-                  ₹20 for 6 pieces
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Professional passport size photo printing service
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <Truck className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                <CardTitle>Doorstep Delivery</CardTitle>
-                <CardDescription>
-                  FREE for orders ₹900+
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Powered by DROPEE - Standard pricing applies for orders below ₹900
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <Package className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-                <CardTitle>Binding Services</CardTitle>
-                <CardDescription>
-                  Professional binding available
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-600">
-                  Spiral binding, hardcover, and other binding options
-                </p>
-              </CardContent>
-            </Card>
+            {isLoading ? (
+              // Loading skeletons
+              Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} className="text-center">
+                  <CardHeader>
+                    <Skeleton className="w-12 h-12 mx-auto mb-4 rounded" />
+                    <Skeleton className="h-6 w-32 mx-auto mb-2" />
+                    <Skeleton className="h-4 w-24 mx-auto" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-4 w-full mb-2" />
+                    <Skeleton className="h-4 w-3/4 mx-auto" />
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              services.map((service) => {
+                const IconComponent = getServiceIcon(service.category);
+                return (
+                  <Card key={service.id} className="text-center">
+                    <CardHeader>
+                      <IconComponent className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                      <CardTitle>{service.name}</CardTitle>
+                      <CardDescription>
+                        {service.price}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600">
+                        {service.description}
+                      </p>
+                    </CardContent>
+                  </Card>
+                );
+              })
+            )}
           </div>
         </div>
       </section>

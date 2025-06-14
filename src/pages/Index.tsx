@@ -29,8 +29,10 @@ const Index = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const generateTrackingId = () => {
-    return 'PJ' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
+  const generateTrackingId = (phone: string) => {
+    // Use phone number as tracking ID (remove any non-digits and ensure it's unique)
+    const cleanPhone = phone.replace(/\D/g, '');
+    return cleanPhone;
   };
 
   const convertFilesToBase64 = async (files: File[]): Promise<Array<{ name: string; size: number; type: string; data: string }>> => {
@@ -67,7 +69,7 @@ const Index = () => {
     setIsSubmitting(true);
 
     try {
-      const newTrackingId = generateTrackingId();
+      const newTrackingId = generateTrackingId(formData.phone);
       const filesWithData = await convertFilesToBase64(files);
 
       const { error } = await supabase

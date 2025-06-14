@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Search, Package, Clock, CheckCircle, Truck } from 'lucide-react';
@@ -6,16 +7,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 
 interface PrintJob {
   id: string;
-  trackingId: string;
+  tracking_id: string;
   name: string;
   phone: string;
   institute: string;
-  timeSlot: string;
+  time_slot: string;
   notes: string;
   files: Array<{ name: string; size: number; type: string }>;
   timestamp: string;
@@ -27,6 +30,7 @@ const Track = () => {
   const [job, setJob] = useState<PrintJob | null>(null);
   const [notFound, setNotFound] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const { toast } = useToast();
 
   const handleTrack = async () => {
     if (!trackingId.trim()) {
@@ -39,22 +43,40 @@ const Track = () => {
     setNotFound(false);
     setJob(null);
 
-    // Add a small delay to show loading state
-    await new Promise(resolve => setTimeout(resolve, 500));
-
     try {
-      const jobs = JSON.parse(localStorage.getItem('printJobs') || '[]');
-      console.log('All jobs:', jobs);
       console.log('Searching for tracking ID:', trackingId.trim());
       
-      const foundJob = jobs.find((j: PrintJob) => {
-        console.log('Comparing:', j.trackingId, 'with', trackingId.trim());
-        return j.trackingId && j.trackingId.toLowerCase() === trackingId.trim().toLowerCase();
-      });
+      const { data, error } = await supabase
+        .from('print_jobs')
+        .select('*')
+        .eq('tracking_id', trackingId.trim())
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error searching for job:', error);
+        toast({
+          title: "Search Error",
+          description: "There was an error searching for your order. Please try again.",
+          variant: "destructive"
+        });
+        setNotFound(true);
+        return;
+      }
       
-      if (foundJob) {
-        console.log('Job found:', foundJob);
-        setJob(foundJob);
+      if (data) {
+        console.log('Job found:', data);
+        setJob({
+          id: data.id,
+          tracking_id: data.tracking_id,
+          name: data.name,
+          phone: data.phone,
+          institute: data.institute || '',
+          time_slot: data.time_slot,
+          notes: data.notes || '',
+          files: Array.isArray(data.files) ? data.files : [],
+          timestamp: data.timestamp,
+          status: data.status
+        });
         setNotFound(false);
       } else {
         console.log('No job found');
@@ -63,6 +85,11 @@ const Track = () => {
       }
     } catch (error) {
       console.error('Error searching for job:', error);
+      toast({
+        title: "Search Error",
+        description: "There was an error searching for your order. Please try again.",
+        variant: "destructive"
+      });
       setJob(null);
       setNotFound(true);
     } finally {
@@ -120,26 +147,26 @@ const Track = () => {
               </Button>
             </Link>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Track Your Order</h1>
-            <p className="text-gray-600">Enter your tracking ID to check the status of your print job</p>
+            <p className="text-gray-600">Enter your phone number to check the status of your print job</p>
           </div>
 
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>Enter Tracking ID</CardTitle>
+              <CardTitle>Enter Your Phone Number</CardTitle>
               <CardDescription>
-                Use the tracking ID provided when you submitted your print job
+                Use the phone number you provided when submitting your print job
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="tracking">Tracking ID</Label>
+                <Label htmlFor="tracking">Phone Number</Label>
                 <div className="flex gap-2">
                   <Input
                     id="tracking"
                     value={trackingId}
                     onChange={(e) => setTrackingId(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    placeholder="Enter tracking ID (e.g., PR12345678)"
+                    placeholder="Enter your phone number"
                     className="font-mono"
                   />
                   <Button onClick={handleTrack} disabled={isSearching}>
@@ -157,9 +184,9 @@ const Track = () => {
                 <div className="text-center text-red-600">
                   <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <h3 className="text-lg font-semibold mb-2">Order Not Found</h3>
-                  <p>Please check your tracking ID and try again.</p>
+                  <p>Please check your phone number and try again.</p>
                   <p className="text-sm mt-2 text-gray-500">
-                    Make sure to enter the complete tracking ID as provided when you submitted your order.
+                    Make sure to enter the same phone number you used when submitting your order.
                   </p>
                 </div>
               </CardContent>
@@ -172,7 +199,7 @@ const Track = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle>Order Details</CardTitle>
-                    <CardDescription>Tracking ID: {job.trackingId}</CardDescription>
+                    <CardDescription>Phone Number: {job.tracking_id}</CardDescription>
                   </div>
                   <Badge className={getStatusColor(job.status)}>
                     {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
@@ -197,7 +224,7 @@ const Track = () => {
                       {job.institute && (
                         <p><span className="font-medium">Institute:</span> {job.institute}</p>
                       )}
-                      <p><span className="font-medium">Pickup Time:</span> {job.timeSlot}</p>
+                      <p><span className="font-medium">Pickup Time:</span> {job.time_slot}</p>
                     </div>
                   </div>
 

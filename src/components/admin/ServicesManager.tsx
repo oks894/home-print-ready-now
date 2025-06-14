@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useServices } from '@/hooks/useServices';
 
 interface Service {
   id: string;
@@ -17,45 +18,7 @@ interface Service {
 }
 
 export const ServicesManager = () => {
-  const { toast } = useToast();
-  const [services, setServices] = useState<Service[]>([
-    {
-      id: '1',
-      name: 'Document Printing',
-      description: 'High-quality black and white document printing',
-      price: '₹3.5/page',
-      category: 'Printing'
-    },
-    {
-      id: '2',
-      name: 'Color Printing',
-      description: 'Vibrant color printing for presentations and photos',
-      price: '₹5/page',
-      category: 'Printing'
-    },
-    {
-      id: '3',
-      name: 'Bulk Printing',
-      description: 'Cost-effective printing for large quantities',
-      price: '₹2.5/page (50+)',
-      category: 'Printing'
-    },
-    {
-      id: '4',
-      name: 'Binding Services',
-      description: 'Professional binding for documents and books',
-      price: '₹50-200',
-      category: 'Binding'
-    },
-    {
-      id: '5',
-      name: 'Doorstep Delivery',
-      description: 'Convenient delivery to your location',
-      price: '₹20-50',
-      category: 'Delivery'
-    }
-  ]);
-
+  const { services, isLoading, addService, updateService, deleteService } = useServices();
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [newService, setNewService] = useState<Omit<Service, 'id'>>({
@@ -65,51 +28,61 @@ export const ServicesManager = () => {
     category: ''
   });
 
-  const handleAddService = () => {
+  const handleAddService = async () => {
     if (!newService.name || !newService.price) {
-      toast({
-        title: "Error",
-        description: "Please fill in at least the name and price",
-        variant: "destructive"
-      });
       return;
     }
 
-    const service: Service = {
-      id: Date.now().toString(),
-      ...newService
-    };
-
-    setServices(prev => [...prev, service]);
-    setNewService({ name: '', description: '', price: '', category: '' });
-    setIsAdding(false);
-
-    toast({
-      title: "Service added",
-      description: "New service has been added successfully"
-    });
+    const success = await addService(newService);
+    if (success) {
+      setNewService({ name: '', description: '', price: '', category: '' });
+      setIsAdding(false);
+    }
   };
 
-  const handleEditService = (id: string, updatedService: Omit<Service, 'id'>) => {
-    setServices(prev => prev.map(service => 
-      service.id === id ? { ...service, ...updatedService } : service
-    ));
-    setEditingId(null);
-
-    toast({
-      title: "Service updated",
-      description: "Service has been updated successfully"
-    });
+  const handleEditService = async (id: string, updatedService: Omit<Service, 'id'>) => {
+    const success = await updateService(id, updatedService);
+    if (success) {
+      setEditingId(null);
+    }
   };
 
-  const handleDeleteService = (id: string) => {
-    setServices(prev => prev.filter(service => service.id !== id));
-    
-    toast({
-      title: "Service deleted",
-      description: "Service has been removed"
-    });
+  const handleDeleteService = async (id: string) => {
+    await deleteService(id);
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid gap-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i}>
+              <CardContent className="pt-6">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-6 w-48" />
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                  <div className="flex gap-2 ml-4">
+                    <Skeleton className="h-8 w-8" />
+                    <Skeleton className="h-8 w-8" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
