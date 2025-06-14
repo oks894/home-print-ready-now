@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -44,6 +45,9 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
 
+  // Ensure deliveryRequested is always boolean
+  const isDeliveryRequested = Boolean(deliveryRequested);
+
   const handleSubmit = async () => {
     if (!canProceed()) {
       toast({
@@ -60,7 +64,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         files: files.length,
         selectedServices: selectedServices.length,
         totalAmount,
-        deliveryRequested
+        deliveryRequested: isDeliveryRequested
       });
 
       const trackingId = await submitPrintJob(
@@ -68,7 +72,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         files,
         selectedServices,
         totalAmount,
-        deliveryRequested,
+        isDeliveryRequested,
         canAccessDelivery
       );
       
@@ -137,7 +141,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
                   canAccessDelivery={canAccessDelivery}
                   formData={formData}
                   onFormDataChange={setFormData}
-                  deliveryRequested={deliveryRequested}
+                  deliveryRequested={isDeliveryRequested}
                   onDeliveryRequestedChange={handleDeliveryRequestedChange}
                 />
               </motion.div>
