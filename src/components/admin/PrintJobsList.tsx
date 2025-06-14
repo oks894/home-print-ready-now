@@ -3,19 +3,7 @@ import { FileText, Clock } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-
-interface PrintJob {
-  id: string;
-  tracking_id?: string;
-  name: string;
-  phone: string;
-  institute: string;
-  time_slot: string;
-  notes: string;
-  files: Array<{ name: string; size: number; type: string; data?: string }>;
-  timestamp: string;
-  status: 'pending' | 'printing' | 'ready' | 'completed';
-}
+import { PrintJob } from '@/types/printJob';
 
 interface PrintJobsListProps {
   printJobs: PrintJob[];
@@ -47,6 +35,7 @@ export const PrintJobsList = ({ printJobs, selectedJob, onJobSelect, isLoading, 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'pending_payment': return 'bg-orange-100 text-orange-800';
       case 'printing': return 'bg-blue-100 text-blue-800';
       case 'ready': return 'bg-green-100 text-green-800';
       case 'completed': return 'bg-gray-100 text-gray-800';
@@ -98,12 +87,10 @@ export const PrintJobsList = ({ printJobs, selectedJob, onJobSelect, isLoading, 
                     {job.institute && (
                       <p className="text-sm text-gray-500 truncate">{job.institute}</p>
                     )}
-                    {job.tracking_id && (
-                      <p className="text-xs text-blue-600 font-mono truncate">{job.tracking_id}</p>
-                    )}
+                    <p className="text-xs text-blue-600 font-mono truncate">{job.tracking_id}</p>
                   </div>
                   <Badge className={`${getStatusColor(job.status)} flex-shrink-0`}>
-                    {job.status}
+                    {job.status.replace('_', ' ')}
                   </Badge>
                 </div>
                 <div className="flex items-center gap-4 text-sm text-gray-500">

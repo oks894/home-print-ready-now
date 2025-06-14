@@ -1,20 +1,7 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-
-interface PrintJob {
-  id: string;
-  tracking_id?: string;
-  name: string;
-  phone: string;
-  institute: string;
-  time_slot: string;
-  notes: string;
-  files: Array<{ name: string; size: number; type: string; data?: string }>;
-  timestamp: string;
-  status: 'pending' | 'printing' | 'ready' | 'completed';
-}
+import { PrintJob } from '@/types/printJob';
 
 interface Feedback {
   id: string;
@@ -80,11 +67,19 @@ export const useAdminData = () => {
     }
 
     const typedJobs: PrintJob[] = (data || []).map(job => ({
-      ...job,
+      id: job.id,
+      tracking_id: job.tracking_id,
+      name: job.name,
+      phone: job.phone,
       institute: job.institute || '',
+      time_slot: job.time_slot,
       notes: job.notes || '',
-      status: job.status as 'pending' | 'printing' | 'ready' | 'completed',
-      files: Array.isArray(job.files) ? job.files as Array<{ name: string; size: number; type: string; data?: string }> : []
+      files: Array.isArray(job.files) ? job.files as Array<{ name: string; size: number; type: string; data?: string }> : [],
+      timestamp: job.timestamp,
+      status: job.status as PrintJob['status'],
+      selected_services: job.selected_services as Array<{ id: string; name: string; quantity: number; price: number }> || [],
+      total_amount: job.total_amount || 0,
+      delivery_requested: job.delivery_requested || false
     }));
 
     setState(prev => ({ ...prev, printJobs: typedJobs }));
@@ -147,7 +142,7 @@ export const useAdminData = () => {
 
       toast({
         title: "Status updated",
-        description: `Job status changed to ${status}`,
+        description: `Job status changed to ${status.replace('_', ' ')}`,
       });
     } catch (error) {
       setState(prev => ({

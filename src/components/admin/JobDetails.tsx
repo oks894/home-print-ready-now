@@ -1,23 +1,10 @@
 
-import { Download, Eye, Trash2, User, Phone, Building, Clock, FileText } from 'lucide-react';
+import { Download, Eye, Trash2, User, Phone, Building, Clock, FileText, Package } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-
-interface PrintJob {
-  id: string;
-  tracking_id?: string;
-  name: string;
-  phone: string;
-  institute: string;
-  time_slot: string;
-  notes: string;
-  files: Array<{ name: string; size: number; type: string; data?: string }>;
-  timestamp: string;
-  status: 'pending' | 'printing' | 'ready' | 'completed';
-}
+import { PrintJob } from '@/types/printJob';
+import { AdminStatusManager } from '@/components/admin/AdminStatusManager';
 
 interface JobDetailsProps {
   selectedJob: PrintJob | null;
@@ -93,13 +80,41 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
             <Clock className="w-4 h-4 text-gray-500" />
             <span>{selectedJob.time_slot}</span>
           </div>
-          {selectedJob.tracking_id && (
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-gray-500" />
-              <span className="font-mono text-sm">{selectedJob.tracking_id}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <FileText className="w-4 h-4 text-gray-500" />
+            <span className="font-mono text-sm">{selectedJob.tracking_id}</span>
+          </div>
         </div>
+
+        {/* Selected Services */}
+        {selectedJob.selected_services && selectedJob.selected_services.length > 0 && (
+          <div>
+            <h4 className="font-medium mb-2 flex items-center gap-2">
+              <Package className="w-4 h-4" />
+              Selected Services
+            </h4>
+            <div className="space-y-2">
+              {selectedJob.selected_services.map((service, index) => (
+                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                  <div>
+                    <span className="font-medium">{service.name}</span>
+                    <span className="text-sm text-gray-500 ml-2">x{service.quantity}</span>
+                  </div>
+                  <span className="font-medium">₹{(service.price * service.quantity).toFixed(2)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between items-center p-2 bg-blue-50 rounded font-semibold">
+                <span>Total Amount</span>
+                <span>₹{selectedJob.total_amount?.toFixed(2) || '0.00'}</span>
+              </div>
+              {selectedJob.delivery_requested && (
+                <div className="p-2 bg-green-50 rounded text-green-800 text-sm">
+                  ✓ Delivery requested (₹200+ order)
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Files */}
         <div>
@@ -137,21 +152,11 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
 
         {/* Status Update */}
         <div>
-          <Label>Update Status</Label>
-          <Select
-            value={selectedJob.status}
-            onValueChange={(value) => onStatusUpdate(selectedJob.id, value as PrintJob['status'])}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="printing">Printing</SelectItem>
-              <SelectItem value="ready">Ready for Pickup</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-            </SelectContent>
-          </Select>
+          <h4 className="font-medium mb-2">Status</h4>
+          <AdminStatusManager
+            job={selectedJob}
+            onStatusUpdate={onStatusUpdate}
+          />
         </div>
 
         {/* Actions */}
