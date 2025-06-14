@@ -1,5 +1,4 @@
-
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useLoader } from '@react-three/fiber';
 import { Float, Text } from '@react-three/drei';
 import { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
@@ -20,10 +19,14 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
   const meshRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
   const innerSphereRef = useRef<THREE.Mesh>(null);
+  const imageRef = useRef<THREE.Mesh>(null);
   const glowLight1Ref = useRef<THREE.PointLight>(null);
   const glowLight2Ref = useRef<THREE.PointLight>(null);
   const glowLight3Ref = useRef<THREE.PointLight>(null);
   const [floatingWords, setFloatingWords] = useState<Array<{word: string, position: [number, number, number], rotation: [number, number, number]}>>([]);
+
+  // Load the texture
+  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/e092d64c-a177-44ad-801b-965cecbbed1a.png');
 
   useEffect(() => {
     // Generate random floating words inside the ball
@@ -46,6 +49,7 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
   }, [isRotating]);
 
   useFrame((state, delta) => {
+    // ... keep existing code (meshRef rotation logic)
     if (meshRef.current) {
       if (isRotating) {
         meshRef.current.rotation.x += delta * 2.5;
@@ -60,8 +64,15 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
       innerSphereRef.current.rotation.x += delta * 0.3;
       innerSphereRef.current.rotation.y -= delta * 0.2;
     }
+
+    // Slow rotation for the faint image
+    if (imageRef.current) {
+      imageRef.current.rotation.x += delta * 0.1;
+      imageRef.current.rotation.y += delta * 0.05;
+      imageRef.current.rotation.z += delta * 0.08;
+    }
     
-    // Enhanced fantasy lighting effects
+    // ... keep existing code (enhanced fantasy lighting effects)
     if (lightRef.current) {
       const baseIntensity = isGlowing ? 5 : 1;
       lightRef.current.intensity = baseIntensity + Math.sin(state.clock.elapsedTime * 4) * (isGlowing ? 2 : 0.5);
@@ -108,6 +119,18 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
             transmission={0.3}
             thickness={0.8}
             ior={1.5}
+          />
+        </mesh>
+        
+        {/* Faint image texture inside the ball */}
+        <mesh ref={imageRef} scale={[1.2, 1.2, 1.2]}>
+          <sphereGeometry args={[0.9, 64, 64]} />
+          <meshBasicMaterial
+            map={texture}
+            transparent
+            opacity={isGlowing ? 0.4 : 0.2}
+            side={THREE.DoubleSide}
+            blending={THREE.AdditiveBlending}
           />
         </mesh>
         
