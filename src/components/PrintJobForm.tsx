@@ -92,6 +92,11 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     exit: { opacity: 0, x: -100, scale: 0.95 }
   };
 
+  // Convert deliveryRequested to boolean if it's a string
+  const deliveryRequestedBoolean = typeof deliveryRequested === 'string' 
+    ? deliveryRequested === 'true' 
+    : Boolean(deliveryRequested);
+
   return (
     <section className="py-16 px-4 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
       <div className="max-w-6xl mx-auto">
@@ -137,7 +142,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
                   canAccessDelivery={canAccessDelivery}
                   formData={formData}
                   onFormDataChange={setFormData}
-                  deliveryRequested={deliveryRequested}
+                  deliveryRequested={deliveryRequestedBoolean}
                   onDeliveryRequestedChange={handleDeliveryRequestedChange}
                 />
               </motion.div>
