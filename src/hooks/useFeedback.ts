@@ -9,17 +9,24 @@ export const useFeedback = () => {
   const { toast } = useToast();
 
   const loadFeedback = async () => {
-    const { data, error } = await supabase
-      .from('feedback')
-      .select('*')
-      .order('timestamp', { ascending: false });
+    console.log('Loading feedback...');
+    try {
+      const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .order('timestamp', { ascending: false });
 
-    if (error) {
-      console.error('Error loading feedback:', error);
-      throw new Error('Failed to load feedback');
+      if (error) {
+        console.error('Error loading feedback:', error);
+        throw new Error('Failed to load feedback');
+      }
+
+      console.log('Loaded feedback:', data?.length || 0, 'items');
+      setFeedback(data || []);
+    } catch (error) {
+      console.error('Error in loadFeedback:', error);
+      throw error;
     }
-
-    setFeedback(data || []);
   };
 
   const deleteFeedback = async (feedbackId: string, retryFn: (fn: () => Promise<void>) => Promise<void>) => {

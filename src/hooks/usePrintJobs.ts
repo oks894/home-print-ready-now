@@ -9,33 +9,45 @@ export const usePrintJobs = () => {
   const { toast } = useToast();
 
   const loadPrintJobs = async () => {
-    const { data, error } = await supabase
-      .from('print_jobs')
-      .select('*')
-      .order('timestamp', { ascending: false });
+    console.log('Loading print jobs...');
+    try {
+      const { data, error } = await supabase
+        .from('print_jobs')
+        .select('*')
+        .order('timestamp', { ascending: false });
 
-    if (error) {
-      console.error('Error loading print jobs:', error);
-      throw new Error('Failed to load print jobs');
+      if (error) {
+        console.error('Error loading print jobs:', error);
+        throw new Error('Failed to load print jobs');
+      }
+
+      console.log('Raw print jobs data:', data);
+
+      const typedJobs: PrintJob[] = (data || []).map(job => {
+        console.log('Processing job:', job.id, job);
+        return {
+          id: job.id,
+          tracking_id: job.tracking_id || '',
+          name: job.name || '',
+          phone: job.phone || '',
+          institute: job.institute || '',
+          time_slot: job.time_slot || '',
+          notes: job.notes || '',
+          files: Array.isArray(job.files) ? job.files as Array<{ name: string; size: number; type: string; data?: string }> : [],
+          timestamp: job.timestamp,
+          status: job.status as PrintJob['status'] || 'pending',
+          selected_services: job.selected_services as Array<{ id: string; name: string; quantity: number; price: number }> || [],
+          total_amount: job.total_amount || 0,
+          delivery_requested: job.delivery_requested || false
+        };
+      });
+
+      console.log('Processed print jobs:', typedJobs.length, typedJobs);
+      setPrintJobs(typedJobs);
+    } catch (error) {
+      console.error('Error in loadPrintJobs:', error);
+      throw error;
     }
-
-    const typedJobs: PrintJob[] = (data || []).map(job => ({
-      id: job.id,
-      tracking_id: job.tracking_id,
-      name: job.name,
-      phone: job.phone,
-      institute: job.institute || '',
-      time_slot: job.time_slot,
-      notes: job.notes || '',
-      files: Array.isArray(job.files) ? job.files as Array<{ name: string; size: number; type: string; data?: string }> : [],
-      timestamp: job.timestamp,
-      status: job.status as PrintJob['status'],
-      selected_services: job.selected_services as Array<{ id: string; name: string; quantity: number; price: number }> || [],
-      total_amount: job.total_amount || 0,
-      delivery_requested: job.delivery_requested || false
-    }));
-
-    setPrintJobs(typedJobs);
   };
 
   const updateJobStatus = async (jobId: string, status: PrintJob['status'], retryFn: (fn: () => Promise<void>) => Promise<void>) => {

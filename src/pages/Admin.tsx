@@ -20,6 +20,8 @@ const Admin = () => {
     setSelectedJob
   } = useAdminData();
 
+  console.log('Admin render - Print jobs:', printJobs.length, 'Feedback:', feedback.length);
+
   if (!isAuthenticated) {
     return <AdminLogin onLogin={() => setIsAuthenticated(true)} />;
   }
@@ -38,6 +40,9 @@ const Admin = () => {
             Dashboard Overview
           </h1>
           <p className="text-gray-600 mt-2">Manage your print services and track customer orders</p>
+          {isLoading && (
+            <div className="mt-2 text-sm text-blue-600">Loading data...</div>
+          )}
         </div>
 
         <AdminTabs

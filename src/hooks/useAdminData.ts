@@ -8,7 +8,7 @@ import { useFeedback } from '@/hooks/useFeedback';
 
 export const useAdminData = () => {
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [lastFetchTime, setLastFetchTime] = useState(0);
   
   const { toast } = useToast();
@@ -32,11 +32,13 @@ export const useAdminData = () => {
   }, [lastFetchTime]);
 
   const loadData = async () => {
+    console.log('Loading admin data...');
     setIsLoading(true);
     try {
       await retryWithBackoff(async () => {
         await Promise.all([loadPrintJobs(), loadFeedback()]);
         setLastFetchTime(Date.now());
+        console.log('Admin data loaded successfully');
       });
     } catch (error) {
       console.error('Failed to load data after retries:', error);
@@ -52,28 +54,43 @@ export const useAdminData = () => {
   };
 
   const updateJobStatus = async (jobId: string, status: PrintJob['status']) => {
+    console.log('Updating job status:', jobId, status);
     const success = await updateJobStatusInternal(jobId, status, retryWithBackoff);
     if (success && selectedJob?.id === jobId) {
       setSelectedJob(prev => prev ? { ...prev, status } : null);
     }
+    return success;
   };
 
   const deleteJob = async (jobId: string) => {
+    console.log('Deleting job:', jobId);
     const success = await deleteJobInternal(jobId, retryWithBackoff);
     if (success && selectedJob?.id === jobId) {
       setSelectedJob(null);
     }
+    return success;
   };
 
   const deleteFeedback = async (feedbackId: string) => {
+    console.log('Deleting feedback:', feedbackId);
     await deleteFeedbackInternal(feedbackId, retryWithBackoff);
   };
 
+  // Load data on component mount
   useEffect(() => {
-    if (shouldRefetchData()) {
-      loadData();
-    }
-  }, [shouldRefetchData]);
+    loadData();
+  }, []);
+
+  // Auto-refresh data periodically
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isLoading && !isRetrying) {
+        loadData();
+      }
+    }, 60000); // Refresh every minute
+
+    return () => clearInterval(interval);
+  }, [isLoading, isRetrying]);
 
   return {
     printJobs,
