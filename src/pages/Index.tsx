@@ -3,11 +3,11 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import TrackingPopup from '@/components/TrackingPopup';
-import Services from '@/components/Services';
+import AnimatedServices from '@/components/AnimatedServices';
 import Feedback from '@/components/Feedback';
 import PaymentQR from '@/components/PaymentQR';
-import HeroSection from '@/components/HeroSection';
-import ContactSection from '@/components/ContactSection';
+import AnimatedHeroSection from '@/components/AnimatedHeroSection';
+import AnimatedContactSection from '@/components/AnimatedContactSection';
 import PrintJobForm from '@/components/PrintJobForm';
 
 const Index = () => {
@@ -27,10 +27,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <Header />
-      <HeroSection />
-      <ContactSection />
+      <AnimatedHeroSection />
+      <AnimatedContactSection />
       <PrintJobForm onOrderSubmitted={handleOrderSubmitted} />
-      <Services />
+      <AnimatedServices />
       <PaymentQR />
       <Feedback />
       <Footer />
