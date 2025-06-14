@@ -16,7 +16,7 @@ export const usePrintJobForm = () => {
   const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [canAccessDelivery, setCanAccessDelivery] = useState(false);
-  const [deliveryRequested, setDeliveryRequested] = useState(false);
+  const [deliveryRequested, setDeliveryRequested] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
     phone: '',
@@ -64,7 +64,7 @@ export const usePrintJobForm = () => {
   };
 
   const handleDeliveryRequestedChange = (requested: boolean) => {
-    setDeliveryRequested(requested);
+    setDeliveryRequested(Boolean(requested));
   };
 
   useEffect(() => {
