@@ -1,9 +1,8 @@
 
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, Environment, Float, Text3D, Center, Stars, ContactShadows } from '@react-three/drei';
+import { OrbitControls, Environment, Float, ContactShadows, Stars } from '@react-three/drei';
 import { Suspense } from 'react';
 import PrinterModel from './PrinterModel';
-import { motion } from 'framer-motion';
 
 const Scene3D = () => {
   return (
@@ -82,36 +81,6 @@ const Scene3D = () => {
             floatIntensity={0.25}
           >
             <PrinterModel position={[-4, 1.5, -5]} scale={0.7} />
-          </Float>
-          
-          {/* 3D Text */}
-          <Float
-            speed={0.8}
-            rotationIntensity={0.02}
-            floatIntensity={0.1}
-          >
-            <Center position={[0, 4, -8]}>
-              <Text3D
-                font="/fonts/helvetiker_regular.typeface.json"
-                size={1.2}
-                height={0.3}
-                curveSegments={12}
-                bevelEnabled
-                bevelThickness={0.02}
-                bevelSize={0.02}
-                bevelOffset={0}
-                bevelSegments={5}
-              >
-                PrintReady
-                <meshStandardMaterial 
-                  color="#3b82f6" 
-                  metalness={0.8} 
-                  roughness={0.2}
-                  emissive="#1e40af"
-                  emissiveIntensity={0.1}
-                />
-              </Text3D>
-            </Center>
           </Float>
           
           {/* Ground Plane with Contact Shadows */}
