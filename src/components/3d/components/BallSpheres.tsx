@@ -1,4 +1,5 @@
 
+
 import { useRef, forwardRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -31,45 +32,48 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
 
   return (
     <>
-      {/* Outer mystical sphere */}
+      {/* Outer mystical sphere - more transparent */}
       <mesh ref={ref}>
         <sphereGeometry args={[1.6, 128, 128]} />
         <meshPhysicalMaterial
           color={isGlowing ? "#d946ef" : "#6d28d9"}
           emissive={isGlowing ? "#a855f7" : "#4c1d95"}
-          emissiveIntensity={isGlowing ? 1.2 : 0.3}
+          emissiveIntensity={isGlowing ? 0.8 : 0.2}
           metalness={0.1}
           roughness={0.05}
           clearcoat={1}
           clearcoatRoughness={0}
-          transmission={0.4}
-          thickness={0.6}
+          transmission={0.7}
+          thickness={0.3}
           ior={1.5}
-        />
-      </mesh>
-      
-      {/* Visible image texture inside the ball - more prominent */}
-      <mesh ref={imageRef} scale={[1.2, 1.2, 1.2]}>
-        <sphereGeometry args={[0.85, 64, 64]} />
-        <meshBasicMaterial
-          map={texture}
           transparent
-          opacity={isGlowing ? 1.0 : 0.8}
-          side={THREE.DoubleSide}
+          opacity={0.3}
         />
       </mesh>
       
-      {/* Inner glowing core - smaller to not interfere */}
+      {/* Image texture - much more prominent and closer to surface */}
+      <mesh ref={imageRef} scale={[1.4, 1.4, 1.4]}>
+        <sphereGeometry args={[1.0, 64, 64]} />
+        <meshStandardMaterial
+          map={texture}
+          transparent={false}
+          side={THREE.DoubleSide}
+          emissive={isGlowing ? "#ffffff" : "#000000"}
+          emissiveIntensity={isGlowing ? 0.3 : 0}
+        />
+      </mesh>
+      
+      {/* Inner glowing core - much smaller */}
       <mesh ref={innerSphereRef}>
-        <sphereGeometry args={[0.6, 64, 64]} />
+        <sphereGeometry args={[0.4, 64, 64]} />
         <meshPhysicalMaterial
           color={isGlowing ? "#f59e0b" : "#8b5cf6"}
           emissive={isGlowing ? "#fbbf24" : "#a855f7"}
-          emissiveIntensity={isGlowing ? 1.5 : 0.4}
+          emissiveIntensity={isGlowing ? 1.0 : 0.3}
           metalness={0}
           roughness={0.1}
           transparent
-          opacity={0.5}
+          opacity={0.4}
         />
       </mesh>
     </>
@@ -77,3 +81,4 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
 });
 
 BallSpheres.displayName = 'BallSpheres';
+
