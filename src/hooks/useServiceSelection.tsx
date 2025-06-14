@@ -26,12 +26,9 @@ export const useServiceSelection = (services: Service[]) => {
     } else {
       const calculatedPrice = calculateServicePrice(service, quantity);
       setSelectedServices(prev => [...prev, {
-        id: service.id,
-        name: service.name,
+        ...service, // This spreads all properties from Service including id, name, description, price, category, created_at
         quantity,
-        basePrice: parsePriceFromString(service.price),
-        calculatedPrice,
-        category: service.category || 'Other'
+        calculatedPrice
       }]);
     }
   };
