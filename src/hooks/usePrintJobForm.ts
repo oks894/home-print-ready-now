@@ -64,7 +64,7 @@ export const usePrintJobForm = () => {
   };
 
   const handleDeliveryRequestedChange = (requested: boolean | string) => {
-    // Ensure we always store a boolean value
+    // Always convert to boolean and store as boolean
     const booleanValue = typeof requested === 'string' ? requested === 'true' : Boolean(requested);
     setDeliveryRequested(booleanValue);
   };
