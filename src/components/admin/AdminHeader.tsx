@@ -1,13 +1,18 @@
 
 import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Wifi, WifiOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface AdminHeaderProps {
   onLogout: () => void;
+  isRetrying?: boolean;
+  onRefresh?: () => void;
 }
 
-export const AdminHeader = ({ onLogout }: AdminHeaderProps) => {
+export const AdminHeader = ({ onLogout, isRetrying = false, onRefresh }: AdminHeaderProps) => {
+  const isOnline = navigator.onLine;
+
   return (
     <div className="bg-white border-b">
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -19,13 +24,40 @@ export const AdminHeader = ({ onLogout }: AdminHeaderProps) => {
             </Button>
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Admin Panel</h1>
+          
+          {/* Connection status indicator */}
+          <Badge variant={isOnline ? "default" : "destructive"} className="gap-1">
+            {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+            {isOnline ? "Online" : "Offline"}
+          </Badge>
+          
+          {isRetrying && (
+            <Badge variant="secondary" className="gap-1">
+              <RefreshCw className="w-3 h-3 animate-spin" />
+              Reconnecting...
+            </Badge>
+          )}
         </div>
-        <Button 
-          variant="outline" 
-          onClick={onLogout}
-        >
-          Logout
-        </Button>
+        
+        <div className="flex items-center gap-2">
+          {onRefresh && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onRefresh}
+              disabled={isRetrying}
+            >
+              <RefreshCw className={`w-4 h-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
+          )}
+          <Button 
+            variant="outline" 
+            onClick={onLogout}
+          >
+            Logout
+          </Button>
+        </div>
       </div>
     </div>
   );
