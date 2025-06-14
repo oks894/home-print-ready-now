@@ -9,7 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FileUpload from './FileUpload';
-import ServiceSelector from './ServiceSelector';
+import { ServiceSelector } from './ServiceSelector';
 import CustomerForm from './CustomerForm';
 import TimeSlotSelector from './TimeSlotSelector';
 import { usePrintJobSubmission } from '@/hooks/usePrintJobSubmission';
@@ -104,28 +104,31 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     if (!canProceed()) return;
 
     try {
-      const trackingId = await submitPrintJob({
+      const trackingId = await submitPrintJob(
+        formData,
         files,
         selectedServices,
-        customerData: formData,
+        totalAmount,
         deliveryRequested,
-        totalAmount
-      });
+        canAccessDelivery
+      );
       
-      onOrderSubmitted(trackingId);
-      
-      // Reset form
-      setCurrentStep(0);
-      setFiles([]);
-      setSelectedServices([]);
-      setFormData({
-        name: '',
-        phone: '',
-        institute: '',
-        timeSlot: '',
-        notes: ''
-      });
-      setDeliveryRequested(false);
+      if (trackingId) {
+        onOrderSubmitted(trackingId);
+        
+        // Reset form
+        setCurrentStep(0);
+        setFiles([]);
+        setSelectedServices([]);
+        setFormData({
+          name: '',
+          phone: '',
+          institute: '',
+          timeSlot: '',
+          notes: ''
+        });
+        setDeliveryRequested(false);
+      }
     } catch (error) {
       console.error('Error submitting print job:', error);
       toast({
@@ -171,7 +174,6 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
             <FileUpload 
               files={files} 
               onFilesChange={setFiles}
-              className="border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors"
             />
             
             {files.length > 0 && (
@@ -215,10 +217,22 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
             </div>
             
             <ServiceSelector 
+              services={[]}
               selectedServices={selectedServices}
-              onServicesChange={setSelectedServices}
-              onTotalChange={setTotalAmount}
-              onCanAccessDeliveryChange={setCanAccessDelivery}
+              onAddService={(service, quantity = 1) => {
+                const newService = { ...service, quantity, calculatedPrice: service.basePrice * quantity };
+                setSelectedServices([...selectedServices, newService]);
+              }}
+              onUpdateQuantity={(serviceId, quantity) => {
+                setSelectedServices(services => 
+                  services.map(s => s.id === serviceId ? { ...s, quantity, calculatedPrice: s.basePrice * quantity } : s)
+                );
+              }}
+              onRemoveService={(serviceId) => {
+                setSelectedServices(services => services.filter(s => s.id !== serviceId));
+              }}
+              totalAmount={totalAmount}
+              canAccessDelivery={canAccessDelivery}
             />
             
             {selectedServices.length > 0 && (
@@ -315,8 +329,10 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
             </div>
             
             <TimeSlotSelector 
-              selectedSlot={formData.timeSlot}
-              onSlotChange={(slot) => setFormData({...formData, timeSlot: slot})}
+              timeSlot={formData.timeSlot}
+              notes={formData.notes}
+              onTimeSlotChange={(slot) => setFormData({...formData, timeSlot: slot})}
+              onNotesChange={(notes) => setFormData({...formData, notes})}
             />
             
             {canAccessDelivery && (
