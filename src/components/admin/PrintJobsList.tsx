@@ -1,8 +1,9 @@
 
-import { FileText, Clock, ChevronRight } from 'lucide-react';
+import { FileText, Clock, ChevronRight, Filter, SortDesc } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { PrintJob } from '@/types/printJob';
 
 interface PrintJobsListProps {
@@ -14,8 +15,8 @@ interface PrintJobsListProps {
 }
 
 const JobSkeleton = () => (
-  <div className="p-3 sm:p-4 border rounded-lg">
-    <div className="flex items-start justify-between mb-2">
+  <div className="p-4 border rounded-xl bg-white shadow-sm">
+    <div className="flex items-start justify-between mb-3">
       <div className="space-y-2 flex-1">
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-3 w-24" />
@@ -34,76 +35,126 @@ const JobSkeleton = () => (
 export const PrintJobsList = ({ printJobs, selectedJob, onJobSelect, isLoading, isRetrying = false }: PrintJobsListProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'pending_payment': return 'bg-orange-100 text-orange-800';
-      case 'printing': return 'bg-blue-100 text-blue-800';
-      case 'ready': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'pending_payment': return 'bg-orange-100 text-orange-800 border-orange-200';
+      case 'printing': return 'bg-blue-100 text-blue-800 border-blue-200';
+      case 'ready': return 'bg-green-100 text-green-800 border-green-200';
+      case 'completed': return 'bg-gray-100 text-gray-800 border-gray-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending': return '⏳';
+      case 'pending_payment': return '💳';
+      case 'printing': return '🖨️';
+      case 'ready': return '✅';
+      case 'completed': return '📦';
+      default: return '📄';
     }
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-3 sm:pb-6">
-        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-          Print Jobs ({printJobs.length})
-          {isRetrying && (
-            <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          )}
-        </CardTitle>
-        <CardDescription className="text-sm">
-          Manage and track all print job requests
-        </CardDescription>
+    <Card className="border-0 shadow-lg bg-white/50 backdrop-blur-sm">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-3 text-xl">
+              <div className="p-2 bg-blue-500 text-white rounded-lg">
+                <FileText className="w-5 h-5" />
+              </div>
+              Print Jobs
+              {isRetrying && (
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              )}
+            </CardTitle>
+            <CardDescription className="mt-1">
+              {printJobs.length} total jobs • Manage and track all requests
+            </CardDescription>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="hidden sm:flex">
+              <Filter className="w-4 h-4 mr-2" />
+              Filter
+            </Button>
+            <Button variant="outline" size="sm" className="hidden sm:flex">
+              <SortDesc className="w-4 h-4 mr-2" />
+              Sort
+            </Button>
+          </div>
+        </div>
       </CardHeader>
+      
       <CardContent className="pt-0">
         {isLoading ? (
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <JobSkeleton key={i} />
             ))}
           </div>
         ) : printJobs.length === 0 ? (
-          <div className="text-center py-6 sm:py-8 text-gray-500">
-            <FileText className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-            <p className="text-sm sm:text-base">No print jobs yet</p>
+          <div className="text-center py-12 text-gray-500">
+            <div className="p-4 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+              <FileText className="w-8 h-8 opacity-50" />
+            </div>
+            <p className="text-lg font-medium mb-2">No print jobs yet</p>
+            <p className="text-sm">Jobs will appear here when customers submit orders</p>
           </div>
         ) : (
-          <div className="space-y-3 sm:space-y-4 max-h-[60vh] sm:max-h-96 overflow-y-auto">
+          <div className="space-y-3 max-h-[70vh] overflow-y-auto custom-scrollbar">
             {printJobs.map((job) => (
               <div
                 key={job.id}
-                className={`p-3 sm:p-4 border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md touch-manipulation ${
+                className={`group p-4 border rounded-xl cursor-pointer transition-all duration-200 hover:shadow-md ${
                   selectedJob?.id === job.id
-                    ? 'border-blue-500 bg-blue-50 shadow-sm'
-                    : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-blue-500 bg-blue-50/50 shadow-md ring-1 ring-blue-200'
+                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/50'
                 }`}
                 onClick={() => onJobSelect(job)}
               >
-                <div className="flex items-start justify-between mb-2">
+                <div className="flex items-start justify-between mb-3">
                   <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-sm sm:text-base truncate">{job.name}</h3>
-                    <p className="text-xs sm:text-sm text-gray-600 truncate">{job.phone}</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <h3 className="font-semibold text-gray-900 truncate">{job.name}</h3>
+                      <span className="text-lg">{getStatusIcon(job.status)}</span>
+                    </div>
+                    <p className="text-sm text-gray-600 truncate">{job.phone}</p>
                     {job.institute && (
-                      <p className="text-xs sm:text-sm text-gray-500 truncate">{job.institute}</p>
+                      <p className="text-sm text-gray-500 truncate">{job.institute}</p>
                     )}
-                    <p className="text-xs text-blue-600 font-mono truncate mt-1">{job.tracking_id}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <Badge variant="outline" className="font-mono text-xs px-2 py-1">
+                        #{job.tracking_id}
+                      </Badge>
+                      {job.total_amount && job.total_amount > 0 && (
+                        <Badge variant="secondary" className="text-xs">
+                          ₹{job.total_amount.toFixed(2)}
+                        </Badge>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Badge className={`${getStatusColor(job.status)} text-xs`}>
+                  
+                  <div className="flex flex-col items-end gap-2">
+                    <Badge className={`${getStatusColor(job.status)} text-xs font-medium border`}>
                       {job.status.replace('_', ' ')}
                     </Badge>
-                    <ChevronRight className="w-4 h-4 text-gray-400 sm:hidden" />
+                    <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
                   </div>
                 </div>
-                <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm text-gray-500">
+                
+                <div className="flex items-center gap-4 text-xs text-gray-500">
                   <span className="flex items-center gap-1">
-                    <FileText className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                    <FileText className="w-3 h-3 flex-shrink-0" />
                     {job.files.length} files
                   </span>
                   <span className="flex items-center gap-1 truncate">
-                    <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                    <Clock className="w-3 h-3 flex-shrink-0" />
                     <span className="truncate">{job.time_slot}</span>
+                  </span>
+                  <span className="text-gray-400 hidden sm:inline">
+                    {new Date(job.timestamp).toLocaleDateString()}
                   </span>
                 </div>
               </div>
