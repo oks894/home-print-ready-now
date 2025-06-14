@@ -143,6 +143,18 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     setCanAccessDelivery(totalAmount >= 200);
   }, [totalAmount]);
 
+  // Helper function to calculate price from service
+  const calculateServicePrice = (service: any) => {
+    // Parse the price string (e.g., "₹3.5/page" -> 3.5)
+    const priceMatch = service.price.match(/₹?(\d+(?:\.\d+)?)/);
+    return priceMatch ? parseFloat(priceMatch[1]) : 0;
+  };
+
+  useEffect(() => {
+    const total = selectedServices.reduce((sum, service) => sum + service.calculatedPrice, 0);
+    setTotalAmount(total);
+  }, [selectedServices]);
+
   const stepVariants = {
     hidden: { opacity: 0, x: 100, scale: 0.95 },
     visible: { opacity: 1, x: 0, scale: 1 },
@@ -220,12 +232,13 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
               services={[]}
               selectedServices={selectedServices}
               onAddService={(service, quantity = 1) => {
-                const newService = { ...service, quantity, calculatedPrice: service.basePrice * quantity };
+                const basePrice = calculateServicePrice(service);
+                const newService = { ...service, quantity, calculatedPrice: basePrice * quantity };
                 setSelectedServices([...selectedServices, newService]);
               }}
               onUpdateQuantity={(serviceId, quantity) => {
                 setSelectedServices(services => 
-                  services.map(s => s.id === serviceId ? { ...s, quantity, calculatedPrice: s.basePrice * quantity } : s)
+                  services.map(s => s.id === serviceId ? { ...s, quantity, calculatedPrice: calculateServicePrice(s) * quantity } : s)
                 );
               }}
               onRemoveService={(serviceId) => {
