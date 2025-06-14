@@ -56,39 +56,48 @@ export type Database = {
       }
       print_jobs: {
         Row: {
+          delivery_requested: boolean | null
           files: Json
           id: string
           institute: string | null
           name: string
           notes: string | null
           phone: string
+          selected_services: Json | null
           status: string
           time_slot: string
           timestamp: string
+          total_amount: number | null
           tracking_id: string
         }
         Insert: {
+          delivery_requested?: boolean | null
           files: Json
           id?: string
           institute?: string | null
           name: string
           notes?: string | null
           phone: string
+          selected_services?: Json | null
           status?: string
           time_slot: string
           timestamp?: string
+          total_amount?: number | null
           tracking_id: string
         }
         Update: {
+          delivery_requested?: boolean | null
           files?: Json
           id?: string
           institute?: string | null
           name?: string
           notes?: string | null
           phone?: string
+          selected_services?: Json | null
           status?: string
           time_slot?: string
           timestamp?: string
+          total_amount?: number | null
           tracking_id?: string
         }
         Relationships: []

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Search, Package, Clock, CheckCircle, Truck, CreditCard } from 'lucide-react';
@@ -54,19 +53,26 @@ const Track = () => {
       if (data) {
         console.log('Job found:', data);
         
-        // Handle files - ensure it's properly typed
+        // Handle files - ensure it's properly typed and handle Json type
         let files: Array<{ name: string; size: number; type: string }> = [];
-        if (Array.isArray(data.files)) {
-          files = data.files.map((file: any) => ({
+        if (data.files && Array.isArray(data.files)) {
+          files = (data.files as any[]).map((file: any) => ({
             name: file.name || 'Unknown file',
             size: file.size || 0,
             type: file.type || 'unknown'
           }));
         }
 
-        // Ensure status is properly typed
+        // Ensure status is properly typed with fallback
         const validStatuses = ['pending', 'pending_payment', 'printing', 'ready', 'completed'] as const;
-        const status = validStatuses.includes(data.status as any) ? data.status as PrintJob['status'] : 'pending';
+        const status = validStatuses.includes(data.status as any) ? 
+          data.status as PrintJob['status'] : 'pending';
+
+        // Handle selected services with proper typing
+        let selectedServices: Array<{ id: string; name: string; quantity: number; price: number }> = [];
+        if (data.selected_services && Array.isArray(data.selected_services)) {
+          selectedServices = data.selected_services as any[];
+        }
 
         setJob({
           id: data.id,
@@ -79,7 +85,7 @@ const Track = () => {
           files,
           timestamp: data.timestamp,
           status,
-          selected_services: data.selected_services || [],
+          selected_services: selectedServices,
           total_amount: data.total_amount || 0,
           delivery_requested: data.delivery_requested || false
         });
@@ -263,13 +269,13 @@ const Track = () => {
                     <div>
                       <h4 className="font-semibold mb-3">Selected Services</h4>
                       <div className="space-y-2">
-                        {job.selected_services.map((service: any, index) => (
+                        {job.selected_services.map((service, index) => (
                           <div key={index} className="flex justify-between p-2 bg-gray-50 rounded text-sm">
                             <span>{service.name} (x{service.quantity})</span>
                             <span className="font-medium">₹{service.price?.toFixed(2) || '0.00'}</span>
                           </div>
                         ))}
-                        {job.total_amount && (
+                        {job.total_amount && job.total_amount > 0 && (
                           <div className="border-t pt-2 flex justify-between font-bold">
                             <span>Total Amount:</span>
                             <span className="text-blue-600">₹{job.total_amount.toFixed(2)}</span>
