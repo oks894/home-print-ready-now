@@ -64,7 +64,7 @@ export const usePrintJobForm = () => {
   };
 
   const handleDeliveryRequestedChange = (requested: boolean) => {
-    setDeliveryRequested(Boolean(requested));
+    setDeliveryRequested(requested);
   };
 
   useEffect(() => {
