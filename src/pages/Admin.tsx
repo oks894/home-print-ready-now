@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminHeader } from '@/components/admin/AdminHeader';
@@ -31,7 +32,7 @@ const Admin = () => {
         onRefresh={loadData}
       />
 
-      <div className="max-w-7xl mx-auto p-4">
+      <div className="max-w-7xl mx-auto mobile-container py-4">
         <AdminTabs
           printJobs={printJobs}
           feedback={feedback}

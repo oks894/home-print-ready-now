@@ -32,16 +32,31 @@ export const AdminTabs = ({
   onDeleteFeedback
 }: AdminTabsProps) => {
   return (
-    <Tabs defaultValue="jobs" className="space-y-6">
-      <TabsList>
-        <TabsTrigger value="jobs">Print Jobs ({printJobs.length})</TabsTrigger>
-        <TabsTrigger value="feedback">Feedback ({feedback.length})</TabsTrigger>
-        <TabsTrigger value="services">Services</TabsTrigger>
-        <TabsTrigger value="notifications">Notifications</TabsTrigger>
+    <Tabs defaultValue="jobs" className="space-y-4 sm:space-y-6">
+      {/* Mobile-optimized tab list */}
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+        <TabsTrigger value="jobs" className="text-xs sm:text-sm px-2 sm:px-4 py-2">
+          <span className="hidden sm:inline">Print Jobs</span>
+          <span className="sm:hidden">Jobs</span>
+          <span className="ml-1">({printJobs.length})</span>
+        </TabsTrigger>
+        <TabsTrigger value="feedback" className="text-xs sm:text-sm px-2 sm:px-4 py-2">
+          <span className="hidden sm:inline">Feedback</span>
+          <span className="sm:hidden">Reviews</span>
+          <span className="ml-1">({feedback.length})</span>
+        </TabsTrigger>
+        <TabsTrigger value="services" className="text-xs sm:text-sm px-2 sm:px-4 py-2">
+          Services
+        </TabsTrigger>
+        <TabsTrigger value="notifications" className="text-xs sm:text-sm px-2 sm:px-4 py-2">
+          <span className="hidden sm:inline">Notifications</span>
+          <span className="sm:hidden">Alerts</span>
+        </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="jobs">
-        <div className="grid lg:grid-cols-3 gap-6">
+      <TabsContent value="jobs" className="space-y-4">
+        {/* Mobile: Stack layout, Desktop: Grid layout */}
+        <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4 lg:gap-6">
           <div className="lg:col-span-2">
             <PrintJobsList
               printJobs={printJobs}
@@ -51,7 +66,9 @@ export const AdminTabs = ({
               isRetrying={isRetrying}
             />
           </div>
-          <div>
+          
+          {/* Mobile: Show job details only when job is selected */}
+          <div className={`${selectedJob ? 'block' : 'hidden lg:block'}`}>
             <JobDetails
               selectedJob={selectedJob}
               onStatusUpdate={onStatusUpdate}

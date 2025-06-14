@@ -1,10 +1,11 @@
 
-import { Download, Eye, Trash2, User, Phone, Building, Clock, FileText, Package } from 'lucide-react';
+import { Download, Eye, Trash2, User, Phone, Building, Clock, FileText, Package, X, ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { PrintJob } from '@/types/printJob';
 import { AdminStatusManager } from '@/components/admin/AdminStatusManager';
+import { Badge } from '@/components/ui/badge';
 
 interface JobDetailsProps {
   selectedJob: PrintJob | null;
@@ -38,13 +39,19 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
     }
   };
 
+  const handleBack = () => {
+    // On mobile, this could be used to close the details view
+    // For now, we'll just scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   if (!selectedJob) {
     return (
       <Card>
-        <CardContent className="flex items-center justify-center h-64 text-gray-500">
+        <CardContent className="flex items-center justify-center h-40 sm:h-64 text-gray-500">
           <div className="text-center">
-            <Eye className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p>Select a print job to view details</p>
+            <Eye className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-50" />
+            <p className="text-sm sm:text-base">Select a print job to view details</p>
           </div>
         </CardContent>
       </Card>
@@ -52,63 +59,79 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Job Details</CardTitle>
-        <CardDescription>
-          Submitted on {new Date(selectedJob.timestamp).toLocaleDateString()}
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Customer Info */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <User className="w-4 h-4 text-gray-500" />
-            <span className="font-medium">{selectedJob.name}</span>
+    <Card className="h-fit">
+      <CardHeader className="pb-3 sm:pb-6">
+        <div className="flex items-center justify-between">
+          <div className="min-w-0 flex-1">
+            <CardTitle className="text-lg sm:text-xl">Job Details</CardTitle>
+            <CardDescription className="text-sm">
+              Submitted on {new Date(selectedJob.timestamp).toLocaleDateString()}
+            </CardDescription>
           </div>
-          <div className="flex items-center gap-2">
-            <Phone className="w-4 h-4 text-gray-500" />
-            <span>{selectedJob.phone}</span>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleBack}
+            className="lg:hidden p-2"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-4 max-h-[70vh] lg:max-h-none overflow-y-auto">
+        {/* Customer Info */}
+        <div className="space-y-2 sm:space-y-3">
+          <div className="flex items-center gap-2 text-sm sm:text-base">
+            <User className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <span className="font-medium truncate">{selectedJob.name}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm sm:text-base">
+            <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <a href={`tel:${selectedJob.phone}`} className="text-blue-600 hover:underline">
+              {selectedJob.phone}
+            </a>
           </div>
           {selectedJob.institute && (
-            <div className="flex items-center gap-2">
-              <Building className="w-4 h-4 text-gray-500" />
-              <span>{selectedJob.institute}</span>
+            <div className="flex items-center gap-2 text-sm sm:text-base">
+              <Building className="w-4 h-4 text-gray-500 flex-shrink-0" />
+              <span className="truncate">{selectedJob.institute}</span>
             </div>
           )}
-          <div className="flex items-center gap-2">
-            <Clock className="w-4 h-4 text-gray-500" />
+          <div className="flex items-center gap-2 text-sm sm:text-base">
+            <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
             <span>{selectedJob.time_slot}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-gray-500" />
-            <span className="font-mono text-sm">{selectedJob.tracking_id}</span>
+          <div className="flex items-center gap-2 text-sm sm:text-base">
+            <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+            <Badge variant="outline" className="font-mono text-xs px-2 py-1">
+              {selectedJob.tracking_id}
+            </Badge>
           </div>
         </div>
 
         {/* Selected Services */}
         {selectedJob.selected_services && selectedJob.selected_services.length > 0 && (
           <div>
-            <h4 className="font-medium mb-2 flex items-center gap-2">
+            <h4 className="font-medium mb-2 sm:mb-3 flex items-center gap-2 text-sm sm:text-base">
               <Package className="w-4 h-4" />
               Selected Services
             </h4>
             <div className="space-y-2">
               {selectedJob.selected_services.map((service, index) => (
-                <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
-                  <div>
-                    <span className="font-medium">{service.name}</span>
-                    <span className="text-sm text-gray-500 ml-2">x{service.quantity}</span>
+                <div key={index} className="flex justify-between items-center p-2 sm:p-3 bg-gray-50 rounded text-sm">
+                  <div className="min-w-0 flex-1">
+                    <span className="font-medium truncate block">{service.name}</span>
+                    <span className="text-xs text-gray-500">Quantity: {service.quantity}</span>
                   </div>
-                  <span className="font-medium">₹{(service.price * service.quantity).toFixed(2)}</span>
+                  <span className="font-medium flex-shrink-0 ml-2">₹{(service.price * service.quantity).toFixed(2)}</span>
                 </div>
               ))}
-              <div className="flex justify-between items-center p-2 bg-blue-50 rounded font-semibold">
+              <div className="flex justify-between items-center p-2 sm:p-3 bg-blue-50 rounded font-semibold text-sm">
                 <span>Total Amount</span>
                 <span>₹{selectedJob.total_amount?.toFixed(2) || '0.00'}</span>
               </div>
               {selectedJob.delivery_requested && (
-                <div className="p-2 bg-green-50 rounded text-green-800 text-sm">
+                <div className="p-2 sm:p-3 bg-green-50 rounded text-green-800 text-xs sm:text-sm">
                   ✓ Delivery requested (₹200+ order)
                 </div>
               )}
@@ -118,12 +141,12 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
 
         {/* Files */}
         <div>
-          <h4 className="font-medium mb-2">Files to Print</h4>
+          <h4 className="font-medium mb-2 sm:mb-3 text-sm sm:text-base">Files to Print</h4>
           <div className="space-y-2">
             {selectedJob.files.map((file, index) => (
-              <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <div>
-                  <div className="font-medium text-sm">{file.name}</div>
+              <div key={index} className="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded">
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-xs sm:text-sm truncate">{file.name}</div>
                   <div className="text-xs text-gray-500">
                     {(file.size / 1024 / 1024).toFixed(2)} MB
                   </div>
@@ -132,8 +155,9 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
                   size="sm" 
                   variant="outline"
                   onClick={() => downloadFile(file.name, file.data)}
+                  className="ml-2 flex-shrink-0"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-3 h-3 sm:w-4 sm:h-4" />
                 </Button>
               </div>
             ))}
@@ -143,8 +167,8 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
         {/* Notes */}
         {selectedJob.notes && (
           <div>
-            <h4 className="font-medium mb-2">Special Instructions</h4>
-            <p className="text-sm text-gray-600 p-2 bg-gray-50 rounded">
+            <h4 className="font-medium mb-2 text-sm sm:text-base">Special Instructions</h4>
+            <p className="text-xs sm:text-sm text-gray-600 p-2 sm:p-3 bg-gray-50 rounded break-words">
               {selectedJob.notes}
             </p>
           </div>
@@ -152,7 +176,7 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
 
         {/* Status Update */}
         <div>
-          <h4 className="font-medium mb-2">Status</h4>
+          <h4 className="font-medium mb-2 text-sm sm:text-base">Status</h4>
           <AdminStatusManager
             job={selectedJob}
             onStatusUpdate={onStatusUpdate}
@@ -160,11 +184,12 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
         </div>
 
         {/* Actions */}
-        <div className="flex gap-2">
+        <div className="flex gap-2 pt-2">
           <Button
             variant="destructive"
             size="sm"
             onClick={() => onDeleteJob(selectedJob.id)}
+            className="w-full sm:w-auto"
           >
             <Trash2 className="w-4 h-4 mr-2" />
             Delete
