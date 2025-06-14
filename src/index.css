@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -99,5 +100,70 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Optimize for mobile performance */
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Mobile-first optimizations */
+  html {
+    touch-action: manipulation;
+    scroll-behavior: smooth;
+  }
+
+  /* Prevent horizontal scroll on mobile */
+  body, html {
+    overflow-x: hidden;
+  }
+
+  /* Improve touch targets for mobile */
+  button, a, input, select, textarea {
+    @apply min-h-[44px] sm:min-h-auto;
+  }
+
+  /* Mobile typography improvements */
+  @media (max-width: 640px) {
+    h1 {
+      @apply text-2xl leading-tight;
+    }
+    
+    h2 {
+      @apply text-xl leading-tight;
+    }
+    
+    h3 {
+      @apply text-lg leading-tight;
+    }
+    
+    p {
+      @apply text-sm leading-relaxed;
+    }
+  }
+}
+
+/* Custom mobile utilities */
+@layer utilities {
+  .touch-manipulation {
+    touch-action: manipulation;
+  }
+  
+  .safe-area-inset {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  
+  .mobile-container {
+    @apply px-3 sm:px-4 lg:px-6;
+  }
+  
+  .mobile-text {
+    @apply text-sm sm:text-base;
+  }
+  
+  .mobile-heading {
+    @apply text-xl sm:text-2xl lg:text-3xl;
   }
 }
