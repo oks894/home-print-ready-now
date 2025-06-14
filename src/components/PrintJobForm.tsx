@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -42,9 +43,6 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
 
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
-
-  // Convert deliveryRequested to boolean for consistent usage
-  const isDeliveryRequested = deliveryRequested === true || deliveryRequested === 'true';
 
   const handleSubmit = async () => {
     if (!canProceed()) {
