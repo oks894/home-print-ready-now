@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -8,6 +7,7 @@ import { AdminHeader } from '@/components/admin/AdminHeader';
 import { PrintJobsList } from '@/components/admin/PrintJobsList';
 import { JobDetails } from '@/components/admin/JobDetails';
 import { FeedbackList } from '@/components/admin/FeedbackList';
+import { ServicesManager } from '@/components/admin/ServicesManager';
 
 interface PrintJob {
   id: string;
@@ -257,6 +257,7 @@ const Admin = () => {
           <TabsList>
             <TabsTrigger value="jobs">Print Jobs ({printJobs.length})</TabsTrigger>
             <TabsTrigger value="feedback">Feedback ({feedback.length})</TabsTrigger>
+            <TabsTrigger value="services">Services</TabsTrigger>
           </TabsList>
 
           <TabsContent value="jobs">
@@ -286,6 +287,10 @@ const Admin = () => {
               onDeleteFeedback={deleteFeedback}
               isLoading={isLoading}
             />
+          </TabsContent>
+
+          <TabsContent value="services">
+            <ServicesManager />
           </TabsContent>
         </Tabs>
       </div>
