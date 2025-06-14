@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Search, Package, Clock, CheckCircle, Truck } from 'lucide-react';
+import { ArrowLeft, Search, Package, Clock, CheckCircle, Truck, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -9,21 +9,9 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { PrintJob } from '@/types/printJob';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-
-interface PrintJob {
-  id: string;
-  tracking_id: string;
-  name: string;
-  phone: string;
-  institute: string;
-  time_slot: string;
-  notes: string;
-  files: Array<{ name: string; size: number; type: string }>;
-  timestamp: string;
-  status: 'pending' | 'printing' | 'ready' | 'completed';
-}
 
 const Track = () => {
   const [trackingId, setTrackingId] = useState('');
@@ -65,6 +53,21 @@ const Track = () => {
       
       if (data) {
         console.log('Job found:', data);
+        
+        // Handle files - ensure it's properly typed
+        let files: Array<{ name: string; size: number; type: string }> = [];
+        if (Array.isArray(data.files)) {
+          files = data.files.map((file: any) => ({
+            name: file.name || 'Unknown file',
+            size: file.size || 0,
+            type: file.type || 'unknown'
+          }));
+        }
+
+        // Ensure status is properly typed
+        const validStatuses = ['pending', 'pending_payment', 'printing', 'ready', 'completed'] as const;
+        const status = validStatuses.includes(data.status as any) ? data.status as PrintJob['status'] : 'pending';
+
         setJob({
           id: data.id,
           tracking_id: data.tracking_id,
@@ -73,9 +76,12 @@ const Track = () => {
           institute: data.institute || '',
           time_slot: data.time_slot,
           notes: data.notes || '',
-          files: Array.isArray(data.files) ? data.files : [],
+          files,
           timestamp: data.timestamp,
-          status: data.status
+          status,
+          selected_services: data.selected_services || [],
+          total_amount: data.total_amount || 0,
+          delivery_requested: data.delivery_requested || false
         });
         setNotFound(false);
       } else {
@@ -106,6 +112,7 @@ const Track = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'pending': return <Clock className="w-5 h-5 text-yellow-600" />;
+      case 'pending_payment': return <CreditCard className="w-5 h-5 text-orange-600" />;
       case 'printing': return <Package className="w-5 h-5 text-blue-600" />;
       case 'ready': return <CheckCircle className="w-5 h-5 text-green-600" />;
       case 'completed': return <Truck className="w-5 h-5 text-gray-600" />;
@@ -116,6 +123,7 @@ const Track = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'pending_payment': return 'bg-orange-100 text-orange-800';
       case 'printing': return 'bg-blue-100 text-blue-800';
       case 'ready': return 'bg-green-100 text-green-800';
       case 'completed': return 'bg-gray-100 text-gray-800';
@@ -126,6 +134,7 @@ const Track = () => {
   const getStatusMessage = (status: string) => {
     switch (status) {
       case 'pending': return 'Your order has been received and is waiting to be processed.';
+      case 'pending_payment': return 'Please complete payment to process your order.';
       case 'printing': return 'Your documents are currently being printed.';
       case 'ready': return 'Your order is ready for pickup!';
       case 'completed': return 'Your order has been completed and delivered.';
@@ -194,69 +203,97 @@ const Track = () => {
           )}
 
           {job && (
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Order Details</CardTitle>
-                    <CardDescription>Phone Number: {job.tracking_id}</CardDescription>
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle>Order Details</CardTitle>
+                      <CardDescription>Phone Number: {job.tracking_id}</CardDescription>
+                    </div>
+                    <Badge className={getStatusColor(job.status)}>
+                      {job.status.replace('_', ' ').charAt(0).toUpperCase() + job.status.replace('_', ' ').slice(1)}
+                    </Badge>
                   </div>
-                  <Badge className={getStatusColor(job.status)}>
-                    {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
-                  {getStatusIcon(job.status)}
-                  <div>
-                    <h4 className="font-semibold">Current Status</h4>
-                    <p className="text-sm text-gray-600">{getStatusMessage(job.status)}</p>
-                  </div>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="font-semibold mb-3">Customer Information</h4>
-                    <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">Name:</span> {job.name}</p>
-                      <p><span className="font-medium">Phone:</span> {job.phone}</p>
-                      {job.institute && (
-                        <p><span className="font-medium">Institute:</span> {job.institute}</p>
-                      )}
-                      <p><span className="font-medium">Pickup Time:</span> {job.time_slot}</p>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+                    {getStatusIcon(job.status)}
+                    <div>
+                      <h4 className="font-semibold">Current Status</h4>
+                      <p className="text-sm text-gray-600">{getStatusMessage(job.status)}</p>
                     </div>
                   </div>
 
-                  <div>
-                    <h4 className="font-semibold mb-3">Files ({job.files.length})</h4>
-                    <div className="space-y-2">
-                      {job.files.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                          <span>{file.name}</span>
-                          <span className="text-gray-500">
-                            {(file.size / 1024 / 1024).toFixed(2)} MB
-                          </span>
-                        </div>
-                      ))}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <h4 className="font-semibold mb-3">Customer Information</h4>
+                      <div className="space-y-2 text-sm">
+                        <p><span className="font-medium">Name:</span> {job.name}</p>
+                        <p><span className="font-medium">Phone:</span> {job.phone}</p>
+                        {job.institute && (
+                          <p><span className="font-medium">Institute:</span> {job.institute}</p>
+                        )}
+                        <p><span className="font-medium">Pickup Time:</span> {job.time_slot}</p>
+                        {job.delivery_requested && (
+                          <Badge className="bg-green-100 text-green-800">
+                            🚚 Delivery Requested
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-semibold mb-3">Files ({job.files.length})</h4>
+                      <div className="space-y-2">
+                        {job.files.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
+                            <span>{file.name}</span>
+                            <span className="text-gray-500">
+                              {(file.size / 1024 / 1024).toFixed(2)} MB
+                            </span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {job.notes && (
-                  <div>
-                    <h4 className="font-semibold mb-2">Special Instructions</h4>
-                    <p className="text-sm text-gray-600 p-3 bg-gray-50 rounded">
-                      {job.notes}
-                    </p>
+                  {/* Services and Pricing */}
+                  {job.selected_services && job.selected_services.length > 0 && (
+                    <div>
+                      <h4 className="font-semibold mb-3">Selected Services</h4>
+                      <div className="space-y-2">
+                        {job.selected_services.map((service: any, index) => (
+                          <div key={index} className="flex justify-between p-2 bg-gray-50 rounded text-sm">
+                            <span>{service.name} (x{service.quantity})</span>
+                            <span className="font-medium">₹{service.price?.toFixed(2) || '0.00'}</span>
+                          </div>
+                        ))}
+                        {job.total_amount && (
+                          <div className="border-t pt-2 flex justify-between font-bold">
+                            <span>Total Amount:</span>
+                            <span className="text-blue-600">₹{job.total_amount.toFixed(2)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {job.notes && (
+                    <div>
+                      <h4 className="font-semibold mb-2">Special Instructions</h4>
+                      <p className="text-sm text-gray-600 p-3 bg-gray-50 rounded">
+                        {job.notes}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="text-sm text-gray-500">
+                    <p>Order submitted on: {new Date(job.timestamp).toLocaleString()}</p>
                   </div>
-                )}
-
-                <div className="text-sm text-gray-500">
-                  <p>Order submitted on: {new Date(job.timestamp).toLocaleString()}</p>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
       </div>

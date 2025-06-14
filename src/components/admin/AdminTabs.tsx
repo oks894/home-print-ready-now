@@ -4,19 +4,7 @@ import { PrintJobsList } from '@/components/admin/PrintJobsList';
 import { JobDetails } from '@/components/admin/JobDetails';
 import { FeedbackList } from '@/components/admin/FeedbackList';
 import { ServicesManager } from '@/components/admin/ServicesManager';
-
-interface PrintJob {
-  id: string;
-  tracking_id?: string;
-  name: string;
-  phone: string;
-  institute: string;
-  time_slot: string;
-  notes: string;
-  files: Array<{ name: string; size: number; type: string; data?: string }>;
-  timestamp: string;
-  status: 'pending' | 'printing' | 'ready' | 'completed';
-}
+import { PrintJob } from '@/types/printJob';
 
 interface Feedback {
   id: string;

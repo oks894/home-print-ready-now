@@ -1,9 +1,11 @@
 
 import { useState } from 'react';
-import { Printer, FileText, Clock, CheckCircle, Users, Star } from 'lucide-react';
+import { Printer, FileText, Clock, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useServices } from '@/hooks/useServices';
+import { useServiceSelection } from '@/hooks/useServiceSelection';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CustomerForm from '@/components/CustomerForm';
@@ -14,6 +16,7 @@ import Services from '@/components/Services';
 import Stats from '@/components/Stats';
 import Feedback from '@/components/Feedback';
 import PaymentQR from '@/components/PaymentQR';
+import { ServiceSelector } from '@/components/ServiceSelector';
 
 const Index = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -24,13 +27,24 @@ const Index = () => {
     timeSlot: '',
     notes: ''
   });
+  const [deliveryRequested, setDeliveryRequested] = useState(false);
   const [showTrackingPopup, setShowTrackingPopup] = useState(false);
   const [trackingId, setTrackingId] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  
+  const { services, isLoading: servicesLoading } = useServices();
+  const {
+    selectedServices,
+    addService,
+    removeService,
+    updateQuantity,
+    totalAmount,
+    canAccessDelivery,
+    clearSelection
+  } = useServiceSelection(services);
 
   const generateTrackingId = (phone: string) => {
-    // Use phone number as tracking ID (remove any non-digits and ensure it's unique)
     const cleanPhone = phone.replace(/\D/g, '');
     return cleanPhone;
   };
@@ -66,11 +80,27 @@ const Index = () => {
       return;
     }
 
+    if (selectedServices.length === 0) {
+      toast({
+        title: "No Services Selected",
+        description: "Please select at least one service",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const newTrackingId = generateTrackingId(formData.phone);
       const filesWithData = await convertFilesToBase64(files);
+
+      const selectedServicesData = selectedServices.map(service => ({
+        id: service.id,
+        name: service.name,
+        quantity: service.quantity,
+        price: service.calculatedPrice
+      }));
 
       const { error } = await supabase
         .from('print_jobs')
@@ -82,7 +112,10 @@ const Index = () => {
           time_slot: formData.timeSlot,
           notes: formData.notes || null,
           files: filesWithData,
-          status: 'pending'
+          status: totalAmount > 0 ? 'pending_payment' : 'pending',
+          selected_services: selectedServicesData,
+          total_amount: totalAmount,
+          delivery_requested: deliveryRequested && canAccessDelivery
         });
 
       if (error) {
@@ -100,7 +133,7 @@ const Index = () => {
 
       toast({
         title: "Order Submitted!",
-        description: `Your tracking ID is ${newTrackingId}`,
+        description: `Your tracking ID is ${newTrackingId}. Total: ₹${totalAmount.toFixed(2)}`,
       });
 
     } catch (error) {
@@ -124,6 +157,8 @@ const Index = () => {
       notes: ''
     });
     setFiles([]);
+    setDeliveryRequested(false);
+    clearSelection();
     setShowTrackingPopup(false);
     setTrackingId('');
   };
@@ -143,7 +178,7 @@ const Index = () => {
             Fast, Reliable <span className="text-blue-600">Print Solutions</span>
           </h1>
           <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Upload your documents, choose your pickup time, and get professional printing done quickly and efficiently.
+            Upload your documents, choose your services, and get professional printing done quickly and efficiently.
           </p>
           
           <div className="grid sm:grid-cols-3 gap-6 max-w-2xl mx-auto text-center">
@@ -158,8 +193,8 @@ const Index = () => {
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
                 <Clock className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="font-semibold text-gray-900 mb-1">Choose Time</h3>
-              <p className="text-sm text-gray-600">Flexible pickup slots</p>
+              <h3 className="font-semibold text-gray-900 mb-1">Choose Services</h3>
+              <p className="text-sm text-gray-600">Select what you need</p>
             </div>
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
@@ -174,13 +209,13 @@ const Index = () => {
 
       {/* Print Job Form */}
       <section className="py-12 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Submit Your Print Job
             </h2>
             <p className="text-lg text-gray-600">
-              Fill out the form below to get started with your printing needs
+              Fill out the form below and select your services
             </p>
           </div>
 
@@ -195,6 +230,31 @@ const Index = () => {
                 onFilesChange={setFiles}
               />
             </div>
+
+            <ServiceSelector
+              services={services}
+              selectedServices={selectedServices}
+              onAddService={addService}
+              onUpdateQuantity={updateQuantity}
+              onRemoveService={removeService}
+              totalAmount={totalAmount}
+              canAccessDelivery={canAccessDelivery}
+            />
+
+            {canAccessDelivery && (
+              <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg border border-green-200">
+                <input
+                  type="checkbox"
+                  id="delivery"
+                  checked={deliveryRequested}
+                  onChange={(e) => setDeliveryRequested(e.target.checked)}
+                  className="w-4 h-4 text-green-600"
+                />
+                <label htmlFor="delivery" className="text-green-800 font-medium">
+                  Request free doorstep delivery (Order ₹200+)
+                </label>
+              </div>
+            )}
             
             <TimeSlotSelector
               timeSlot={formData.timeSlot}
@@ -208,7 +268,7 @@ const Index = () => {
                 type="submit" 
                 size="lg" 
                 className="px-8 py-4 text-lg font-semibold min-w-48"
-                disabled={isSubmitting}
+                disabled={isSubmitting || selectedServices.length === 0}
               >
                 {isSubmitting ? (
                   <div className="flex items-center gap-2">
@@ -218,7 +278,7 @@ const Index = () => {
                 ) : (
                   <>
                     <Printer className="w-5 h-5 mr-2" />
-                    Submit Print Job
+                    Submit Print Job {totalAmount > 0 && `(₹${totalAmount.toFixed(2)})`}
                   </>
                 )}
               </Button>
