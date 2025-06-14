@@ -4,7 +4,11 @@ import { useFrame } from '@react-three/fiber';
 import { Box, Cylinder, Sphere } from '@react-three/drei';
 import { Mesh } from 'three';
 
-const PrinterModel = ({ position = [0, 0, 0] }) => {
+interface PrinterModelProps {
+  position?: [number, number, number];
+}
+
+const PrinterModel = ({ position = [0, 0, 0] }: PrinterModelProps) => {
   const printerRef = useRef<Mesh>(null);
   const paperRef = useRef<Mesh>(null);
 
