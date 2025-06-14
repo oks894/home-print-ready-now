@@ -19,15 +19,21 @@ const Scene3D = () => {
     if (usedToday && savedFortune) {
       setHasUsedToday(true);
       setFortune(savedFortune);
-      setShowFortune(true);
-      setIsGlowing(true); // Keep the glow for completed readings
+      // Don't automatically show fortune - only show when clicked
     }
   }, []);
 
   const handleBallClick = () => {
-    if (hasUsedToday) return;
+    if (hasUsedToday && fortune) {
+      // If already used today, just show the saved fortune
+      setShowFortune(true);
+      setIsGlowing(true);
+      return;
+    }
 
-    // Start glowing and rotating animation
+    if (hasUsedToday) return; // Safety check
+
+    // Start glowing and rotating animation for new fortune
     setIsGlowing(true);
     setIsRotating(true);
 
