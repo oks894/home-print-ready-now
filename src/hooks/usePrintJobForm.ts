@@ -63,8 +63,10 @@ export const usePrintJobForm = () => {
     setTotalAmount(0);
   };
 
-  const handleDeliveryRequestedChange = (requested: boolean) => {
-    setDeliveryRequested(requested);
+  const handleDeliveryRequestedChange = (requested: boolean | string) => {
+    // Ensure we always store a boolean value
+    const booleanValue = typeof requested === 'string' ? requested === 'true' : Boolean(requested);
+    setDeliveryRequested(booleanValue);
   };
 
   useEffect(() => {
