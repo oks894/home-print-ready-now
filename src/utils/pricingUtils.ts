@@ -1,3 +1,4 @@
+
 export const calculateBulkPrice = (basePrice: number, quantity: number): number => {
   // If quantity is 50 or more, apply bulk pricing (₹2.5 per page)
   if (quantity >= 50) {
@@ -9,6 +10,22 @@ export const calculateBulkPrice = (basePrice: number, quantity: number): number 
 };
 
 export const parsePriceFromString = (priceString: string): number => {
+  // Handle different price formats
+  if (priceString.includes('FREE') || priceString.includes('free')) {
+    return 0;
+  }
+  
+  // Handle "20 / 6 pcs" format
+  if (priceString.includes('/') && priceString.includes('pcs')) {
+    const match = priceString.match(/(\d+(?:\.\d+)?)\s*\/\s*(\d+)\s*pcs/);
+    if (match) {
+      const totalPrice = parseFloat(match[1]);
+      const pieces = parseFloat(match[2]);
+      return totalPrice / pieces; // Price per piece
+    }
+  }
+  
+  // Handle "₹X/page" or "₹X" format
   const match = priceString.match(/₹?(\d+(?:\.\d+)?)/);
   return match ? parseFloat(match[1]) : 0;
 };
@@ -28,4 +45,16 @@ export const getBulkDiscountInfo = (quantity: number): { hasBulkDiscount: boolea
     originalPrice,
     discountedPrice
   };
+};
+
+export const calculateServicePrice = (service: any, quantity: number): number => {
+  const basePrice = parsePriceFromString(service.price);
+  
+  // Apply bulk pricing for printing services
+  if (service.category === 'Printing' || service.category === 'Color') {
+    return calculateBulkPrice(basePrice, quantity);
+  }
+  
+  // For other services, use regular pricing
+  return basePrice * quantity;
 };

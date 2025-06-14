@@ -29,6 +29,14 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
     ? getBulkDiscountInfo(selectedService.quantity) 
     : null;
 
+  const handleQuantityChange = (newQuantity: number) => {
+    if (newQuantity <= 0) {
+      onRemoveService(service.id);
+    } else {
+      onUpdateQuantity(service.id, newQuantity);
+    }
+  };
+
   return (
     <Card key={service.id} className="relative">
       <CardHeader className="pb-3">
@@ -56,21 +64,21 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => onUpdateQuantity(service.id, selectedService.quantity - 1)}
+                onClick={() => handleQuantityChange(selectedService.quantity - 1)}
               >
                 <Minus className="w-3 h-3" />
               </Button>
               <Input
                 type="number"
                 value={selectedService.quantity}
-                onChange={(e) => onUpdateQuantity(service.id, parseInt(e.target.value) || 0)}
+                onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 0)}
                 className="w-16 text-center"
                 min="0"
               />
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => onUpdateQuantity(service.id, selectedService.quantity + 1)}
+                onClick={() => handleQuantityChange(selectedService.quantity + 1)}
               >
                 <Plus className="w-3 h-3" />
               </Button>
