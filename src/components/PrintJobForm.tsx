@@ -137,7 +137,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
                   canAccessDelivery={canAccessDelivery}
                   formData={formData}
                   onFormDataChange={setFormData}
-                  deliveryRequested={Boolean(deliveryRequested)}
+                  deliveryRequested={deliveryRequested === true || deliveryRequested === 'true'}
                   onDeliveryRequestedChange={handleDeliveryRequestedChange}
                 />
               </motion.div>
