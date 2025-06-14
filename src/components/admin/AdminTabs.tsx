@@ -143,7 +143,7 @@ export const AdminTabs = ({
         <PrintJobsList
           printJobs={filteredPrintJobs}
           onJobSelect={onJobSelect}
-          selectedJobId={selectedJob?.id}
+          selectedJob={selectedJob}
           onStatusUpdate={onStatusUpdate}
           onDeleteJob={onDeleteJob}
           isLoading={isLoading}
@@ -165,7 +165,6 @@ export const AdminTabs = ({
             selectedJob={selectedJob}
             onStatusUpdate={onStatusUpdate}
             onDeleteJob={onDeleteJob}
-            onClose={() => onJobSelect(null)}
           />
         ) : (
           <Card>
