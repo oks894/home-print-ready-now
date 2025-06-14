@@ -1,14 +1,11 @@
-
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Stars } from '@react-three/drei';
 import { Suspense, useState, useEffect } from 'react';
 import { FortuneBall } from './FortuneBall';
-import { FortuneDisplay } from './FortuneDisplay';
 import { getDailyFortune, checkDailyUsage, saveDailyFortune } from '@/utils/fortuneUtils';
 
 const Scene3D = () => {
   const [hasUsedToday, setHasUsedToday] = useState(false);
-  const [showFortune, setShowFortune] = useState(false);
   const [isGlowing, setIsGlowing] = useState(false);
   const [isRotating, setIsRotating] = useState(false);
   const [fortune, setFortune] = useState('');
@@ -24,29 +21,29 @@ const Scene3D = () => {
   }, []);
 
   const handleBallClick = () => {
-    if (hasUsedToday && fortune) {
-      // If already used today, just show the saved fortune
-      setShowFortune(true);
+    if (hasUsedToday) {
+      // If already used today, just make it glow briefly
       setIsGlowing(true);
+      setTimeout(() => setIsGlowing(false), 3000);
       return;
     }
-
-    if (hasUsedToday) return; // Safety check
 
     // Start glowing and rotating animation for new fortune
     setIsGlowing(true);
     setIsRotating(true);
 
-    // After 2.5 seconds, show fortune
+    // After 2.5 seconds, stop rotating but keep glowing
     setTimeout(() => {
       const dailyFortune = getDailyFortune();
       setFortune(dailyFortune);
-      setShowFortune(true);
       setHasUsedToday(true);
       setIsRotating(false);
 
       // Save to localStorage
       saveDailyFortune(dailyFortune);
+      
+      // Keep glowing for a few more seconds
+      setTimeout(() => setIsGlowing(false), 4000);
     }, 2500);
   };
 
@@ -114,13 +111,6 @@ const Scene3D = () => {
           />
         </Suspense>
       </Canvas>
-      
-      <FortuneDisplay
-        hasUsedToday={hasUsedToday}
-        showFortune={showFortune}
-        isRotating={isRotating}
-        fortune={fortune}
-      />
     </div>
   );
 };

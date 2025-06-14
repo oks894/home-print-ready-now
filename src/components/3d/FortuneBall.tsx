@@ -20,6 +20,9 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
   const meshRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
   const innerSphereRef = useRef<THREE.Mesh>(null);
+  const glowLight1Ref = useRef<THREE.PointLight>(null);
+  const glowLight2Ref = useRef<THREE.PointLight>(null);
+  const glowLight3Ref = useRef<THREE.PointLight>(null);
   const [floatingWords, setFloatingWords] = useState<Array<{word: string, position: [number, number, number], rotation: [number, number, number]}>>([]);
 
   useEffect(() => {
@@ -58,9 +61,29 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
       innerSphereRef.current.rotation.y -= delta * 0.2;
     }
     
-    if (lightRef.current && (isGlowing || !isRotating)) {
-      const baseIntensity = isGlowing ? 3 : 1;
-      lightRef.current.intensity = baseIntensity + Math.sin(state.clock.elapsedTime * 3) * 0.8;
+    // Enhanced fantasy lighting effects
+    if (lightRef.current) {
+      const baseIntensity = isGlowing ? 5 : 1;
+      lightRef.current.intensity = baseIntensity + Math.sin(state.clock.elapsedTime * 4) * (isGlowing ? 2 : 0.5);
+    }
+
+    // Fantasy glow lights with different patterns
+    if (glowLight1Ref.current && isGlowing) {
+      glowLight1Ref.current.intensity = 3 + Math.sin(state.clock.elapsedTime * 3) * 1.5;
+      glowLight1Ref.current.position.x = Math.sin(state.clock.elapsedTime * 2) * 3;
+      glowLight1Ref.current.position.y = Math.cos(state.clock.elapsedTime * 1.5) * 2;
+    }
+
+    if (glowLight2Ref.current && isGlowing) {
+      glowLight2Ref.current.intensity = 2.5 + Math.cos(state.clock.elapsedTime * 4) * 1;
+      glowLight2Ref.current.position.x = Math.cos(state.clock.elapsedTime * 1.8) * 2.5;
+      glowLight2Ref.current.position.z = Math.sin(state.clock.elapsedTime * 2.2) * 3;
+    }
+
+    if (glowLight3Ref.current && isGlowing) {
+      glowLight3Ref.current.intensity = 2 + Math.sin(state.clock.elapsedTime * 5) * 0.8;
+      glowLight3Ref.current.position.y = Math.sin(state.clock.elapsedTime * 2.5) * 2.5;
+      glowLight3Ref.current.position.z = Math.cos(state.clock.elapsedTime * 1.7) * 2;
     }
   });
 
@@ -75,9 +98,9 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
         <mesh ref={meshRef}>
           <sphereGeometry args={[1.6, 128, 128]} />
           <meshPhysicalMaterial
-            color={isGlowing ? "#a855f7" : "#6d28d9"}
-            emissive={isGlowing ? "#7c3aed" : "#4c1d95"}
-            emissiveIntensity={isGlowing ? 0.8 : 0.3}
+            color={isGlowing ? "#d946ef" : "#6d28d9"}
+            emissive={isGlowing ? "#a855f7" : "#4c1d95"}
+            emissiveIntensity={isGlowing ? 1.2 : 0.3}
             metalness={0.1}
             roughness={0.05}
             clearcoat={1}
@@ -92,9 +115,9 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
         <mesh ref={innerSphereRef}>
           <sphereGeometry args={[0.8, 64, 64]} />
           <meshPhysicalMaterial
-            color={isGlowing ? "#ec4899" : "#8b5cf6"}
-            emissive={isGlowing ? "#f97316" : "#a855f7"}
-            emissiveIntensity={isGlowing ? 1.2 : 0.6}
+            color={isGlowing ? "#f59e0b" : "#8b5cf6"}
+            emissive={isGlowing ? "#fbbf24" : "#a855f7"}
+            emissiveIntensity={isGlowing ? 2 : 0.6}
             metalness={0}
             roughness={0.1}
             transparent
@@ -122,31 +145,58 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
               <meshBasicMaterial 
                 color={isGlowing ? "#fbbf24" : "#a855f7"} 
                 transparent 
-                opacity={0.6}
+                opacity={isGlowing ? 0.9 : 0.6}
               />
             </Text>
           </Float>
         ))}
         
-        {/* Dynamic lighting */}
+        {/* Main dynamic lighting */}
         <pointLight
           ref={lightRef}
           position={[0, 0, 0]}
-          intensity={isGlowing ? 3 : 1}
-          color={isGlowing ? "#f59e0b" : "#a855f7"}
-          distance={12}
+          intensity={isGlowing ? 5 : 1}
+          color={isGlowing ? "#fbbf24" : "#a855f7"}
+          distance={15}
           decay={2}
         />
         
-        {/* Ambient magical glow */}
-        {(isGlowing || !isRotating) && (
-          <pointLight
-            position={[0, 0, 0]}
-            intensity={0.5}
-            color="#ec4899"
-            distance={8}
-            decay={1}
-          />
+        {/* Fantasy glow lights - only when glowing */}
+        {isGlowing && (
+          <>
+            <pointLight
+              ref={glowLight1Ref}
+              position={[3, 2, 0]}
+              intensity={3}
+              color="#ec4899"
+              distance={12}
+              decay={1.5}
+            />
+            <pointLight
+              ref={glowLight2Ref}
+              position={[-2, 0, 3]}
+              intensity={2.5}
+              color="#8b5cf6"
+              distance={10}
+              decay={1.8}
+            />
+            <pointLight
+              ref={glowLight3Ref}
+              position={[0, -2, -2]}
+              intensity={2}
+              color="#06b6d4"
+              distance={8}
+              decay={2}
+            />
+            {/* Additional ambient glow */}
+            <pointLight
+              position={[0, 0, 0]}
+              intensity={1.5}
+              color="#fbbf24"
+              distance={20}
+              decay={0.5}
+            />
+          </>
         )}
       </group>
     </Float>
