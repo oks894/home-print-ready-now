@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Upload, Clock, FileText, Printer, CheckCircle } from 'lucide-react';
+import { Upload, Clock, FileText, Printer, CheckCircle, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
