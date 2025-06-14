@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Users, Star, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,7 +16,7 @@ const Stats = () => {
       // Get print jobs count
       const { data: printJobs, error: jobsError } = await supabase
         .from('print_jobs')
-        .select('id');
+        .select('*');
 
       if (jobsError) {
         console.error('Error fetching print jobs:', jobsError);
