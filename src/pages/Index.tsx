@@ -13,7 +13,6 @@ import FileUpload from '@/components/FileUpload';
 import TimeSlotSelector from '@/components/TimeSlotSelector';
 import TrackingPopup from '@/components/TrackingPopup';
 import Services from '@/components/Services';
-import Stats from '@/components/Stats';
 import Feedback from '@/components/Feedback';
 import PaymentQR from '@/components/PaymentQR';
 import { ServiceSelector } from '@/components/ServiceSelector';
@@ -289,7 +288,6 @@ const Index = () => {
 
       <Services />
       <PaymentQR />
-      <Stats />
       <Feedback />
       <Footer />
 
