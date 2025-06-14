@@ -44,11 +44,6 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
 
-  // Convert deliveryRequested to boolean if it's a string
-  const deliveryRequestedBoolean = typeof deliveryRequested === 'string' 
-    ? deliveryRequested === 'true' 
-    : Boolean(deliveryRequested);
-
   const handleSubmit = async () => {
     if (!canProceed()) {
       toast({
@@ -65,7 +60,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         files: files.length,
         selectedServices: selectedServices.length,
         totalAmount,
-        deliveryRequested: deliveryRequestedBoolean
+        deliveryRequested
       });
 
       const trackingId = await submitPrintJob(
@@ -73,7 +68,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         files,
         selectedServices,
         totalAmount,
-        deliveryRequestedBoolean,
+        deliveryRequested,
         canAccessDelivery
       );
       
@@ -142,7 +137,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
                   canAccessDelivery={canAccessDelivery}
                   formData={formData}
                   onFormDataChange={setFormData}
-                  deliveryRequested={deliveryRequestedBoolean}
+                  deliveryRequested={deliveryRequested}
                   onDeliveryRequestedChange={handleDeliveryRequestedChange}
                 />
               </motion.div>

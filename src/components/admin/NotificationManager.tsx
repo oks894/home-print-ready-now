@@ -9,16 +9,26 @@ import { Badge } from '@/components/ui/badge';
 export const NotificationManager = () => {
   const { permission, requestPermission, startListening } = useNotifications();
   const [isListening, setIsListening] = useState(false);
+  const [cleanup, setCleanup] = useState<(() => void) | null>(null);
 
   const handleEnableNotifications = async () => {
+    console.log('Enabling notifications...');
     const result = await requestPermission();
     if (result === 'granted') {
-      const cleanup = startListening();
+      console.log('Permission granted, starting to listen...');
+      const cleanupFn = startListening();
+      setCleanup(() => cleanupFn);
       setIsListening(true);
-      
-      // Store cleanup function to call when component unmounts or notifications are disabled
-      return cleanup;
     }
+  };
+
+  const handleDisableNotifications = () => {
+    console.log('Disabling notifications...');
+    if (cleanup) {
+      cleanup();
+      setCleanup(null);
+    }
+    setIsListening(false);
   };
 
   const getPermissionStatus = () => {
@@ -37,12 +47,19 @@ export const NotificationManager = () => {
   useEffect(() => {
     // Auto-start listening if permission is already granted
     if (permission === 'granted' && !isListening) {
-      const cleanup = startListening();
+      console.log('Auto-starting notifications with granted permission');
+      const cleanupFn = startListening();
+      setCleanup(() => cleanupFn);
       setIsListening(true);
-      
-      return cleanup;
     }
-  }, [permission, isListening, startListening]);
+
+    // Cleanup on unmount
+    return () => {
+      if (cleanup) {
+        cleanup();
+      }
+    };
+  }, [permission]);
 
   return (
     <Card>
@@ -76,15 +93,38 @@ export const NotificationManager = () => {
           </Badge>
         </div>
 
-        {permission !== 'granted' && (
-          <Button 
-            onClick={handleEnableNotifications}
-            className="w-full"
-          >
-            <Bell className="w-4 h-4 mr-2" />
-            Enable Notifications
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {permission !== 'granted' && (
+            <Button 
+              onClick={handleEnableNotifications}
+              className="flex-1"
+            >
+              <Bell className="w-4 h-4 mr-2" />
+              Enable Notifications
+            </Button>
+          )}
+
+          {permission === 'granted' && !isListening && (
+            <Button 
+              onClick={handleEnableNotifications}
+              className="flex-1"
+            >
+              <Bell className="w-4 h-4 mr-2" />
+              Start Listening
+            </Button>
+          )}
+
+          {isListening && (
+            <Button 
+              onClick={handleDisableNotifications}
+              variant="outline"
+              className="flex-1"
+            >
+              <BellOff className="w-4 h-4 mr-2" />
+              Stop Listening
+            </Button>
+          )}
+        </div>
 
         {permission === 'denied' && (
           <div className="p-3 bg-orange-50 border border-orange-200 rounded-lg">
@@ -94,10 +134,18 @@ export const NotificationManager = () => {
           </div>
         )}
 
-        {permission === 'granted' && (
+        {permission === 'granted' && isListening && (
           <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-green-800">
-              <strong>Notifications Enabled:</strong> You'll receive alerts for new print orders even when this tab is in the background.
+              <strong>Notifications Active:</strong> You'll receive alerts for new print orders even when this tab is in the background.
+            </p>
+          </div>
+        )}
+
+        {permission === 'granted' && !isListening && (
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Ready to Listen:</strong> Click "Start Listening" to begin receiving real-time notifications.
             </p>
           </div>
         )}
