@@ -5,9 +5,9 @@ import { Suspense, useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 
 // Fortune Ball Component
-const FortuneBall = ({ onClick, isGlowing, isRotating }) => {
-  const meshRef = useRef();
-  const lightRef = useRef();
+const FortuneBall = ({ onClick, isGlowing, isRotating }: { onClick: () => void; isGlowing: boolean; isRotating: boolean }) => {
+  const meshRef = useRef<THREE.Mesh>(null);
+  const lightRef = useRef<THREE.PointLight>(null);
 
   useFrame((state, delta) => {
     if (meshRef.current) {
