@@ -8,8 +8,10 @@ import { usePrintJobSubmission } from '@/hooks/usePrintJobSubmission';
 import { useServices } from '@/hooks/useServices';
 import { useToast } from '@/hooks/use-toast';
 import { usePrintJobForm } from '@/hooks/usePrintJobForm';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { createServiceHandlers } from '@/utils/serviceHandlers';
 import { steps } from './form-steps/stepDefinitions';
+import { MobileContainer } from '@/components/mobile/MobileContainer';
 import StepProgress from './form-steps/StepProgress';
 import StepContent from './form-steps/StepContent';
 import NavigationButtons from './form-steps/NavigationButtons';
@@ -19,6 +21,7 @@ interface PrintJobFormProps {
 }
 
 const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
+  const isMobile = useIsMobile();
   const {
     currentStep,
     files,
@@ -117,17 +120,17 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   };
 
   const stepVariants = {
-    hidden: { opacity: 0, x: 100, scale: 0.95 },
+    hidden: { opacity: 0, x: isMobile ? 50 : 100, scale: 0.95 },
     visible: { opacity: 1, x: 0, scale: 1 },
-    exit: { opacity: 0, x: -100, scale: 0.95 }
+    exit: { opacity: 0, x: isMobile ? -50 : -100, scale: 0.95 }
   };
 
-  // Notification component for inline messages
+  // Mobile-optimized notification component
   const StepNotification = ({ message, type = 'info' }: { message: string; type?: 'info' | 'warning' | 'success' }) => {
     const icons = {
-      info: <Info className="h-4 w-4" />,
-      warning: <AlertCircle className="h-4 w-4" />,
-      success: <CheckCircle className="h-4 w-4" />
+      info: <Info className="h-4 w-4 flex-shrink-0" />,
+      warning: <AlertCircle className="h-4 w-4 flex-shrink-0" />,
+      success: <CheckCircle className="h-4 w-4 flex-shrink-0" />
     };
 
     const variants = {
@@ -141,35 +144,45 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
-        className="mb-6"
+        className={`mb-4 ${isMobile ? 'mx-2' : 'mb-6'}`}
       >
-        <Alert className={`${variants[type]} border`}>
-          {icons[type]}
-          <AlertDescription>{message}</AlertDescription>
+        <Alert className={`${variants[type]} border ${isMobile ? 'text-sm' : ''}`}>
+          <div className="flex items-start gap-2">
+            {icons[type]}
+            <AlertDescription className="flex-1 leading-relaxed">
+              {message}
+            </AlertDescription>
+          </div>
         </Alert>
       </motion.div>
     );
   };
 
   return (
-    <section className="py-16 px-4 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
+    <section className={`${isMobile ? 'py-6 px-0' : 'py-16 px-4'} bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50`}>
+      <MobileContainer className={isMobile ? 'px-0' : ''}>
+        {/* Mobile-optimized Header */}
         <motion.div 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className={`text-center ${isMobile ? 'mb-6 px-4' : 'mb-12'}`}
         >
-          <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+          <h2 className={`font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 ${
+            isMobile ? 'text-2xl leading-tight' : 'text-4xl md:text-5xl'
+          }`}>
             Submit Your Print Job
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className={`text-gray-600 max-w-3xl mx-auto ${
+            isMobile ? 'text-base leading-relaxed' : 'text-xl'
+          }`}>
             Professional printing made simple. Upload, customize, and get your documents printed with premium quality.
           </p>
         </motion.div>
 
-        {/* Progress Indicator */}
-        <StepProgress steps={steps} currentStep={currentStep} />
+        {/* Mobile-optimized Progress Indicator */}
+        <div className={isMobile ? 'px-2' : ''}>
+          <StepProgress steps={steps} currentStep={currentStep} />
+        </div>
 
         {/* Loading State Notification */}
         {servicesLoading && (
@@ -187,9 +200,11 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
           />
         )}
 
-        {/* Step Content */}
-        <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
-          <CardContent className="p-8 md:p-12">
+        {/* Mobile-optimized Step Content */}
+        <Card className={`border-0 shadow-2xl bg-white/80 backdrop-blur-sm ${
+          isMobile ? 'mx-2 rounded-xl' : ''
+        }`}>
+          <CardContent className={isMobile ? 'p-4 sm:p-6' : 'p-8 md:p-12'}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentStep}
@@ -197,7 +212,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
                 animate="visible"
                 exit="exit"
                 variants={stepVariants}
-                transition={{ duration: 0.3 }}
+                transition={{ duration: isMobile ? 0.2 : 0.3 }}
               >
                 <StepContent
                   currentStep={currentStep}
@@ -225,7 +240,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="mt-6"
+            className={isMobile ? 'mt-4' : 'mt-6'}
           >
             <StepNotification 
               message="All information completed! Ready to submit your print job." 
@@ -234,17 +249,19 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
           </motion.div>
         )}
 
-        {/* Navigation */}
-        <NavigationButtons
-          currentStep={currentStep}
-          totalSteps={steps.length}
-          canProceed={canProceedBoolean}
-          isSubmitting={isSubmitting}
-          onPrevious={handlePrevious}
-          onNext={handleNext}
-          onSubmit={handleSubmit}
-        />
-      </div>
+        {/* Mobile-optimized Navigation */}
+        <div className={isMobile ? 'px-2' : ''}>
+          <NavigationButtons
+            currentStep={currentStep}
+            totalSteps={steps.length}
+            canProceed={canProceedBoolean}
+            isSubmitting={isSubmitting}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            onSubmit={handleSubmit}
+          />
+        </div>
+      </MobileContainer>
     </section>
   );
 };

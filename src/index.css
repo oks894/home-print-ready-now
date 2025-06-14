@@ -1,5 +1,4 @@
 
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -39,19 +38,12 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -149,6 +141,18 @@
       @apply text-sm leading-relaxed;
     }
   }
+
+  /* Enhanced mobile form elements */
+  @media (max-width: 768px) {
+    input, textarea, select {
+      @apply text-base; /* Prevents zoom on iOS */
+      min-height: 48px;
+    }
+    
+    .mobile-form-input {
+      @apply w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all;
+    }
+  }
 }
 
 /* Custom mobile utilities */
@@ -162,6 +166,14 @@
     padding-right: env(safe-area-inset-right);
   }
   
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
   .mobile-container {
     @apply px-3 sm:px-4 lg:px-6;
   }
@@ -173,5 +185,87 @@
   .mobile-heading {
     @apply text-xl sm:text-2xl lg:text-3xl;
   }
+
+  /* Mobile-optimized spacing */
+  .mobile-spacing {
+    @apply py-4 sm:py-6 lg:py-8;
+  }
+
+  .mobile-gap {
+    @apply gap-3 sm:gap-4 lg:gap-6;
+  }
+
+  /* Touch-friendly buttons */
+  .touch-button {
+    @apply min-h-[48px] min-w-[48px] touch-manipulation;
+  }
+
+  /* Mobile-optimized cards */
+  .mobile-card {
+    @apply rounded-lg sm:rounded-xl shadow-md sm:shadow-lg;
+  }
+
+  /* Prevent text selection on mobile UI elements */
+  .no-select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  /* Mobile swipe indicators */
+  .swipe-indicator {
+    @apply relative;
+  }
+  
+  .swipe-indicator::after {
+    content: '';
+    @apply absolute bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full;
+  }
+
+  /* Mobile-optimized animations */
+  .mobile-fade-in {
+    animation: mobile-fade-in 0.3s ease-out;
+  }
+
+  @keyframes mobile-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* High contrast for mobile accessibility */
+  @media (max-width: 768px) {
+    .mobile-high-contrast {
+      @apply contrast-125;
+    }
+  }
 }
 
+/* Mobile-specific component styles */
+@layer components {
+  .mobile-nav-item {
+    @apply block w-full text-left px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors touch-manipulation;
+  }
+
+  .mobile-form-section {
+    @apply space-y-4 p-4 bg-white rounded-lg shadow-sm border border-gray-100;
+  }
+
+  .mobile-step-indicator {
+    @apply flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold;
+  }
+
+  .mobile-progress-bar {
+    @apply w-full h-2 bg-gray-200 rounded-full overflow-hidden;
+  }
+
+  .mobile-toast {
+    @apply fixed bottom-4 left-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50;
+  }
+}

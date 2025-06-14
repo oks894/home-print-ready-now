@@ -2,11 +2,16 @@
 import { Link } from 'react-router-dom';
 import { Printer, User, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { TouchButton } from '@/components/mobile/TouchButton';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
+
+  const ButtonComponent = isMobile ? TouchButton : Button;
 
   return (
     <motion.header 
@@ -15,19 +20,21 @@ const Header = () => {
       animate={{ y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
     >
-      <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2 sm:py-3">
+      <div className={`max-w-6xl mx-auto safe-area-inset ${isMobile ? 'px-3 py-2' : 'px-3 sm:px-4 py-2 sm:py-3'}`}>
         {/* Mobile-First Header */}
         <div className="flex items-center justify-between">
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Link to="/" className="flex items-center gap-2 text-lg sm:text-xl font-bold text-blue-600">
+            <Link to="/" className={`flex items-center gap-2 font-bold text-blue-600 ${
+              isMobile ? 'text-lg' : 'text-lg sm:text-xl'
+            }`}>
               <motion.div
                 animate={{ rotate: [0, 360] }}
                 transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
               >
-                <Printer className="w-5 h-5 sm:w-6 sm:h-6" />
+                <Printer className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5 sm:w-6 sm:h-6'}`} />
               </motion.div>
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 PrintReady
@@ -62,21 +69,25 @@ const Header = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <Link to="/admin" className="hidden sm:block">
-                <Button variant="outline" size="sm" className="text-xs sm:text-sm hover:bg-blue-50 border-blue-200">
+                <ButtonComponent 
+                  variant="outline" 
+                  size="sm" 
+                  className={`hover:bg-blue-50 border-blue-200 ${
+                    isMobile ? 'text-xs p-2' : 'text-xs sm:text-sm'
+                  }`}
+                >
                   <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                   Admin
-                </Button>
+                </ButtonComponent>
               </Link>
             </motion.div>
             
             {/* Mobile Menu Button */}
-            <motion.div
-              whileTap={{ scale: 0.9 }}
-            >
-              <Button 
+            <motion.div whileTap={{ scale: 0.9 }}>
+              <ButtonComponent 
                 variant="ghost" 
                 size="sm" 
-                className="lg:hidden p-1 sm:p-2 hover:bg-blue-50"
+                className="lg:hidden hover:bg-blue-50 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
                 <AnimatePresence mode="wait">
@@ -88,7 +99,7 @@ const Header = () => {
                       exit={{ rotate: 90, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <X className="w-5 h-5" />
+                      <X className="w-6 h-6" />
                     </motion.div>
                   ) : (
                     <motion.div
@@ -98,11 +109,11 @@ const Header = () => {
                       exit={{ rotate: -90, opacity: 0 }}
                       transition={{ duration: 0.2 }}
                     >
-                      <Menu className="w-5 h-5" />
+                      <Menu className="w-6 h-6" />
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </Button>
+              </ButtonComponent>
             </motion.div>
           </div>
         </div>
@@ -117,7 +128,7 @@ const Header = () => {
               transition={{ duration: 0.3 }}
               className="lg:hidden mt-3 pb-3 border-t pt-3 bg-white/90 backdrop-blur-sm rounded-lg"
             >
-              <div className="flex flex-col space-y-2">
+              <div className="flex flex-col space-y-1">
                 {[
                   { name: 'Home', path: '/' },
                   { name: 'Services', path: '/services' },
@@ -133,7 +144,7 @@ const Header = () => {
                   >
                     <Link 
                       to={item.path}
-                      className="text-gray-600 hover:text-blue-600 transition-colors font-medium py-2 px-3 rounded-lg hover:bg-blue-50 text-base block"
+                      className="text-gray-600 hover:text-blue-600 transition-colors font-medium py-3 px-4 rounded-lg hover:bg-blue-50 text-base block min-h-[48px] flex items-center touch-manipulation"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {item.name}
@@ -144,16 +155,20 @@ const Header = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.5 }}
-                  className="sm:hidden mt-2"
+                  className="sm:hidden mt-2 px-4"
                 >
                   <Link 
                     to="/admin"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    <Button variant="outline" size="sm" className="w-full justify-start text-sm border-blue-200 hover:bg-blue-50">
-                      <User className="w-4 h-4 mr-2" />
+                    <TouchButton 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full justify-start text-base border-blue-200 hover:bg-blue-50 min-h-[48px]"
+                    >
+                      <User className="w-5 h-5 mr-3" />
                       Admin Panel
-                    </Button>
+                    </TouchButton>
                   </Link>
                 </motion.div>
               </div>
