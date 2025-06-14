@@ -2,6 +2,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { CheckCircle, AlertCircle, Info } from 'lucide-react';
 import { usePrintJobSubmission } from '@/hooks/usePrintJobSubmission';
 import { useServices } from '@/hooks/useServices';
 import { useToast } from '@/hooks/use-toast';
@@ -44,6 +46,9 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
 
+  // Convert deliveryRequested to boolean to fix TypeScript error
+  const deliveryRequestedBoolean = typeof deliveryRequested === 'string' ? deliveryRequested === 'true' : Boolean(deliveryRequested);
+
   const handleSubmit = async () => {
     if (!canProceed()) {
       toast({
@@ -60,7 +65,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         files: files.length,
         selectedServices: selectedServices.length,
         totalAmount,
-        deliveryRequested
+        deliveryRequested: deliveryRequestedBoolean
       });
 
       const trackingId = await submitPrintJob(
@@ -68,7 +73,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         files,
         selectedServices,
         totalAmount,
-        deliveryRequested,
+        deliveryRequestedBoolean,
         canAccessDelivery
       );
       
@@ -137,7 +142,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
                   canAccessDelivery={canAccessDelivery}
                   formData={formData}
                   onFormDataChange={setFormData}
-                  deliveryRequested={deliveryRequested}
+                  deliveryRequested={deliveryRequestedBoolean}
                   onDeliveryRequestedChange={handleDeliveryRequestedChange}
                 />
               </motion.div>
