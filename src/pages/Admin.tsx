@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Download, Eye, Trash2, FileText, Clock, User, Phone, Building, Star, MessageSquare } from 'lucide-react';
@@ -88,6 +89,9 @@ const Admin = () => {
       // Cast the data to match our PrintJob interface
       const typedJobs: PrintJob[] = (data || []).map(job => ({
         ...job,
+        institute: job.institute || '',
+        notes: job.notes || '',
+        status: job.status as 'pending' | 'printing' | 'ready' | 'completed',
         files: Array.isArray(job.files) ? job.files as Array<{ name: string; size: number; type: string; data?: string }> : []
       }));
 
