@@ -129,7 +129,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
       if (trackingId) {
         onOrderSubmitted(trackingId);
         
-        // Reset form
+        // Reset form with explicit boolean type
         setCurrentStep(0);
         setFiles([]);
         setSelectedServices([]);
@@ -140,7 +140,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
           timeSlot: '',
           notes: ''
         });
-        setDeliveryRequested(false);
+        setDeliveryRequested(false); // Explicitly set to boolean false
         setTotalAmount(0);
       }
     } catch (error) {
@@ -195,6 +195,11 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     exit: { opacity: 0, x: -100, scale: 0.95 }
   };
 
+  // Ensure deliveryRequested is always boolean when passed to StepContent
+  const handleDeliveryRequestedChange = (requested: boolean) => {
+    setDeliveryRequested(requested);
+  };
+
   return (
     <section className="py-16 px-4 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
       <div className="max-w-6xl mx-auto">
@@ -241,7 +246,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
                   formData={formData}
                   onFormDataChange={setFormData}
                   deliveryRequested={deliveryRequested}
-                  onDeliveryRequestedChange={setDeliveryRequested}
+                  onDeliveryRequestedChange={handleDeliveryRequestedChange}
                 />
               </motion.div>
             </AnimatePresence>
