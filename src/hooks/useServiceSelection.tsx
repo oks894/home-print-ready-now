@@ -11,13 +11,13 @@ export const useServiceSelection = (services: Service[]) => {
     if (existingIndex >= 0) {
       const updated = [...selectedServices];
       updated[existingIndex].quantity += quantity;
-      updated[existingIndex].calculatedPrice = calculateServicePrice(service.price, updated[existingIndex].quantity);
+      updated[existingIndex].calculatedPrice = calculateServicePrice(service, updated[existingIndex].quantity);
       setSelectedServices(updated);
     } else {
       const newService: SelectedService = {
         ...service,
         quantity,
-        calculatedPrice: calculateServicePrice(service.price, quantity)
+        calculatedPrice: calculateServicePrice(service, quantity)
       };
       setSelectedServices([...selectedServices, newService]);
     }
@@ -33,12 +33,15 @@ export const useServiceSelection = (services: Service[]) => {
       return;
     }
 
+    const service = selectedServices.find(s => s.id === serviceId);
+    if (!service) return;
+
     const updated = selectedServices.map(s => {
       if (s.id === serviceId) {
         return {
           ...s,
           quantity,
-          calculatedPrice: calculateServicePrice(s.price, quantity)
+          calculatedPrice: calculateServicePrice(s, quantity)
         };
       }
       return s;
@@ -67,11 +70,33 @@ export const useServiceSelection = (services: Service[]) => {
   };
 };
 
-const calculateServicePrice = (priceString: string, quantity: number): number => {
-  // Extract numeric value from price string like "₹3.5/page"
-  const match = priceString.match(/₹?([\d.]+)/);
-  if (match) {
-    return parseFloat(match[1]) * quantity;
+const calculateServicePrice = (service: Service, quantity: number): number => {
+  // Handle different service types with bulk pricing
+  const serviceName = service.name.toLowerCase();
+  
+  if (serviceName.includes('document') || serviceName.includes('black') || serviceName.includes('b&w')) {
+    // Document/B&W printing: ₹3.5 for 1-49 pages, ₹2.5 for 50+ pages
+    if (quantity >= 50) {
+      return quantity * 2.5;
+    } else {
+      return quantity * 3.5;
+    }
+  } else if (serviceName.includes('color')) {
+    // Color printing: ₹5 for 1-49 pages, ₹2.5 for 50+ pages
+    if (quantity >= 50) {
+      return quantity * 2.5;
+    } else {
+      return quantity * 5;
+    }
+  } else if (serviceName.includes('passport')) {
+    // Passport photos: ₹20 per set of 6
+    return quantity * 20;
+  } else {
+    // Fallback: extract numeric value from price string
+    const match = service.price.match(/₹?([\d.]+)/);
+    if (match) {
+      return parseFloat(match[1]) * quantity;
+    }
+    return 0;
   }
-  return 0;
 };

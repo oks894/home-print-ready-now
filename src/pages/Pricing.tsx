@@ -26,6 +26,7 @@ const Pricing = () => {
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl">Document Printing</CardTitle>
                 <CardDescription className="text-3xl font-bold text-blue-600">₹3.5<span className="text-sm text-gray-500">/page</span></CardDescription>
+                <p className="text-xs text-gray-500">₹2.5/page for 50+ pages</p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
@@ -73,7 +74,7 @@ const Pricing = () => {
               <CardHeader className="text-center">
                 <CardTitle className="text-2xl">Color Printing</CardTitle>
                 <CardDescription className="text-3xl font-bold text-purple-600">₹5<span className="text-sm text-gray-500">/page</span></CardDescription>
-                <p className="text-xs text-gray-500">₹3.5/page for 50+ pages</p>
+                <p className="text-xs text-gray-500">₹2.5/page for 50+ pages</p>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
@@ -142,7 +143,7 @@ const Pricing = () => {
                   </li>
                   <li className="flex justify-between">
                     <span>50+ pages:</span>
-                    <span className="font-medium text-green-600">₹3.5 per page</span>
+                    <span className="font-medium text-green-600">₹2.5 per page</span>
                   </li>
                 </ul>
               </div>
