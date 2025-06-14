@@ -1,7 +1,7 @@
 
 import { useFrame } from '@react-three/fiber';
-import { Float } from '@react-three/drei';
-import { useRef } from 'react';
+import { Float, Text } from '@react-three/drei';
+import { useRef, useState, useEffect } from 'react';
 import * as THREE from 'three';
 
 interface FortuneBallProps {
@@ -10,10 +10,37 @@ interface FortuneBallProps {
   isRotating: boolean;
 }
 
+const mysticalWords = [
+  'DESTINY', 'WISDOM', 'POWER', 'MAGIC', 'FUTURE', 'DREAMS', 'HOPE',
+  'FORTUNE', 'MYSTIC', 'ORACLE', 'SPIRIT', 'ENERGY', 'COSMIC', 'VISION',
+  'HARMONY', 'BALANCE', 'TRUTH', 'LIGHT', 'SHADOW', 'STARS', 'MOON'
+];
+
 export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const lightRef = useRef<THREE.PointLight>(null);
   const innerSphereRef = useRef<THREE.Mesh>(null);
+  const [floatingWords, setFloatingWords] = useState<Array<{word: string, position: [number, number, number], rotation: [number, number, number]}>>([]);
+
+  useEffect(() => {
+    // Generate random floating words inside the ball
+    const words = [];
+    for (let i = 0; i < 8; i++) {
+      const word = mysticalWords[Math.floor(Math.random() * mysticalWords.length)];
+      const position: [number, number, number] = [
+        (Math.random() - 0.5) * 1.5,
+        (Math.random() - 0.5) * 1.5,
+        (Math.random() - 0.5) * 1.5
+      ];
+      const rotation: [number, number, number] = [
+        Math.random() * Math.PI * 2,
+        Math.random() * Math.PI * 2,
+        Math.random() * Math.PI * 2
+      ];
+      words.push({ word, position, rotation });
+    }
+    setFloatingWords(words);
+  }, [isRotating]);
 
   useFrame((state, delta) => {
     if (meshRef.current) {
@@ -74,6 +101,32 @@ export const FortuneBall = ({ onClick, isGlowing, isRotating }: FortuneBallProps
             opacity={0.7}
           />
         </mesh>
+
+        {/* Floating mystical words inside the ball */}
+        {floatingWords.map((item, index) => (
+          <Float
+            key={`${item.word}-${index}`}
+            speed={0.5 + Math.random() * 0.5}
+            rotationIntensity={0.2}
+            floatIntensity={0.1}
+            position={item.position}
+          >
+            <Text
+              fontSize={0.08}
+              maxWidth={0.5}
+              textAlign="center"
+              font="https://fonts.gstatic.com/s/orbitron/v29/yMJRMIlzdpvBhQQL_Qq7dys.woff"
+              rotation={item.rotation}
+            >
+              {item.word}
+              <meshBasicMaterial 
+                color={isGlowing ? "#fbbf24" : "#a855f7"} 
+                transparent 
+                opacity={0.6}
+              />
+            </Text>
+          </Float>
+        ))}
         
         {/* Dynamic lighting */}
         <pointLight
