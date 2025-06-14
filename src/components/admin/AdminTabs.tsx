@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -144,8 +143,6 @@ export const AdminTabs = ({
           printJobs={filteredPrintJobs}
           onJobSelect={onJobSelect}
           selectedJob={selectedJob}
-          onStatusUpdate={onStatusUpdate}
-          onDeleteJob={onDeleteJob}
           isLoading={isLoading}
           isRetrying={isRetrying}
         />
