@@ -1,5 +1,3 @@
-
-
 import { useRef, forwardRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -13,8 +11,8 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
   const innerSphereRef = useRef<THREE.Mesh>(null);
   const imageRef = useRef<THREE.Mesh>(null);
 
-  // Load the new texture
-  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/31bb0103-cdde-4fa3-b51f-485a6bc16aa5.png');
+  // Load the previous texture
+  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/352a0e16-01f2-4d3a-9ee9-b3587643113a.png');
 
   useFrame((state, delta) => {
     if (innerSphereRef.current) {
@@ -81,4 +79,3 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
 });
 
 BallSpheres.displayName = 'BallSpheres';
-
