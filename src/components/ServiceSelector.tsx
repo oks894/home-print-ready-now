@@ -27,6 +27,9 @@ export const ServiceSelector: React.FC<ServiceSelectorProps> = ({
   totalAmount,
   canAccessDelivery
 }) => {
+  console.log('ServiceSelector received services:', services);
+  console.log('Services length:', services?.length);
+
   const getServiceIcon = (category: string) => {
     const icons: Record<string, string> = {
       'Printing': '📄',
@@ -40,6 +43,23 @@ export const ServiceSelector: React.FC<ServiceSelectorProps> = ({
   const isPrintingService = (category: string) => {
     return category === 'Printing' || category === 'Color';
   };
+
+  // Show loading state if no services
+  if (!services || services.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-semibold mb-4">Select Services</h3>
+          <div className="text-center py-8">
+            <p className="text-gray-500">Loading services...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const nonDeliveryServices = services.filter(s => s.category !== 'Delivery');
+  console.log('Non-delivery services:', nonDeliveryServices);
 
   return (
     <div className="space-y-6">
@@ -58,7 +78,8 @@ export const ServiceSelector: React.FC<ServiceSelectorProps> = ({
         </div>
 
         <div className="grid md:grid-cols-2 gap-4">
-          {services.filter(s => s.category !== 'Delivery').map(service => {
+          {nonDeliveryServices.map(service => {
+            console.log('Rendering service:', service);
             const selected = selectedServices.find(s => s.id === service.id);
             const bulkInfo = selected && isPrintingService(service.category || '') 
               ? getBulkDiscountInfo(selected.quantity) 

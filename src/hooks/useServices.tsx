@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -17,74 +16,60 @@ export const useServices = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
+  const defaultServices = [
+    {
+      id: '1',
+      name: 'Document Printing',
+      description: 'High-quality black and white document printing',
+      price: '₹3.5/page',
+      category: 'Printing'
+    },
+    {
+      id: '2',
+      name: 'Color Printing',
+      description: 'Vibrant color printing for presentations, photos, and graphics',
+      price: '₹5/page',
+      category: 'Color'
+    },
+    {
+      id: '3',
+      name: 'Doorstep Delivery',
+      description: 'Powered by DROPEE - Standard pricing applies for orders below ₹900',
+      price: 'FREE for orders ₹900+',
+      category: 'Delivery'
+    }
+  ];
+
   const loadServices = async () => {
+    console.log('Loading services...');
+    setIsLoading(true);
+    
     try {
-      // Use any type to bypass TypeScript errors until types are updated
       const { data, error } = await (supabase as any)
         .from('services')
         .select('*')
         .order('created_at', { ascending: true });
 
+      console.log('Supabase response:', { data, error });
+
       if (error) {
-        console.error('Error loading services:', error);
-        // If table doesn't exist yet, use default services
-        setServices([
-          {
-            id: '1',
-            name: 'Document Printing',
-            description: 'High-quality black and white document printing',
-            price: '₹3.5/page',
-            category: 'Printing'
-          },
-          {
-            id: '2',
-            name: 'Color Printing',
-            description: 'Vibrant color printing for presentations, photos, and graphics',
-            price: '₹5/page',
-            category: 'Color'
-          },
-          {
-            id: '3',
-            name: 'Doorstep Delivery',
-            description: 'Powered by DROPEE - Standard pricing applies for orders below ₹900',
-            price: 'FREE for orders ₹900+',
-            category: 'Delivery'
-          }
-        ]);
+        console.error('Error loading services from Supabase:', error);
+        console.log('Using default services');
+        setServices(defaultServices);
         return;
       }
 
       if (data && data.length > 0) {
+        console.log('Using services from database:', data);
         setServices(data);
       } else {
-        // If no services in database, use defaults
-        setServices([
-          {
-            id: '1',
-            name: 'Document Printing',
-            description: 'High-quality black and white document printing',
-            price: '₹3.5/page',
-            category: 'Printing'
-          },
-          {
-            id: '2',
-            name: 'Color Printing',
-            description: 'Vibrant color printing for presentations, photos, and graphics',
-            price: '₹5/page',
-            category: 'Color'
-          },
-          {
-            id: '3',
-            name: 'Doorstep Delivery',
-            description: 'Powered by DROPEE - Standard pricing applies for orders below ₹900',
-            price: 'FREE for orders ₹900+',
-            category: 'Delivery'
-          }
-        ]);
+        console.log('No services in database, using defaults');
+        setServices(defaultServices);
       }
     } catch (error) {
       console.error('Error loading services:', error);
-      setServices([]);
+      console.log('Using default services due to error');
+      setServices(defaultServices);
     } finally {
       setIsLoading(false);
     }
