@@ -1,3 +1,4 @@
+
 import { useRef, forwardRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
@@ -11,8 +12,8 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
   const innerSphereRef = useRef<THREE.Mesh>(null);
   const imageRef = useRef<THREE.Mesh>(null);
 
-  // Load the texture
-  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/e092d64c-a177-44ad-801b-965cecbbed1a.png');
+  // Load the new texture
+  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/352a0e16-01f2-4d3a-9ee9-b3587643113a.png');
 
   useFrame((state, delta) => {
     if (innerSphereRef.current) {
@@ -41,34 +42,34 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
           roughness={0.05}
           clearcoat={1}
           clearcoatRoughness={0}
-          transmission={0.3}
-          thickness={0.8}
+          transmission={0.4}
+          thickness={0.6}
           ior={1.5}
         />
       </mesh>
       
-      {/* Visible image texture inside the ball */}
-      <mesh ref={imageRef} scale={[1.1, 1.1, 1.1]}>
-        <sphereGeometry args={[0.9, 64, 64]} />
+      {/* Visible image texture inside the ball - more prominent */}
+      <mesh ref={imageRef} scale={[1.2, 1.2, 1.2]}>
+        <sphereGeometry args={[0.85, 64, 64]} />
         <meshBasicMaterial
           map={texture}
           transparent
-          opacity={isGlowing ? 0.9 : 0.7}
+          opacity={isGlowing ? 1.0 : 0.8}
           side={THREE.DoubleSide}
         />
       </mesh>
       
-      {/* Inner glowing core */}
+      {/* Inner glowing core - smaller to not interfere */}
       <mesh ref={innerSphereRef}>
-        <sphereGeometry args={[0.8, 64, 64]} />
+        <sphereGeometry args={[0.6, 64, 64]} />
         <meshPhysicalMaterial
           color={isGlowing ? "#f59e0b" : "#8b5cf6"}
           emissive={isGlowing ? "#fbbf24" : "#a855f7"}
-          emissiveIntensity={isGlowing ? 2 : 0.6}
+          emissiveIntensity={isGlowing ? 1.5 : 0.4}
           metalness={0}
           roughness={0.1}
           transparent
-          opacity={0.7}
+          opacity={0.5}
         />
       </mesh>
     </>
