@@ -85,7 +85,13 @@ const Admin = () => {
         return;
       }
 
-      setPrintJobs(data || []);
+      // Cast the data to match our PrintJob interface
+      const typedJobs: PrintJob[] = (data || []).map(job => ({
+        ...job,
+        files: Array.isArray(job.files) ? job.files as Array<{ name: string; size: number; type: string; data?: string }> : []
+      }));
+
+      setPrintJobs(typedJobs);
     } catch (error) {
       console.error('Error loading print jobs:', error);
     } finally {
