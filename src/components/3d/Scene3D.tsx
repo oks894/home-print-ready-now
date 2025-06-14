@@ -4,7 +4,42 @@ import { OrbitControls, Environment, Float, ContactShadows, Stars } from '@react
 import { Suspense } from 'react';
 import PrinterModel from './PrinterModel';
 
+// Daily fortune generator
+const getDailyFortune = () => {
+  const fortunes = [
+    "✨ Today brings unexpected creative breakthroughs in your projects",
+    "🌟 Your patience will be rewarded with remarkable results",
+    "💫 A small decision today will lead to big opportunities",
+    "🔮 Trust your instincts - they're guiding you toward success",
+    "⭐ Someone will offer valuable advice that changes your perspective",
+    "🌙 Embrace new technologies - they hold the key to your growth",
+    "💎 Your hard work is about to pay off in surprising ways",
+    "🌸 Collaboration with others will unlock hidden potential",
+    "🦋 A challenge today will become tomorrow's greatest strength",
+    "🌺 Focus on quality over quantity - excellence is your path",
+    "🍀 Lucky encounters await in unexpected places",
+    "🌈 Your creativity will inspire others around you",
+    "⚡ Energy and enthusiasm will open new doors",
+    "🌻 Share your knowledge - teaching others enriches your soul",
+    "🎯 Precision and attention to detail will set you apart",
+    "🌊 Go with the flow - adaptability is your superpower today",
+    "🔥 Passion projects will gain momentum and recognition",
+    "🌟 A moment of clarity will illuminate your next steps",
+    "💝 Kindness to others returns to you tenfold",
+    "🚀 Innovation and bold thinking lead to breakthrough moments"
+  ];
+
+  // Use current date as seed for consistent daily fortune
+  const today = new Date();
+  const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+  const index = seed % fortunes.length;
+  
+  return fortunes[index];
+};
+
 const Scene3D = () => {
+  const dailyFortune = getDailyFortune();
+
   return (
     <div className="h-[600px] w-full relative">
       <Canvas
@@ -105,9 +140,23 @@ const Scene3D = () => {
         </Suspense>
       </Canvas>
       
-      {/* Overlay UI Elements */}
-      <div className="absolute top-4 left-4 bg-black/20 backdrop-blur-sm rounded-lg p-3 text-white">
-        <p className="text-xs">🖱️ Drag to rotate • 🔍 Scroll to zoom</p>
+      {/* Daily Fortune Teller Overlay */}
+      <div className="absolute top-4 left-4 right-4 bg-gradient-to-br from-purple-900/30 via-indigo-900/30 to-pink-900/30 backdrop-blur-lg rounded-2xl border border-white/20 p-4 text-white shadow-2xl max-w-md">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="text-2xl animate-pulse">🔮</div>
+          <h3 className="text-lg font-bold bg-gradient-to-r from-purple-300 to-pink-300 bg-clip-text text-transparent">
+            Daily Fortune
+          </h3>
+          <div className="text-2xl animate-pulse">⭐</div>
+        </div>
+        
+        <p className="text-sm leading-relaxed text-purple-100 font-medium">
+          {dailyFortune}
+        </p>
+        
+        <div className="mt-3 text-xs text-purple-200/70 text-center">
+          ✨ Your fortune updates daily ✨
+        </div>
       </div>
     </div>
   );
