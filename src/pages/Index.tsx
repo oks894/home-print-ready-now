@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Printer, FileText, Clock, CheckCircle, Phone, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -45,7 +44,9 @@ const Index = () => {
 
   const generateTrackingId = (phone: string) => {
     const cleanPhone = phone.replace(/\D/g, '');
-    return cleanPhone;
+    const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+    const random = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+    return `${cleanPhone}${timestamp}${random}`;
   };
 
   const convertFilesToBase64 = async (files: File[]): Promise<Array<{ name: string; size: number; type: string; data: string }>> => {
@@ -100,6 +101,8 @@ const Index = () => {
         quantity: service.quantity,
         price: service.calculatedPrice
       }));
+
+      console.log('Attempting to insert print job with tracking ID:', newTrackingId);
 
       const { error } = await supabase
         .from('print_jobs')
