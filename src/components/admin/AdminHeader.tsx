@@ -4,6 +4,7 @@ import { ArrowLeft, RefreshCw, Wifi, WifiOff, Home, Package, MessageCircle, Phon
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { useSearch } from '@/components/admin/AdminSearch';
 
 interface AdminHeaderProps {
   onLogout: () => void;
@@ -13,6 +14,7 @@ interface AdminHeaderProps {
 
 export const AdminHeader = ({ onLogout, isRetrying = false, onRefresh }: AdminHeaderProps) => {
   const isOnline = navigator.onLine;
+  const { searchQuery, setSearchQuery } = useSearch();
 
   return (
     <div className="bg-white/80 backdrop-blur-lg border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
@@ -58,6 +60,8 @@ export const AdminHeader = ({ onLogout, isRetrying = false, onRefresh }: AdminHe
               <Input 
                 placeholder="Search jobs, customers..." 
                 className="pl-10 bg-gray-50 border-gray-200 focus:bg-white transition-colors"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
           </div>
@@ -98,6 +102,8 @@ export const AdminHeader = ({ onLogout, isRetrying = false, onRefresh }: AdminHe
             <Input 
               placeholder="Search..." 
               className="pl-10 bg-gray-50 border-gray-200"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>

@@ -1,14 +1,16 @@
 
+import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { PrintJobsList } from '@/components/admin/PrintJobsList';
-import { JobDetails } from '@/components/admin/JobDetails';
-import { FeedbackList } from '@/components/admin/FeedbackList';
-import { ServicesManager } from '@/components/admin/ServicesManager';
-import { NotificationManager } from '@/components/admin/NotificationManager';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Clock, Users, MessageSquare, TrendingUp } from 'lucide-react';
+import { PrintJobsList } from './PrintJobsList';
+import { FeedbackList } from './FeedbackList';
+import { JobDetails } from './JobDetails';
+import { ServicesManager } from './ServicesManager';
 import { PrintJob } from '@/types/printJob';
 import { Feedback } from '@/types/admin';
-import { FileText, MessageSquare, Settings, Bell, TrendingUp } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useSearch } from '@/components/admin/AdminSearch';
 
 interface AdminTabsProps {
   printJobs: PrintJob[];
@@ -16,10 +18,10 @@ interface AdminTabsProps {
   selectedJob: PrintJob | null;
   isLoading: boolean;
   isRetrying: boolean;
-  onJobSelect: (job: PrintJob) => void;
-  onStatusUpdate: (jobId: string, status: PrintJob['status']) => void;
-  onDeleteJob: (jobId: string) => void;
-  onDeleteFeedback: (feedbackId: string) => void;
+  onJobSelect: (job: PrintJob | null) => void;
+  onStatusUpdate: (jobId: string, status: PrintJob['status']) => Promise<boolean>;
+  onDeleteJob: (jobId: string) => Promise<boolean>;
+  onDeleteFeedback: (feedbackId: string) => Promise<void>;
 }
 
 export const AdminTabs = ({
@@ -33,143 +35,153 @@ export const AdminTabs = ({
   onDeleteJob,
   onDeleteFeedback
 }: AdminTabsProps) => {
-  // Calculate stats
-  const activeJobs = printJobs.filter(job => ['pending', 'printing'].includes(job.status)).length;
-  const completedJobs = printJobs.filter(job => job.status === 'completed').length;
-  const avgRating = feedback.length > 0 ? (feedback.reduce((sum, f) => sum + f.rating, 0) / feedback.length).toFixed(1) : '0';
+  const [activeTab, setActiveTab] = useState('orders');
+  const { filteredPrintJobs, filteredFeedback, setData, searchQuery } = useSearch();
+
+  // Update search data when props change
+  React.useEffect(() => {
+    setData(printJobs, feedback);
+  }, [printJobs, feedback, setData]);
+
+  const pendingJobs = filteredPrintJobs.filter(job => job.status === 'pending').length;
+  const completedJobs = filteredPrintJobs.filter(job => job.status === 'completed').length;
+  const averageRating = filteredFeedback.length > 0 
+    ? (filteredFeedback.reduce((sum, item) => sum + item.rating, 0) / filteredFeedback.length).toFixed(1)
+    : '0';
 
   return (
-    <div className="space-y-6">
-      {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-blue-100/50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-500 text-white rounded-lg">
-                <FileText className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Total Jobs</p>
-                <p className="text-xl font-bold text-gray-900">{printJobs.length}</p>
-              </div>
-            </div>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{filteredPrintJobs.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {searchQuery ? 'Filtered results' : 'All time'}
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-orange-50 to-orange-100/50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-orange-500 text-white rounded-lg">
-                <TrendingUp className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Active</p>
-                <p className="text-xl font-bold text-gray-900">{activeJobs}</p>
-              </div>
-            </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Pending</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">{pendingJobs}</div>
+            <p className="text-xs text-muted-foreground">
+              Awaiting processing
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-green-100/50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-500 text-white rounded-lg">
-                <MessageSquare className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Rating</p>
-                <p className="text-xl font-bold text-gray-900">{avgRating}★</p>
-              </div>
-            </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600">{completedJobs}</div>
+            <p className="text-xs text-muted-foreground">
+              Successfully finished
+            </p>
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-purple-100/50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-purple-500 text-white rounded-lg">
-                <Bell className="w-4 h-4" />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Completed</p>
-                <p className="text-xl font-bold text-gray-900">{completedJobs}</p>
-              </div>
-            </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Avg Rating</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">{averageRating}</div>
+            <p className="text-xs text-muted-foreground">
+              {filteredFeedback.length} reviews
+            </p>
           </CardContent>
         </Card>
       </div>
 
-      <Tabs defaultValue="jobs" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 h-12 bg-white border shadow-sm">
-          <TabsTrigger value="jobs" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white transition-all duration-200">
-            <FileText className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Print Jobs</span>
-            <span className="sm:hidden">Jobs</span>
-            <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded text-xs">
-              {printJobs.length}
-            </span>
-          </TabsTrigger>
-          
-          <TabsTrigger value="feedback" className="data-[state=active]:bg-green-500 data-[state=active]:text-white transition-all duration-200">
-            <MessageSquare className="w-4 h-4 mr-2" />
-            <span className="hidden sm:inline">Feedback</span>
-            <span className="sm:hidden">Reviews</span>
-            <span className="ml-1 bg-white/20 px-1.5 py-0.5 rounded text-xs">
-              {feedback.length}
-            </span>
-          </TabsTrigger>
-          
-          <TabsTrigger value="services" className="data-[state=active]:bg-purple-500 data-[state=active]:text-white transition-all duration-200">
-            <Settings className="w-4 h-4 mr-2" />
-            <span className="hidden lg:inline">Services</span>
-            <span className="lg:hidden">Config</span>
-          </TabsTrigger>
-          
-          <TabsTrigger value="notifications" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white transition-all duration-200">
-            <Bell className="w-4 h-4 mr-2" />
-            <span className="hidden lg:inline">Notifications</span>
-            <span className="lg:hidden">Alerts</span>
-          </TabsTrigger>
-        </TabsList>
+      {/* Search Results Info */}
+      {searchQuery && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            Showing results for "<span className="font-medium">{searchQuery}</span>" - 
+            Found {filteredPrintJobs.length} orders and {filteredFeedback.length} feedback items
+          </p>
+        </div>
+      )}
 
-        <TabsContent value="jobs" className="space-y-4">
-          <div className="flex flex-col lg:grid lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-4">
-              <PrintJobsList
-                printJobs={printJobs}
-                selectedJob={selectedJob}
-                onJobSelect={onJobSelect}
-                isLoading={isLoading}
-                isRetrying={isRetrying}
-              />
-            </div>
-            
-            <div className={`${selectedJob ? 'block' : 'hidden lg:block'}`}>
-              <JobDetails
-                selectedJob={selectedJob}
-                onStatusUpdate={onStatusUpdate}
-                onDeleteJob={onDeleteJob}
-              />
-            </div>
-          </div>
-        </TabsContent>
+      <TabsList className="grid w-full grid-cols-4 mb-6">
+        <TabsTrigger value="orders" className="relative">
+          Print Jobs
+          {pendingJobs > 0 && (
+            <Badge variant="destructive" className="ml-2 h-5 w-5 p-0 text-xs">
+              {pendingJobs}
+            </Badge>
+          )}
+        </TabsTrigger>
+        <TabsTrigger value="feedback">
+          Feedback
+          <Badge variant="secondary" className="ml-2 h-5 w-5 p-0 text-xs">
+            {filteredFeedback.length}
+          </Badge>
+        </TabsTrigger>
+        <TabsTrigger value="details" disabled={!selectedJob}>
+          Job Details
+        </TabsTrigger>
+        <TabsTrigger value="services">
+          Services
+        </TabsTrigger>
+      </TabsList>
 
-        <TabsContent value="feedback">
-          <FeedbackList
-            feedback={feedback}
-            onDeleteFeedback={onDeleteFeedback}
-            isLoading={isLoading}
+      <TabsContent value="orders" className="space-y-4">
+        <PrintJobsList
+          jobs={filteredPrintJobs}
+          onJobSelect={onJobSelect}
+          selectedJobId={selectedJob?.id}
+          onStatusUpdate={onStatusUpdate}
+          onDeleteJob={onDeleteJob}
+          isLoading={isLoading}
+          isRetrying={isRetrying}
+        />
+      </TabsContent>
+
+      <TabsContent value="feedback" className="space-y-4">
+        <FeedbackList
+          feedback={filteredFeedback}
+          onDeleteFeedback={onDeleteFeedback}
+          isLoading={isLoading}
+        />
+      </TabsContent>
+
+      <TabsContent value="details" className="space-y-4">
+        {selectedJob ? (
+          <JobDetails
+            job={selectedJob}
+            onStatusUpdate={onStatusUpdate}
+            onDeleteJob={onDeleteJob}
+            onClose={() => onJobSelect(null)}
           />
-        </TabsContent>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>No Job Selected</CardTitle>
+              <CardDescription>
+                Select a print job from the orders tab to view its details.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        )}
+      </TabsContent>
 
-        <TabsContent value="services">
-          <ServicesManager />
-        </TabsContent>
-
-        <TabsContent value="notifications">
-          <NotificationManager />
-        </TabsContent>
-      </Tabs>
-    </div>
+      <TabsContent value="services" className="space-y-4">
+        <ServicesManager />
+      </TabsContent>
+    </Tabs>
   );
 };
