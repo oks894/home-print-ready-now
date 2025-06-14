@@ -1,11 +1,14 @@
+
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Search, Package, Clock, CheckCircle, Truck, CreditCard } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Search, Package, Clock, CheckCircle, Truck, CreditCard, Phone, User, MapPin, Calendar, FileText, Star, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PrintJob } from '@/types/printJob';
@@ -117,190 +120,364 @@ const Track = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return <Clock className="w-5 h-5 text-yellow-600" />;
-      case 'pending_payment': return <CreditCard className="w-5 h-5 text-orange-600" />;
-      case 'printing': return <Package className="w-5 h-5 text-blue-600" />;
-      case 'ready': return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'completed': return <Truck className="w-5 h-5 text-gray-600" />;
-      default: return <Clock className="w-5 h-5 text-gray-600" />;
+      case 'pending': return <Clock className="w-6 h-6 text-yellow-600" />;
+      case 'pending_payment': return <CreditCard className="w-6 h-6 text-orange-600" />;
+      case 'printing': return <Package className="w-6 h-6 text-blue-600" />;
+      case 'ready': return <CheckCircle className="w-6 h-6 text-green-600" />;
+      case 'completed': return <Truck className="w-6 h-6 text-gray-600" />;
+      default: return <Clock className="w-6 h-6 text-gray-600" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'pending_payment': return 'bg-orange-100 text-orange-800';
-      case 'printing': return 'bg-blue-100 text-blue-800';
-      case 'ready': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'pending': return 'bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 border-yellow-300';
+      case 'pending_payment': return 'bg-gradient-to-r from-orange-100 to-orange-200 text-orange-800 border-orange-300';
+      case 'printing': return 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border-blue-300';
+      case 'ready': return 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border-green-300';
+      case 'completed': return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border-gray-300';
+      default: return 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border-gray-300';
     }
   };
 
   const getStatusMessage = (status: string) => {
     switch (status) {
-      case 'pending': return 'Your order has been received and is waiting to be processed.';
-      case 'pending_payment': return 'Please complete payment to process your order.';
-      case 'printing': return 'Your documents are currently being printed.';
-      case 'ready': return 'Your order is ready for pickup!';
-      case 'completed': return 'Your order has been completed and delivered.';
-      default: return 'Status unknown';
+      case 'pending': return 'Your order has been received and is waiting to be processed. We\'ll call you shortly to confirm details.';
+      case 'pending_payment': return 'Please complete payment to process your order. Our team will contact you with payment details.';
+      case 'printing': return 'Great news! Your documents are currently being printed with premium quality materials.';
+      case 'ready': return '🎉 Your order is ready for pickup! Please collect it at your scheduled time or wait for delivery.';
+      case 'completed': return '✅ Your order has been completed and delivered. Thank you for choosing our services!';
+      default: return 'Status information is being updated...';
+    }
+  };
+
+  const getProgressPercentage = (status: string) => {
+    switch (status) {
+      case 'pending': return 20;
+      case 'pending_payment': return 40;
+      case 'printing': return 60;
+      case 'ready': return 80;
+      case 'completed': return 100;
+      default: return 0;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 flex flex-col">
       <Header />
       
       <div className="flex-1 py-8 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Header */}
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8"
+          >
             <Link to="/">
-              <Button variant="outline" size="sm" className="mb-4">
+              <Button variant="outline" size="sm" className="mb-6 hover:bg-blue-50">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Home
               </Button>
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Track Your Order</h1>
-            <p className="text-gray-600">Enter your phone number to check the status of your print job</p>
-          </div>
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+                Track Your Order
+              </h1>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                Enter your phone number to check the real-time status of your print job
+              </p>
+            </div>
+          </motion.div>
 
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Enter Your Phone Number</CardTitle>
-              <CardDescription>
-                Use the phone number you provided when submitting your print job
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="tracking">Phone Number</Label>
-                <div className="flex gap-2">
-                  <Input
-                    id="tracking"
-                    value={trackingId}
-                    onChange={(e) => setTrackingId(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Enter your phone number"
-                    className="font-mono"
-                  />
-                  <Button onClick={handleTrack} disabled={isSearching}>
-                    <Search className="w-4 h-4 mr-2" />
-                    {isSearching ? 'Searching...' : 'Track'}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {notFound && (
-            <Card className="border-red-200">
-              <CardContent className="pt-6">
-                <div className="text-center text-red-600">
-                  <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <h3 className="text-lg font-semibold mb-2">Order Not Found</h3>
-                  <p>Please check your phone number and try again.</p>
-                  <p className="text-sm mt-2 text-gray-500">
-                    Make sure to enter the same phone number you used when submitting your order.
-                  </p>
+          {/* Search Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <Card className="mb-8 border-0 shadow-xl bg-white/80 backdrop-blur-sm">
+              <CardHeader className="text-center">
+                <CardTitle className="flex items-center justify-center gap-3 text-2xl">
+                  <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full">
+                    <Phone className="w-6 h-6 text-white" />
+                  </div>
+                  Enter Your Phone Number
+                </CardTitle>
+                <CardDescription className="text-base">
+                  Use the same phone number you provided when submitting your print job
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label htmlFor="tracking" className="text-sm font-semibold mb-2 block">Phone Number</Label>
+                  <div className="flex gap-3">
+                    <div className="relative flex-1">
+                      <Input
+                        id="tracking"
+                        value={trackingId}
+                        onChange={(e) => setTrackingId(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        placeholder="Enter your phone number"
+                        className="h-12 text-base border-2 focus:border-blue-500 transition-colors pl-4"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleTrack} 
+                      disabled={isSearching}
+                      className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      {isSearching ? (
+                        <>
+                          <motion.div 
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                            className="w-5 h-5 border-2 border-white border-t-transparent rounded-full mr-2"
+                          />
+                          Searching...
+                        </>
+                      ) : (
+                        <>
+                          <Search className="w-5 h-5 mr-2" />
+                          Track Order
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          )}
+          </motion.div>
 
-          {job && (
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Order Details</CardTitle>
-                      <CardDescription>Phone Number: {job.tracking_id}</CardDescription>
-                    </div>
-                    <Badge className={getStatusColor(job.status)}>
-                      {job.status.replace('_', ' ').charAt(0).toUpperCase() + job.status.replace('_', ' ').slice(1)}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
-                    {getStatusIcon(job.status)}
-                    <div>
-                      <h4 className="font-semibold">Current Status</h4>
-                      <p className="text-sm text-gray-600">{getStatusMessage(job.status)}</p>
-                    </div>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <h4 className="font-semibold mb-3">Customer Information</h4>
-                      <div className="space-y-2 text-sm">
-                        <p><span className="font-medium">Name:</span> {job.name}</p>
-                        <p><span className="font-medium">Phone:</span> {job.phone}</p>
-                        {job.institute && (
-                          <p><span className="font-medium">Institute:</span> {job.institute}</p>
-                        )}
-                        <p><span className="font-medium">Pickup Time:</span> {job.time_slot}</p>
-                        {job.delivery_requested && (
-                          <Badge className="bg-green-100 text-green-800">
-                            🚚 Delivery Requested
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-semibold mb-3">Files ({job.files.length})</h4>
-                      <div className="space-y-2">
-                        {job.files.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-sm">
-                            <span>{file.name}</span>
-                            <span className="text-gray-500">
-                              {(file.size / 1024 / 1024).toFixed(2)} MB
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Services and Pricing */}
-                  {job.selected_services && job.selected_services.length > 0 && (
-                    <div>
-                      <h4 className="font-semibold mb-3">Selected Services</h4>
-                      <div className="space-y-2">
-                        {job.selected_services.map((service, index) => (
-                          <div key={index} className="flex justify-between p-2 bg-gray-50 rounded text-sm">
-                            <span>{service.name} (x{service.quantity})</span>
-                            <span className="font-medium">₹{service.price?.toFixed(2) || '0.00'}</span>
-                          </div>
-                        ))}
-                        {job.total_amount && job.total_amount > 0 && (
-                          <div className="border-t pt-2 flex justify-between font-bold">
-                            <span>Total Amount:</span>
-                            <span className="text-blue-600">₹{job.total_amount.toFixed(2)}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {job.notes && (
-                    <div>
-                      <h4 className="font-semibold mb-2">Special Instructions</h4>
-                      <p className="text-sm text-gray-600 p-3 bg-gray-50 rounded">
-                        {job.notes}
+          {/* Results */}
+          <AnimatePresence mode="wait">
+            {notFound && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+              >
+                <Card className="border-2 border-red-200 bg-red-50">
+                  <CardContent className="pt-8 pb-8">
+                    <div className="text-center text-red-600">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                      </motion.div>
+                      <h3 className="text-xl font-semibold mb-3">Order Not Found</h3>
+                      <p className="mb-2">Please check your phone number and try again.</p>
+                      <p className="text-sm text-gray-600">
+                        Make sure to enter the exact same phone number you used when submitting your order.
                       </p>
                     </div>
-                  )}
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
 
-                  <div className="text-sm text-gray-500">
-                    <p>Order submitted on: {new Date(job.timestamp).toLocaleString()}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+            {job && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-8"
+              >
+                {/* Status Card */}
+                <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-sm overflow-hidden">
+                  <div className={`h-2 ${getStatusColor(job.status)}`}></div>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="text-2xl mb-2">Order Status</CardTitle>
+                        <CardDescription className="text-base">
+                          Phone: {job.tracking_id} • Submitted: {new Date(job.timestamp).toLocaleDateString()}
+                        </CardDescription>
+                      </div>
+                      <Badge className={`text-base px-4 py-2 border-2 ${getStatusColor(job.status)}`}>
+                        {job.status.replace('_', ' ').charAt(0).toUpperCase() + job.status.replace('_', ' ').slice(1)}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Progress Bar */}
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-sm font-medium">
+                        <span>Progress</span>
+                        <span>{getProgressPercentage(job.status)}%</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-3">
+                        <motion.div 
+                          className="h-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full"
+                          initial={{ width: 0 }}
+                          animate={{ width: `${getProgressPercentage(job.status)}%` }}
+                          transition={{ duration: 1, delay: 0.5 }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Status Message */}
+                    <div className="flex items-start gap-4 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-200">
+                      <div className="flex-shrink-0">
+                        {getStatusIcon(job.status)}
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-lg mb-2">Current Status</h4>
+                        <p className="text-gray-700">{getStatusMessage(job.status)}</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Details Grid */}
+                <div className="grid lg:grid-cols-2 gap-8">
+                  {/* Customer Information */}
+                  <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                          <User className="w-5 h-5 text-green-600" />
+                        </div>
+                        Customer Information
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid gap-4">
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <User className="w-5 h-5 text-gray-500" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Name</p>
+                            <p className="font-semibold">{job.name}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <Phone className="w-5 h-5 text-gray-500" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Phone</p>
+                            <p className="font-semibold">{job.phone}</p>
+                          </div>
+                        </div>
+                        {job.institute && (
+                          <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                            <MapPin className="w-5 h-5 text-gray-500" />
+                            <div>
+                              <p className="text-sm font-medium text-gray-500">Institute</p>
+                              <p className="font-semibold">{job.institute}</p>
+                            </div>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                          <Calendar className="w-5 h-5 text-gray-500" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-500">Pickup Time</p>
+                            <p className="font-semibold">{job.time_slot}</p>
+                          </div>
+                        </div>
+                        {job.delivery_requested && (
+                          <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                            <Badge className="bg-green-100 text-green-800">
+                              <Truck className="w-4 h-4 mr-1" />
+                              Delivery Requested
+                            </Badge>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Files and Services */}
+                  <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                        </div>
+                        Order Details
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {/* Files */}
+                      <div>
+                        <h5 className="font-semibold mb-3 flex items-center gap-2">
+                          Files ({job.files.length})
+                          <Badge variant="secondary">{job.files.length}</Badge>
+                        </h5>
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
+                          {job.files.map((file, index) => (
+                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm">
+                              <div className="flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-gray-500" />
+                                <span className="truncate font-medium">{file.name}</span>
+                              </div>
+                              <span className="text-gray-500 text-xs">
+                                {(file.size / 1024 / 1024).toFixed(2)} MB
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Services and Pricing */}
+                      {job.selected_services && job.selected_services.length > 0 && (
+                        <div>
+                          <h5 className="font-semibold mb-3 flex items-center gap-2">
+                            Services
+                            <Badge variant="secondary">{job.selected_services.length}</Badge>
+                          </h5>
+                          <div className="space-y-3">
+                            {job.selected_services.map((service, index) => (
+                              <div key={index} className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                                <div>
+                                  <span className="font-medium">{service.name}</span>
+                                  <span className="text-gray-500 text-sm ml-2">(x{service.quantity})</span>
+                                </div>
+                                <span className="font-bold text-blue-600">₹{service.price?.toFixed(2) || '0.00'}</span>
+                              </div>
+                            ))}
+                            {job.total_amount && job.total_amount > 0 && (
+                              <>
+                                <Separator />
+                                <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-200">
+                                  <span className="text-lg font-bold">Total Amount:</span>
+                                  <span className="text-2xl font-bold text-green-600">₹{job.total_amount.toFixed(2)}</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Special Instructions */}
+                {job.notes && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-3">
+                          <div className="p-2 bg-purple-100 rounded-lg">
+                            <Star className="w-5 h-5 text-purple-600" />
+                          </div>
+                          Special Instructions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+                          <p className="text-gray-700">{job.notes}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
