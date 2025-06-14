@@ -240,8 +240,8 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
                   canAccessDelivery={canAccessDelivery}
                   formData={formData}
                   onFormDataChange={setFormData}
-                  deliveryRequested={deliveryRequested}
-                  onDeliveryRequestedChange={setDeliveryRequested}
+                  deliveryRequested={Boolean(deliveryRequested)}
+                  onDeliveryRequestedChange={(value: boolean) => setDeliveryRequested(value)}
                 />
               </motion.div>
             </AnimatePresence>
