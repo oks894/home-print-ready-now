@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, User, Clock, Settings, CheckCircle, ArrowRight, ArrowLeft, Package, Truck, CreditCard, Star } from 'lucide-react';
@@ -13,6 +12,7 @@ import { ServiceSelector } from './ServiceSelector';
 import CustomerForm from './CustomerForm';
 import TimeSlotSelector from './TimeSlotSelector';
 import { usePrintJobSubmission } from '@/hooks/usePrintJobSubmission';
+import { useServices } from '@/hooks/useServices';
 import { useToast } from '@/hooks/use-toast';
 import { SelectedService } from '@/types/service';
 
@@ -36,7 +36,11 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   });
 
   const { submitPrintJob, isSubmitting } = usePrintJobSubmission();
+  const { services, isLoading: servicesLoading } = useServices();
   const { toast } = useToast();
+
+  console.log('PrintJobForm - services:', services);
+  console.log('PrintJobForm - servicesLoading:', servicesLoading);
 
   const steps = [
     { 
@@ -266,7 +270,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
             </div>
             
             <ServiceSelector 
-              services={[]}
+              services={services}
               selectedServices={selectedServices}
               onAddService={handleServiceAdd}
               onUpdateQuantity={handleServiceUpdate}
