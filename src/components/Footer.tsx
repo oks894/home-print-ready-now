@@ -73,7 +73,7 @@ const Footer = () => {
                 </li>
                 <li className="flex items-center gap-2 text-gray-400">
                   <Mail className="w-4 h-4" />
-                  <span>info@printready.com</span>
+                  <span>Viewland Zone II / Opposite Warm delights</span>
                 </li>
                 <li className="flex items-center gap-2 text-gray-400">
                   <MapPin className="w-4 h-4" />
