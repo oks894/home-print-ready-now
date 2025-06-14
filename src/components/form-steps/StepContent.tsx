@@ -28,7 +28,7 @@ interface StepContentProps {
   };
   onFormDataChange: (data: any) => void;
   deliveryRequested: boolean;
-  onDeliveryRequestedChange: (requested: boolean) => void;
+  onDeliveryRequestedChange: (requested: boolean | string) => void;
 }
 
 const StepContent = ({
