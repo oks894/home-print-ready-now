@@ -1,9 +1,22 @@
 
 import React from 'react';
-import { QrCode, Smartphone, CreditCard } from 'lucide-react';
+import { QrCode, Smartphone, CreditCard, Copy } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 const PaymentQR = () => {
+  const { toast } = useToast();
+  const upiId = "8787665349@okbizaxis";
+
+  const copyUpiId = () => {
+    navigator.clipboard.writeText(upiId);
+    toast({
+      title: "Copied!",
+      description: "UPI ID copied to clipboard",
+    });
+  };
+
   return (
     <section className="py-12 px-4 bg-gray-50">
       <div className="max-w-4xl mx-auto">
@@ -35,7 +48,12 @@ const PaymentQR = () => {
               </div>
               <div className="space-y-2">
                 <p className="text-sm text-gray-600">UPI ID:</p>
-                <p className="font-mono text-lg font-bold text-blue-600">8787665349@okbizaxis</p>
+                <div className="flex items-center justify-center gap-2 p-3 bg-blue-50 rounded-lg">
+                  <span className="font-mono text-lg font-bold text-blue-600">{upiId}</span>
+                  <Button size="sm" variant="outline" onClick={copyUpiId}>
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                </div>
                 <p className="text-sm text-gray-500">Next Gen Enterprise Pvt Ltd</p>
               </div>
             </CardContent>

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Search, Package, Clock, CheckCircle, Truck } from 'lucide-react';
@@ -27,17 +26,53 @@ const Track = () => {
   const [trackingId, setTrackingId] = useState('');
   const [job, setJob] = useState<PrintJob | null>(null);
   const [notFound, setNotFound] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
-  const handleTrack = () => {
-    const jobs = JSON.parse(localStorage.getItem('printJobs') || '[]');
-    const foundJob = jobs.find((j: PrintJob) => j.trackingId === trackingId.trim());
-    
-    if (foundJob) {
-      setJob(foundJob);
-      setNotFound(false);
-    } else {
+  const handleTrack = async () => {
+    if (!trackingId.trim()) {
+      setNotFound(true);
+      setJob(null);
+      return;
+    }
+
+    setIsSearching(true);
+    setNotFound(false);
+    setJob(null);
+
+    // Add a small delay to show loading state
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    try {
+      const jobs = JSON.parse(localStorage.getItem('printJobs') || '[]');
+      console.log('All jobs:', jobs);
+      console.log('Searching for tracking ID:', trackingId.trim());
+      
+      const foundJob = jobs.find((j: PrintJob) => {
+        console.log('Comparing:', j.trackingId, 'with', trackingId.trim());
+        return j.trackingId && j.trackingId.toLowerCase() === trackingId.trim().toLowerCase();
+      });
+      
+      if (foundJob) {
+        console.log('Job found:', foundJob);
+        setJob(foundJob);
+        setNotFound(false);
+      } else {
+        console.log('No job found');
+        setJob(null);
+        setNotFound(true);
+      }
+    } catch (error) {
+      console.error('Error searching for job:', error);
       setJob(null);
       setNotFound(true);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTrack();
     }
   };
 
@@ -103,12 +138,13 @@ const Track = () => {
                     id="tracking"
                     value={trackingId}
                     onChange={(e) => setTrackingId(e.target.value)}
+                    onKeyPress={handleKeyPress}
                     placeholder="Enter tracking ID (e.g., PR12345678)"
                     className="font-mono"
                   />
-                  <Button onClick={handleTrack}>
+                  <Button onClick={handleTrack} disabled={isSearching}>
                     <Search className="w-4 h-4 mr-2" />
-                    Track
+                    {isSearching ? 'Searching...' : 'Track'}
                   </Button>
                 </div>
               </div>
@@ -122,6 +158,9 @@ const Track = () => {
                   <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
                   <h3 className="text-lg font-semibold mb-2">Order Not Found</h3>
                   <p>Please check your tracking ID and try again.</p>
+                  <p className="text-sm mt-2 text-gray-500">
+                    Make sure to enter the complete tracking ID as provided when you submitted your order.
+                  </p>
                 </div>
               </CardContent>
             </Card>
