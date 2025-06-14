@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -141,7 +141,7 @@ export const AdminTabs = ({
 
       <TabsContent value="orders" className="space-y-4">
         <PrintJobsList
-          jobs={filteredPrintJobs}
+          printJobs={filteredPrintJobs}
           onJobSelect={onJobSelect}
           selectedJobId={selectedJob?.id}
           onStatusUpdate={onStatusUpdate}
@@ -162,7 +162,7 @@ export const AdminTabs = ({
       <TabsContent value="details" className="space-y-4">
         {selectedJob ? (
           <JobDetails
-            job={selectedJob}
+            selectedJob={selectedJob}
             onStatusUpdate={onStatusUpdate}
             onDeleteJob={onDeleteJob}
             onClose={() => onJobSelect(null)}
