@@ -9,8 +9,7 @@ const Stats = () => {
     totalJobs: 0
   });
 
-  useEffect(() => {
-    // Calculate stats from localStorage
+  const calculateStats = () => {
     const printJobs = JSON.parse(localStorage.getItem('printJobs') || '[]');
     const feedback = JSON.parse(localStorage.getItem('feedback') || '[]');
     
@@ -21,6 +20,17 @@ const Stats = () => {
       : 4.8; // Default high rating for demo
 
     setStats({ totalUsers, averageRating, totalJobs });
+  };
+
+  useEffect(() => {
+    // Initial calculation
+    calculateStats();
+    
+    // Set up auto-refresh every 5 minutes (300000ms)
+    const interval = setInterval(calculateStats, 300000);
+    
+    // Cleanup interval on component unmount
+    return () => clearInterval(interval);
   }, []);
 
   return (

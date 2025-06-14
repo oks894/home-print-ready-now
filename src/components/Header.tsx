@@ -16,13 +16,13 @@ const Header = () => {
           <Link to="/" className="text-gray-600 hover:text-blue-600 transition-colors">
             Home
           </Link>
-          <Link to="#services" className="text-gray-600 hover:text-blue-600 transition-colors">
+          <Link to="/services" className="text-gray-600 hover:text-blue-600 transition-colors">
             Services
           </Link>
-          <Link to="#pricing" className="text-gray-600 hover:text-blue-600 transition-colors">
+          <Link to="/pricing" className="text-gray-600 hover:text-blue-600 transition-colors">
             Pricing
           </Link>
-          <Link to="#contact" className="text-gray-600 hover:text-blue-600 transition-colors">
+          <Link to="/contact" className="text-gray-600 hover:text-blue-600 transition-colors">
             Contact
           </Link>
         </nav>

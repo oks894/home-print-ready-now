@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Download, Eye, Trash2, FileText, Clock, User, Phone, Building } from 'lucide-react';
@@ -79,6 +78,23 @@ const Admin = () => {
     toast({
       title: "Job deleted",
       description: "Print job has been removed",
+    });
+  };
+
+  const downloadFile = (fileName: string) => {
+    // Create a mock download since we can't access actual uploaded files
+    // In a real app, this would fetch the file from server storage
+    const element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(`Mock file content for: ${fileName}`));
+    element.setAttribute('download', fileName);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    
+    toast({
+      title: "Download started",
+      description: `Downloading ${fileName}`,
     });
   };
 
@@ -255,7 +271,11 @@ const Admin = () => {
                               {(file.size / 1024 / 1024).toFixed(2)} MB
                             </div>
                           </div>
-                          <Button size="sm" variant="outline">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => downloadFile(file.name)}
+                          >
                             <Download className="w-4 h-4" />
                           </Button>
                         </div>
