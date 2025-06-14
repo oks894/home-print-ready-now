@@ -49,11 +49,23 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   // Convert deliveryRequested to boolean to fix TypeScript error
   const deliveryRequestedBoolean = typeof deliveryRequested === 'string' ? deliveryRequested === 'true' : Boolean(deliveryRequested);
 
+  // Fix: Get validation result and convert to boolean
+  const validationResult = canProceed();
+  const canProceedBoolean = validationResult === true;
+  const validationMessage = typeof validationResult === 'string' ? validationResult : null;
+
   const handleSubmit = async () => {
-    if (!canProceed()) {
+    const currentValidationResult = canProceed();
+    const isValid = currentValidationResult === true;
+    
+    if (!isValid) {
+      const message = typeof currentValidationResult === 'string' 
+        ? currentValidationResult 
+        : "Please fill in all required fields before submitting.";
+        
       toast({
         title: "Form Incomplete",
-        description: "Please fill in all required fields before submitting.",
+        description: message,
         variant: "destructive"
       });
       return;
@@ -68,6 +80,12 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         deliveryRequested: deliveryRequestedBoolean
       });
 
+      // Show loading notification
+      toast({
+        title: "Submitting Order",
+        description: "Please wait while we process your print job...",
+      });
+
       const trackingId = await submitPrintJob(
         formData,
         files,
@@ -78,6 +96,13 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
       );
       
       if (trackingId) {
+        // Success notification
+        toast({
+          title: "Order Submitted Successfully!",
+          description: `Your print job has been submitted. Tracking ID: ${trackingId}`,
+          variant: "default",
+        });
+        
         onOrderSubmitted(trackingId);
         resetForm();
       }
@@ -85,7 +110,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
       console.error('Error submitting print job:', error);
       toast({
         title: "Submission Error",
-        description: "Failed to submit your print job. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to submit your print job. Please try again.",
         variant: "destructive"
       });
     }
@@ -95,6 +120,35 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     hidden: { opacity: 0, x: 100, scale: 0.95 },
     visible: { opacity: 1, x: 0, scale: 1 },
     exit: { opacity: 0, x: -100, scale: 0.95 }
+  };
+
+  // Notification component for inline messages
+  const StepNotification = ({ message, type = 'info' }: { message: string; type?: 'info' | 'warning' | 'success' }) => {
+    const icons = {
+      info: <Info className="h-4 w-4" />,
+      warning: <AlertCircle className="h-4 w-4" />,
+      success: <CheckCircle className="h-4 w-4" />
+    };
+
+    const variants = {
+      info: 'bg-blue-50 border-blue-200 text-blue-800',
+      warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+      success: 'bg-green-50 border-green-200 text-green-800'
+    };
+
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="mb-6"
+      >
+        <Alert className={`${variants[type]} border`}>
+          {icons[type]}
+          <AlertDescription>{message}</AlertDescription>
+        </Alert>
+      </motion.div>
+    );
   };
 
   return (
@@ -116,6 +170,22 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
 
         {/* Progress Indicator */}
         <StepProgress steps={steps} currentStep={currentStep} />
+
+        {/* Loading State Notification */}
+        {servicesLoading && (
+          <StepNotification 
+            message="Loading available services..." 
+            type="info" 
+          />
+        )}
+
+        {/* Validation Message */}
+        {validationMessage && !canProceedBoolean && (
+          <StepNotification 
+            message={validationMessage} 
+            type="warning" 
+          />
+        )}
 
         {/* Step Content */}
         <Card className="border-0 shadow-2xl bg-white/80 backdrop-blur-sm">
@@ -150,11 +220,25 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
           </CardContent>
         </Card>
 
+        {/* Success Message for Completed Steps */}
+        {canProceedBoolean && currentStep === steps.length - 1 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="mt-6"
+          >
+            <StepNotification 
+              message="All information completed! Ready to submit your print job." 
+              type="success" 
+            />
+          </motion.div>
+        )}
+
         {/* Navigation */}
         <NavigationButtons
           currentStep={currentStep}
           totalSteps={steps.length}
-          canProceed={canProceed()}
+          canProceed={canProceedBoolean}
           isSubmitting={isSubmitting}
           onPrevious={handlePrevious}
           onNext={handleNext}
