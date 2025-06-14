@@ -140,7 +140,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
           timeSlot: '',
           notes: ''
         });
-        setDeliveryRequested(false); // Explicitly set to boolean false
+        setDeliveryRequested(false);
         setTotalAmount(0);
       }
     } catch (error) {
@@ -195,7 +195,6 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     exit: { opacity: 0, x: -100, scale: 0.95 }
   };
 
-  // Ensure deliveryRequested is always boolean when passed to StepContent
   const handleDeliveryRequestedChange = (requested: boolean) => {
     setDeliveryRequested(requested);
   };
