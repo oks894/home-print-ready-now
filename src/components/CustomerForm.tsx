@@ -10,8 +10,10 @@ interface CustomerFormProps {
     name: string;
     phone: string;
     institute: string;
+    timeSlot: string;
+    notes: string;
   };
-  onFormDataChange: (data: { name: string; phone: string; institute: string }) => void;
+  onFormDataChange: (data: { name: string; phone: string; institute: string; timeSlot: string; notes: string }) => void;
 }
 
 const CustomerForm = ({ formData, onFormDataChange }: CustomerFormProps) => {

@@ -9,6 +9,8 @@ import FileUpload from '@/components/FileUpload';
 import CustomerForm from '@/components/CustomerForm';
 import TimeSlotSelector from '@/components/TimeSlotSelector';
 import SuccessMessage from '@/components/SuccessMessage';
+import Services from '@/components/Services';
+import Feedback from '@/components/Feedback';
 
 const Index = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -123,6 +125,8 @@ const Index = () => {
         </div>
       </section>
 
+      <Services />
+      <Feedback />
       <Footer />
     </div>
   );
