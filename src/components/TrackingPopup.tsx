@@ -139,7 +139,7 @@ const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) 
               className="text-xs text-gray-500 text-center"
             >
               Save your tracking ID to check your order status anytime
-            </p>
+            </motion.p>
           </CardContent>
         </Card>
       </motion.div>
