@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { X, Copy, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +13,21 @@ interface TrackingPopupProps {
 
 const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) => {
   const { toast } = useToast();
+
+  // Auto-copy tracking ID when popup opens
+  useEffect(() => {
+    if (trackingId) {
+      navigator.clipboard.writeText(trackingId).then(() => {
+        toast({
+          title: "Tracking ID Copied!",
+          description: "Your tracking ID has been automatically copied to clipboard",
+        });
+      }).catch(() => {
+        // Fallback if clipboard API fails
+        console.log('Auto-copy failed, user can manually copy');
+      });
+    }
+  }, [trackingId, toast]);
 
   const copyTrackingId = () => {
     navigator.clipboard.writeText(trackingId);
@@ -36,7 +51,7 @@ const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) 
         </CardHeader>
         <CardContent className="space-y-4 sm:space-y-6">
           <div className="text-center">
-            <p className="text-sm text-gray-600 mb-2">Your Tracking ID:</p>
+            <p className="text-sm text-gray-600 mb-2">Your Tracking ID (Auto-copied):</p>
             <div className="flex items-center gap-2 p-3 sm:p-4 bg-blue-50 rounded-lg">
               <span className="font-mono text-lg sm:text-xl font-bold text-blue-600 flex-1 text-center break-all">
                 {trackingId}

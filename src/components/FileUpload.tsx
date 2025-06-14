@@ -24,13 +24,30 @@ const FileUpload = ({ files, onFilesChange }: FileUploadProps) => {
         'application/msword',
         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       ];
-      return validTypes.includes(file.type);
+      
+      // Check file type
+      if (!validTypes.includes(file.type)) {
+        return false;
+      }
+      
+      // Check file size (20MB = 20 * 1024 * 1024 bytes)
+      const maxSize = 20 * 1024 * 1024;
+      if (file.size > maxSize) {
+        toast({
+          title: "File too large",
+          description: `${file.name} exceeds 20MB limit`,
+          variant: "destructive"
+        });
+        return false;
+      }
+      
+      return true;
     });
     
     if (validFiles.length !== selectedFiles.length) {
       toast({
         title: "Some files were rejected",
-        description: "Please upload only PDF, Word documents, or images (JPG, PNG)",
+        description: "Please upload only PDF, Word documents, or images (JPG, PNG) under 20MB each",
         variant: "destructive"
       });
     }
@@ -50,7 +67,7 @@ const FileUpload = ({ files, onFilesChange }: FileUploadProps) => {
           Upload Documents
         </CardTitle>
         <CardDescription className="text-sm sm:text-base">
-          Upload PDF, Word documents, or images (JPG, PNG) that you want to print
+          Upload PDF, Word documents, or images (JPG, PNG) that you want to print (Max 20MB per file)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -66,7 +83,7 @@ const FileUpload = ({ files, onFilesChange }: FileUploadProps) => {
           <label htmlFor="file-upload" className="cursor-pointer">
             <FileText className="w-10 h-10 sm:w-12 sm:h-12 text-blue-400 mx-auto mb-3 sm:mb-4" />
             <p className="text-base sm:text-lg font-medium text-gray-700 mb-1">Click to upload files</p>
-            <p className="text-sm text-gray-500">Supports PDF, Word, JPG, PNG</p>
+            <p className="text-sm text-gray-500">Supports PDF, Word, JPG, PNG (Max 20MB each)</p>
           </label>
         </div>
 

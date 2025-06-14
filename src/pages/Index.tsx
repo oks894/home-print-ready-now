@@ -13,6 +13,7 @@ import TrackingPopup from '@/components/TrackingPopup';
 import Services from '@/components/Services';
 import Stats from '@/components/Stats';
 import Feedback from '@/components/Feedback';
+import PaymentQR from '@/components/PaymentQR';
 
 const Index = () => {
   const [files, setFiles] = useState<File[]>([]);
@@ -149,7 +150,7 @@ const Index = () => {
                 <FileText className="w-6 h-6 text-blue-600" />
               </div>
               <h3 className="font-semibold text-gray-900 mb-1">Upload Files</h3>
-              <p className="text-sm text-gray-600">PDF, Word, Images</p>
+              <p className="text-sm text-gray-600">PDF, Word, Images (Max 20MB)</p>
             </div>
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-3">
@@ -225,6 +226,7 @@ const Index = () => {
       </section>
 
       <Services />
+      <PaymentQR />
       <Stats />
       <Feedback />
       <Footer />

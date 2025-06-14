@@ -34,6 +34,16 @@ const Footer = () => {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/track" className="text-gray-400 hover:text-white transition-colors">
+                    Track Order
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contact" className="text-gray-400 hover:text-white transition-colors">
+                    Contact Us
+                  </Link>
+                </li>
+                <li>
                   <Link to="/admin" className="text-gray-400 hover:text-white transition-colors">
                     Admin Panel
                   </Link>
@@ -88,7 +98,7 @@ const Footer = () => {
           </div>
 
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 PrintReady by DYNAMIC EDU. All rights reserved. Built with ❤️ for convenient printing.</p>
+            <p>&copy; 2024 PrintReady by DYNAMIC EDU. All rights reserved. Developed by Jihal Shimray</p>
           </div>
         </div>
       </footer>
