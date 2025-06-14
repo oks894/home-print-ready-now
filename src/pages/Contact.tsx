@@ -35,9 +35,9 @@ const Contact = () => {
                   href="tel:+918787665349" 
                   className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
                 >
-                  +91 8787665349
+                  +91 7005498122
                 </a>
-                <p className="text-gray-600 mt-2">Available Mon-Sat: 9AM-6PM</p>
+                <p className="text-gray-600 mt-2">Available Mon-Sat: 9AM-5PM</p>
               </CardContent>
             </Card>
 
@@ -71,8 +71,8 @@ const Contact = () => {
                 <div className="flex items-center gap-3">
                   <Mail className="w-5 h-5 text-blue-600" />
                   <div>
-                    <p className="font-medium">Email</p>
-                    <p className="text-gray-600">info@printready.com</p>
+                    <p className="font-medium">Location</p>
+                    <p className="text-gray-600">Viewland Zone II / Opposite Warm Delights</p>
                   </div>
                 </div>
                 
@@ -88,7 +88,7 @@ const Contact = () => {
                   <Clock className="w-5 h-5 text-blue-600" />
                   <div>
                     <p className="font-medium">Business Hours</p>
-                    <p className="text-gray-600">Monday - Saturday: 9:00 AM - 6:00 PM</p>
+                    <p className="text-gray-600">Monday - Saturday: 9:00 AM - 5:00 PM</p>
                   </div>
                 </div>
               </div>
