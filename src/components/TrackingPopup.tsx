@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { X, ExternalLink, RotateCcw, CheckCircle, Package, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 
 interface TrackingPopupProps {
   trackingId: string;
@@ -13,6 +14,31 @@ interface TrackingPopupProps {
 }
 
 const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) => {
+  const { toast } = useToast();
+
+  // Auto-copy tracking ID when popup opens
+  useEffect(() => {
+    if (trackingId) {
+      navigator.clipboard.writeText(trackingId).then(() => {
+        toast({
+          title: "Tracking ID Copied!",
+          description: "Your tracking ID has been automatically copied to clipboard.",
+        });
+      }).catch(() => {
+        console.log('Auto-copy failed, manual copy available');
+      });
+    }
+  }, [trackingId, toast]);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(trackingId).then(() => {
+      toast({
+        title: "Copied!",
+        description: "Tracking ID copied to clipboard.",
+      });
+    });
+  };
+
   return (
     <motion.div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
@@ -66,21 +92,22 @@ const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) 
               <div className="flex items-center gap-3 mb-2">
                 <Package className="w-5 h-5 text-blue-600" />
                 <span className="font-semibold text-gray-700">Your Tracking ID</span>
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Auto-copied!</span>
               </div>
               <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
                 <span className="font-mono text-lg font-bold text-blue-600">{trackingId}</span>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => navigator.clipboard.writeText(trackingId)}
+                  onClick={handleCopy}
                   className="text-xs hover:bg-blue-50"
                 >
-                  Copy
+                  Copy Again
                 </Button>
               </div>
               <p className="text-sm text-gray-500 mt-2 flex items-center gap-1">
                 <Phone className="w-4 h-4" />
-                This is your phone number - use it to track your order
+                Format: Phone number + letter (e.g., 9876543210A)
               </p>
             </motion.div>
 

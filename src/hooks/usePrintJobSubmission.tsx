@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,25 +17,33 @@ export const usePrintJobSubmission = () => {
 
   const generateUniqueTrackingId = async (phone: string): Promise<string> => {
     // Start with the clean phone number
-    let baseTrackingId = phone.replace(/\D/g, '');
+    const cleanPhone = phone.replace(/\D/g, '');
     
-    // Check if this tracking ID already exists
-    const { data: existingJob } = await supabase
-      .from('print_jobs')
-      .select('tracking_id')
-      .eq('tracking_id', baseTrackingId)
-      .maybeSingle();
+    // Generate a random alphabet character (A-Z)
+    const alphabetChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     
-    // If no conflict, use the original phone number
-    if (!existingJob) {
-      return baseTrackingId;
+    // Try different alphabet combinations until we find a unique one
+    for (let i = 0; i < 26; i++) {
+      const randomChar = alphabetChars[Math.floor(Math.random() * alphabetChars.length)];
+      const trackingId = `${cleanPhone}${randomChar}`;
+      
+      // Check if this tracking ID already exists
+      const { data: existingJob } = await supabase
+        .from('print_jobs')
+        .select('tracking_id')
+        .eq('tracking_id', trackingId)
+        .maybeSingle();
+      
+      // If no conflict, use this tracking ID
+      if (!existingJob) {
+        return trackingId;
+      }
     }
     
-    // If there's a conflict, add a timestamp suffix to make it unique
-    const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
-    const uniqueTrackingId = `${baseTrackingId}${timestamp}`;
-    
-    return uniqueTrackingId;
+    // If all single letters are taken, add a number
+    const timestamp = Date.now().toString().slice(-2);
+    const randomChar = alphabetChars[Math.floor(Math.random() * alphabetChars.length)];
+    return `${cleanPhone}${randomChar}${timestamp}`;
   };
 
   const convertFilesToBase64 = async (files: File[]): Promise<Array<{ name: string; size: number; type: string; data: string }>> => {
