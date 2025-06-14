@@ -48,13 +48,13 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
         />
       </mesh>
       
-      {/* Faint image texture inside the ball */}
+      {/* More visible image texture inside the ball */}
       <mesh ref={imageRef} scale={[1.2, 1.2, 1.2]}>
         <sphereGeometry args={[0.9, 64, 64]} />
         <meshBasicMaterial
           map={texture}
           transparent
-          opacity={isGlowing ? 0.4 : 0.2}
+          opacity={isGlowing ? 0.7 : 0.5}
           side={THREE.DoubleSide}
           blending={THREE.AdditiveBlending}
         />
