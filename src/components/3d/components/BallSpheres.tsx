@@ -1,7 +1,7 @@
 
 import { useRef, forwardRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
-import * as THREE from 'three';
+import * THREE from 'three';
 
 interface BallSpheresProps {
   isGlowing: boolean;
@@ -21,7 +21,7 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
       innerSphereRef.current.rotation.y -= delta * 0.2;
     }
 
-    // Slow rotation for the faint image
+    // Slow rotation for the image
     if (imageRef.current) {
       imageRef.current.rotation.x += delta * 0.1;
       imageRef.current.rotation.y += delta * 0.05;
@@ -48,15 +48,14 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
         />
       </mesh>
       
-      {/* More visible image texture inside the ball */}
-      <mesh ref={imageRef} scale={[1.2, 1.2, 1.2]}>
+      {/* Visible image texture inside the ball */}
+      <mesh ref={imageRef} scale={[1.1, 1.1, 1.1]}>
         <sphereGeometry args={[0.9, 64, 64]} />
         <meshBasicMaterial
           map={texture}
           transparent
-          opacity={isGlowing ? 0.7 : 0.5}
+          opacity={isGlowing ? 0.9 : 0.7}
           side={THREE.DoubleSide}
-          blending={THREE.AdditiveBlending}
         />
       </mesh>
       
