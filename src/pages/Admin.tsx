@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Download, Eye, Trash2, FileText, Clock, User, Phone, Building, Star, MessageSquare } from 'lucide-react';
@@ -10,14 +9,15 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PrintJob {
   id: string;
-  trackingId?: string;
+  tracking_id?: string;
   name: string;
   phone: string;
   institute: string;
-  timeSlot: string;
+  time_slot: string;
   notes: string;
   files: Array<{ name: string; size: number; type: string; data?: string }>;
   timestamp: string;
@@ -40,6 +40,7 @@ const Admin = () => {
   const [printJobs, setPrintJobs] = useState<PrintJob[]>([]);
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -66,56 +67,143 @@ const Admin = () => {
     }
   };
 
-  const loadPrintJobs = () => {
-    const jobs = JSON.parse(localStorage.getItem('printJobs') || '[]');
-    setPrintJobs(jobs.sort((a: PrintJob, b: PrintJob) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    ));
+  const loadPrintJobs = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('print_jobs')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.error('Error loading print jobs:', error);
+        toast({
+          title: "Error loading print jobs",
+          description: "Could not fetch print jobs from database",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setPrintJobs(data || []);
+    } catch (error) {
+      console.error('Error loading print jobs:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const loadFeedback = () => {
-    const feedbackData = JSON.parse(localStorage.getItem('feedback') || '[]');
-    setFeedback(feedbackData.sort((a: Feedback, b: Feedback) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-    ));
+  const loadFeedback = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (error) {
+        console.error('Error loading feedback:', error);
+        return;
+      }
+
+      setFeedback(data || []);
+    } catch (error) {
+      console.error('Error loading feedback:', error);
+    }
   };
 
-  const updateJobStatus = (jobId: string, status: PrintJob['status']) => {
-    const updatedJobs = printJobs.map(job => 
-      job.id === jobId ? { ...job, status } : job
-    );
-    setPrintJobs(updatedJobs);
-    localStorage.setItem('printJobs', JSON.stringify(updatedJobs));
-    toast({
-      title: "Status updated",
-      description: `Job status changed to ${status}`,
-    });
+  const updateJobStatus = async (jobId: string, status: PrintJob['status']) => {
+    try {
+      const { error } = await supabase
+        .from('print_jobs')
+        .update({ status })
+        .eq('id', jobId);
+
+      if (error) {
+        console.error('Error updating job status:', error);
+        toast({
+          title: "Error updating status",
+          description: "Could not update job status",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Update local state
+      setPrintJobs(prev => prev.map(job => 
+        job.id === jobId ? { ...job, status } : job
+      ));
+
+      // Update selected job if it's the one being updated
+      if (selectedJob?.id === jobId) {
+        setSelectedJob(prev => prev ? { ...prev, status } : null);
+      }
+
+      toast({
+        title: "Status updated",
+        description: `Job status changed to ${status}`,
+      });
+    } catch (error) {
+      console.error('Error updating job status:', error);
+    }
   };
 
-  const deleteJob = (jobId: string) => {
-    const updatedJobs = printJobs.filter(job => job.id !== jobId);
-    setPrintJobs(updatedJobs);
-    localStorage.setItem('printJobs', JSON.stringify(updatedJobs));
-    setSelectedJob(null);
-    toast({
-      title: "Job deleted",
-      description: "Print job has been removed",
-    });
+  const deleteJob = async (jobId: string) => {
+    try {
+      const { error } = await supabase
+        .from('print_jobs')
+        .delete()
+        .eq('id', jobId);
+
+      if (error) {
+        console.error('Error deleting job:', error);
+        toast({
+          title: "Error deleting job",
+          description: "Could not delete job from database",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setPrintJobs(prev => prev.filter(job => job.id !== jobId));
+      setSelectedJob(null);
+      toast({
+        title: "Job deleted",
+        description: "Print job has been removed",
+      });
+    } catch (error) {
+      console.error('Error deleting job:', error);
+    }
   };
 
-  const deleteFeedback = (feedbackId: string) => {
-    const updatedFeedback = feedback.filter(f => f.id !== feedbackId);
-    setFeedback(updatedFeedback);
-    localStorage.setItem('feedback', JSON.stringify(updatedFeedback));
-    toast({
-      title: "Feedback deleted",
-      description: "Feedback has been removed",
-    });
+  const deleteFeedback = async (feedbackId: string) => {
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .delete()
+        .eq('id', feedbackId);
+
+      if (error) {
+        console.error('Error deleting feedback:', error);
+        toast({
+          title: "Error deleting feedback",
+          description: "Could not delete feedback from database",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setFeedback(prev => prev.filter(f => f.id !== feedbackId));
+      toast({
+        title: "Feedback deleted",
+        description: "Feedback has been removed",
+      });
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+    }
   };
 
   const downloadFile = (fileName: string, fileData?: string) => {
     if (fileData) {
-      // Create a proper download link from base64 data
       const link = document.createElement('a');
       link.href = fileData;
       link.download = fileName;
@@ -225,7 +313,12 @@ const Admin = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    {printJobs.length === 0 ? (
+                    {isLoading ? (
+                      <div className="text-center py-8">
+                        <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-gray-500">Loading print jobs...</p>
+                      </div>
+                    ) : printJobs.length === 0 ? (
                       <div className="text-center py-8 text-gray-500">
                         <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
                         <p>No print jobs yet</p>
@@ -249,8 +342,8 @@ const Admin = () => {
                                 {job.institute && (
                                   <p className="text-sm text-gray-500">{job.institute}</p>
                                 )}
-                                {job.trackingId && (
-                                  <p className="text-xs text-blue-600 font-mono">{job.trackingId}</p>
+                                {job.tracking_id && (
+                                  <p className="text-xs text-blue-600 font-mono">{job.tracking_id}</p>
                                 )}
                               </div>
                               <Badge className={getStatusColor(job.status)}>
@@ -264,7 +357,7 @@ const Admin = () => {
                               </span>
                               <span className="flex items-center gap-1">
                                 <Clock className="w-4 h-4" />
-                                {job.timeSlot}
+                                {job.time_slot}
                               </span>
                             </div>
                           </div>
@@ -304,12 +397,12 @@ const Admin = () => {
                         )}
                         <div className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-gray-500" />
-                          <span>{selectedJob.timeSlot}</span>
+                          <span>{selectedJob.time_slot}</span>
                         </div>
-                        {selectedJob.trackingId && (
+                        {selectedJob.tracking_id && (
                           <div className="flex items-center gap-2">
                             <FileText className="w-4 h-4 text-gray-500" />
-                            <span className="font-mono text-sm">{selectedJob.trackingId}</span>
+                            <span className="font-mono text-sm">{selectedJob.tracking_id}</span>
                           </div>
                         )}
                       </div>

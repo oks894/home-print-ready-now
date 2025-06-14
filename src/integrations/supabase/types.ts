@@ -24,6 +24,75 @@ export type Database = {
         }
         Relationships: []
       }
+      feedback: {
+        Row: {
+          comments: string | null
+          email: string
+          id: string
+          name: string
+          rating: number
+          service: string | null
+          timestamp: string
+        }
+        Insert: {
+          comments?: string | null
+          email: string
+          id?: string
+          name: string
+          rating: number
+          service?: string | null
+          timestamp?: string
+        }
+        Update: {
+          comments?: string | null
+          email?: string
+          id?: string
+          name?: string
+          rating?: number
+          service?: string | null
+          timestamp?: string
+        }
+        Relationships: []
+      }
+      print_jobs: {
+        Row: {
+          files: Json
+          id: string
+          institute: string | null
+          name: string
+          notes: string | null
+          phone: string
+          status: string
+          time_slot: string
+          timestamp: string
+          tracking_id: string
+        }
+        Insert: {
+          files: Json
+          id?: string
+          institute?: string | null
+          name: string
+          notes?: string | null
+          phone: string
+          status?: string
+          time_slot: string
+          timestamp?: string
+          tracking_id: string
+        }
+        Update: {
+          files?: Json
+          id?: string
+          institute?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string
+          status?: string
+          time_slot?: string
+          timestamp?: string
+          tracking_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
