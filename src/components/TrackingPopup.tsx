@@ -23,25 +23,25 @@ const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) 
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardHeader className="text-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center pb-4">
           <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
-          <CardTitle className="text-2xl text-green-600">Order Submitted!</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-xl sm:text-2xl text-green-600">Order Submitted!</CardTitle>
+          <CardDescription className="text-sm sm:text-base">
             Your print job has been submitted successfully
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 sm:space-y-6">
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-2">Your Tracking ID:</p>
-            <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
-              <span className="font-mono text-lg font-bold text-blue-600 flex-1 text-center">
+            <div className="flex items-center gap-2 p-3 sm:p-4 bg-blue-50 rounded-lg">
+              <span className="font-mono text-lg sm:text-xl font-bold text-blue-600 flex-1 text-center break-all">
                 {trackingId}
               </span>
-              <Button size="sm" variant="outline" onClick={copyTrackingId}>
+              <Button size="sm" variant="outline" onClick={copyTrackingId} className="flex-shrink-0">
                 <Copy className="w-4 h-4" />
               </Button>
             </div>
@@ -50,11 +50,11 @@ const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) 
             </p>
           </div>
 
-          <div className="flex gap-2">
-            <Button onClick={onNewOrder} className="flex-1">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Button onClick={onNewOrder} className="flex-1 h-11">
               New Order
             </Button>
-            <Button variant="outline" onClick={onClose} className="flex-1">
+            <Button variant="outline" onClick={onClose} className="flex-1 h-11">
               Close
             </Button>
           </div>

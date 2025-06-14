@@ -124,22 +124,22 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col">
       <Header />
       
-      {/* Hero Section */}
-      <section className="py-16 px-4">
+      {/* Hero Section - Mobile Optimized */}
+      <section className="py-8 sm:py-12 lg:py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
             Print from <span className="text-blue-600">Home</span>
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg sm:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto leading-relaxed">
             Upload your documents, schedule a pickup time, and get professional printing done while you stay comfortable at home.
           </p>
         </div>
       </section>
 
-      {/* Main Form */}
-      <section className="py-8 px-4 flex-1">
+      {/* Main Form - Mobile Optimized */}
+      <section className="py-4 sm:py-6 lg:py-8 px-4 flex-1">
         <div className="max-w-4xl mx-auto">
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
             <FileUpload files={files} onFilesChange={setFiles} />
             
             <CustomerForm 
@@ -154,9 +154,13 @@ const Index = () => {
               onNotesChange={(notes) => setFormData(prev => ({ ...prev, notes }))}
             />
 
-            {/* Submit Button */}
-            <div className="text-center">
-              <Button type="submit" size="lg" className="px-12 py-6 text-lg">
+            {/* Submit Button - Mobile Optimized */}
+            <div className="text-center pt-4">
+              <Button 
+                type="submit" 
+                size="lg" 
+                className="w-full sm:w-auto px-8 sm:px-12 py-4 sm:py-6 text-base sm:text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+              >
                 <Printer className="w-5 h-5 mr-2" />
                 Submit Print Job
               </Button>

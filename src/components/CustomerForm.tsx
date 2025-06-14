@@ -23,47 +23,52 @@ const CustomerForm = ({ formData, onFormDataChange }: CustomerFormProps) => {
 
   return (
     <Card className="shadow-lg border-0">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <User className="w-5 h-5 text-blue-600" />
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+          <User className="w-5 h-5 text-blue-600 flex-shrink-0" />
           Your Information
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-sm sm:text-base">
           We need your details to contact you about your print job
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid md:grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="name">Full Name *</Label>
+      <CardContent className="space-y-4 sm:space-y-6">
+        <div className="grid gap-4 sm:gap-6">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="text-sm font-medium">Full Name *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                placeholder="Enter your full name"
+                required
+                className="h-11 text-base"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="text-sm font-medium">Phone Number *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                placeholder="Enter your phone number"
+                required
+                className="h-11 text-base"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="institute" className="text-sm font-medium">Institute/Organization (Optional)</Label>
             <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
-              placeholder="Enter your full name"
-              required
+              id="institute"
+              value={formData.institute}
+              onChange={(e) => handleInputChange('institute', e.target.value)}
+              placeholder="School, College, Office, etc."
+              className="h-11 text-base"
             />
           </div>
-          <div>
-            <Label htmlFor="phone">Phone Number *</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              placeholder="Enter your phone number"
-              required
-            />
-          </div>
-        </div>
-        <div>
-          <Label htmlFor="institute">Institute/Organization (Optional)</Label>
-          <Input
-            id="institute"
-            value={formData.institute}
-            onChange={(e) => handleInputChange('institute', e.target.value)}
-            placeholder="School, College, Office, etc."
-          />
         </div>
       </CardContent>
     </Card>
