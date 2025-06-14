@@ -1,7 +1,6 @@
-
 import { useRef, forwardRef } from 'react';
 import { useFrame, useLoader } from '@react-three/fiber';
-import * THREE from 'three';
+import * as THREE from 'three';
 
 interface BallSpheresProps {
   isGlowing: boolean;
