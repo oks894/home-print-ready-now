@@ -23,7 +23,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     selectedServices,
     totalAmount,
     canAccessDelivery,
-    deliveryRequested: deliveryRequestedRaw,
+    deliveryRequested,
     formData,
     setFiles,
     setSelectedServices,
@@ -40,9 +40,6 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   const { toast } = useToast();
 
   const serviceHandlers = createServiceHandlers(setSelectedServices);
-
-  // Normalize deliveryRequested to boolean - ensure it's always a boolean
-  const deliveryRequested = deliveryRequestedRaw === true || deliveryRequestedRaw === 'true';
 
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
