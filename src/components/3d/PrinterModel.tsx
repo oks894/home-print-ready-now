@@ -1,7 +1,6 @@
 
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { Box, Cylinder, Sphere } from '@react-three/drei';
 import { Mesh } from 'three';
 
 interface PrinterModelProps {
@@ -24,46 +23,34 @@ const PrinterModel = ({ position = [0, 0, 0] }: PrinterModelProps) => {
   return (
     <group position={position}>
       {/* Printer Base */}
-      <Box
-        ref={printerRef}
-        args={[2, 0.8, 1.5]}
-        position={[0, 0, 0]}
-      >
+      <mesh ref={printerRef} position={[0, 0, 0]}>
+        <boxGeometry args={[2, 0.8, 1.5]} />
         <meshStandardMaterial color="#2563eb" />
-      </Box>
+      </mesh>
       
       {/* Printer Top */}
-      <Box
-        args={[1.8, 0.4, 1.3]}
-        position={[0, 0.6, 0]}
-      >
+      <mesh position={[0, 0.6, 0]}>
+        <boxGeometry args={[1.8, 0.4, 1.3]} />
         <meshStandardMaterial color="#1d4ed8" />
-      </Box>
+      </mesh>
       
       {/* Paper Tray */}
-      <Box
-        args={[1.6, 0.1, 1.1]}
-        position={[0, -0.4, -0.2]}
-      >
+      <mesh position={[0, -0.4, -0.2]}>
+        <boxGeometry args={[1.6, 0.1, 1.1]} />
         <meshStandardMaterial color="#64748b" />
-      </Box>
+      </mesh>
       
       {/* Floating Paper */}
-      <Box
-        ref={paperRef}
-        args={[0.8, 0.02, 1.1]}
-        position={[0, 0.5, 0.8]}
-      >
+      <mesh ref={paperRef} position={[0, 0.5, 0.8]}>
+        <boxGeometry args={[0.8, 0.02, 1.1]} />
         <meshStandardMaterial color="#ffffff" />
-      </Box>
+      </mesh>
       
       {/* Status Light */}
-      <Sphere
-        args={[0.05]}
-        position={[0.8, 0.8, 0.6]}
-      >
+      <mesh position={[0.8, 0.8, 0.6]}>
+        <sphereGeometry args={[0.05]} />
         <meshStandardMaterial color="#10b981" emissive="#10b981" emissiveIntensity={0.5} />
-      </Sphere>
+      </mesh>
     </group>
   );
 };
