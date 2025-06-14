@@ -6,16 +6,6 @@ import { ServicesManager } from '@/components/admin/ServicesManager';
 import { PrintJob } from '@/types/printJob';
 import { Feedback } from '@/types/admin';
 
-interface Feedback {
-  id: string;
-  name: string;
-  email: string;
-  service: string;
-  comments: string;
-  rating: number;
-  timestamp: string;
-}
-
 interface AdminTabsProps {
   printJobs: PrintJob[];
   feedback: Feedback[];
