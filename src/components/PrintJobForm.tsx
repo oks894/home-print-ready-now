@@ -47,14 +47,20 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
 
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
+  console.log('PrintJobForm - currentStep:', currentStep);
+  console.log('PrintJobForm - files count:', files.length);
+  console.log('PrintJobForm - selected services count:', selectedServices.length);
 
   // Convert deliveryRequested to boolean to fix TypeScript error
   const deliveryRequestedBoolean = typeof deliveryRequested === 'string' ? deliveryRequested === 'true' : Boolean(deliveryRequested);
 
-  // Fix: Get validation result and convert to boolean
+  // Get validation result
   const validationResult = canProceed();
   const canProceedBoolean = validationResult === true;
   const validationMessage = typeof validationResult === 'string' ? validationResult : null;
+
+  console.log('PrintJobForm - validation result:', validationResult);
+  console.log('PrintJobForm - can proceed:', canProceedBoolean);
 
   const handleSubmit = async () => {
     const currentValidationResult = canProceed();

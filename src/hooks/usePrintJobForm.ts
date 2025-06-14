@@ -37,14 +37,40 @@ export const usePrintJobForm = () => {
     }
   };
 
-  const canProceed = () => {
+  const canProceed = (): boolean | string => {
+    console.log('Checking canProceed for step:', currentStep);
+    console.log('Files:', files.length);
+    console.log('Selected services:', selectedServices.length);
+    console.log('Form data:', formData);
+    
     switch (currentStep) {
-      case 0: return files.length > 0;
-      case 1: return selectedServices.length > 0;
-      case 2: return formData.name.trim() && formData.phone.trim();
-      case 3: return formData.timeSlot.trim();
-      case 4: return true;
-      default: return false;
+      case 0: 
+        if (files.length === 0) {
+          return 'Please upload at least one file to continue';
+        }
+        return true;
+      case 1: 
+        if (selectedServices.length === 0) {
+          return 'Please select at least one service to continue';
+        }
+        return true;
+      case 2: 
+        if (!formData.name.trim()) {
+          return 'Please enter your name to continue';
+        }
+        if (!formData.phone.trim()) {
+          return 'Please enter your phone number to continue';
+        }
+        return true;
+      case 3: 
+        if (!formData.timeSlot.trim()) {
+          return 'Please select a time slot to continue';
+        }
+        return true;
+      case 4: 
+        return true;
+      default: 
+        return false;
     }
   };
 
@@ -74,6 +100,7 @@ export const usePrintJobForm = () => {
     setTotalAmount(total);
     setCanAccessDelivery(total >= 200);
     console.log('Total amount updated:', total);
+    console.log('Selected services updated:', selectedServices);
   }, [selectedServices]);
 
   return {
