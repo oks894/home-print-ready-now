@@ -16,9 +16,27 @@ export const usePrintJobSubmission = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const generateTrackingId = (phone: string) => {
-    // Use only the phone number as tracking ID (remove any non-digits)
-    return phone.replace(/\D/g, '');
+  const generateUniqueTrackingId = async (phone: string): Promise<string> => {
+    // Start with the clean phone number
+    let baseTrackingId = phone.replace(/\D/g, '');
+    
+    // Check if this tracking ID already exists
+    const { data: existingJob } = await supabase
+      .from('print_jobs')
+      .select('tracking_id')
+      .eq('tracking_id', baseTrackingId)
+      .maybeSingle();
+    
+    // If no conflict, use the original phone number
+    if (!existingJob) {
+      return baseTrackingId;
+    }
+    
+    // If there's a conflict, add a timestamp suffix to make it unique
+    const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+    const uniqueTrackingId = `${baseTrackingId}${timestamp}`;
+    
+    return uniqueTrackingId;
   };
 
   const convertFilesToBase64 = async (files: File[]): Promise<Array<{ name: string; size: number; type: string; data: string }>> => {
@@ -69,7 +87,7 @@ export const usePrintJobSubmission = () => {
     setIsSubmitting(true);
 
     try {
-      const newTrackingId = generateTrackingId(formData.phone);
+      const newTrackingId = await generateUniqueTrackingId(formData.phone);
       const filesWithData = await convertFilesToBase64(files);
 
       const selectedServicesData = selectedServices.map(service => ({
@@ -109,7 +127,7 @@ export const usePrintJobSubmission = () => {
 
       toast({
         title: "Order Submitted!",
-        description: `Your tracking phone number is ${newTrackingId}. Total: ₹${totalAmount.toFixed(2)}${totalAmount > 0 && selectedServices.some(s => s.quantity >= 50) ? ' (Bulk discount applied!)' : ''}`,
+        description: `Your tracking ID is ${newTrackingId}. Total: ₹${totalAmount.toFixed(2)}${totalAmount > 0 && selectedServices.some(s => s.quantity >= 50) ? ' (Bulk discount applied!)' : ''}`,
       });
 
       return newTrackingId;
