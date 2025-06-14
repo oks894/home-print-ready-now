@@ -14,6 +14,7 @@ import CustomerForm from './CustomerForm';
 import TimeSlotSelector from './TimeSlotSelector';
 import { usePrintJobSubmission } from '@/hooks/usePrintJobSubmission';
 import { useToast } from '@/hooks/use-toast';
+import { SelectedService } from '@/types/service';
 
 interface PrintJobFormProps {
   onOrderSubmitted: (trackingId: string) => void;
@@ -22,7 +23,7 @@ interface PrintJobFormProps {
 const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [files, setFiles] = useState<File[]>([]);
-  const [selectedServices, setSelectedServices] = useState<any[]>([]);
+  const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [canAccessDelivery, setCanAccessDelivery] = useState(false);
   const [deliveryRequested, setDeliveryRequested] = useState(false);
@@ -93,17 +94,32 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     switch (currentStep) {
       case 0: return files.length > 0;
       case 1: return selectedServices.length > 0;
-      case 2: return formData.name && formData.phone;
-      case 3: return formData.timeSlot;
+      case 2: return formData.name.trim() && formData.phone.trim();
+      case 3: return formData.timeSlot.trim();
       case 4: return true;
       default: return false;
     }
   };
 
   const handleSubmit = async () => {
-    if (!canProceed()) return;
+    if (!canProceed()) {
+      toast({
+        title: "Form Incomplete",
+        description: "Please fill in all required fields before submitting.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     try {
+      console.log('Submitting form with data:', {
+        formData,
+        files: files.length,
+        selectedServices: selectedServices.length,
+        totalAmount,
+        deliveryRequested
+      });
+
       const trackingId = await submitPrintJob(
         formData,
         files,
@@ -128,6 +144,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
           notes: ''
         });
         setDeliveryRequested(false);
+        setTotalAmount(0);
       }
     } catch (error) {
       console.error('Error submitting print job:', error);
@@ -139,20 +156,40 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     }
   };
 
-  useEffect(() => {
-    setCanAccessDelivery(totalAmount >= 200);
-  }, [totalAmount]);
+  const handleServiceAdd = (service: any, quantity = 1) => {
+    console.log('Adding service:', service, 'quantity:', quantity);
+    const basePrice = parseFloat(service.price.replace(/[₹\/\w\s]/g, '')) || 0;
+    const newService: SelectedService = { 
+      ...service, 
+      quantity, 
+      calculatedPrice: basePrice * quantity 
+    };
+    setSelectedServices(prev => [...prev, newService]);
+  };
 
-  // Helper function to calculate price from service
-  const calculateServicePrice = (service: any) => {
-    // Parse the price string (e.g., "₹3.5/page" -> 3.5)
-    const priceMatch = service.price.match(/₹?(\d+(?:\.\d+)?)/);
-    return priceMatch ? parseFloat(priceMatch[1]) : 0;
+  const handleServiceUpdate = (serviceId: string, quantity: number) => {
+    console.log('Updating service:', serviceId, 'quantity:', quantity);
+    setSelectedServices(services => 
+      services.map(s => {
+        if (s.id === serviceId) {
+          const basePrice = parseFloat(s.price.replace(/[₹\/\w\s]/g, '')) || 0;
+          return { ...s, quantity, calculatedPrice: basePrice * quantity };
+        }
+        return s;
+      })
+    );
+  };
+
+  const handleServiceRemove = (serviceId: string) => {
+    console.log('Removing service:', serviceId);
+    setSelectedServices(services => services.filter(s => s.id !== serviceId));
   };
 
   useEffect(() => {
     const total = selectedServices.reduce((sum, service) => sum + service.calculatedPrice, 0);
     setTotalAmount(total);
+    setCanAccessDelivery(total >= 200);
+    console.log('Total amount updated:', total);
   }, [selectedServices]);
 
   const stepVariants = {
@@ -231,19 +268,9 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
             <ServiceSelector 
               services={[]}
               selectedServices={selectedServices}
-              onAddService={(service, quantity = 1) => {
-                const basePrice = calculateServicePrice(service);
-                const newService = { ...service, quantity, calculatedPrice: basePrice * quantity };
-                setSelectedServices([...selectedServices, newService]);
-              }}
-              onUpdateQuantity={(serviceId, quantity) => {
-                setSelectedServices(services => 
-                  services.map(s => s.id === serviceId ? { ...s, quantity, calculatedPrice: calculateServicePrice(s) * quantity } : s)
-                );
-              }}
-              onRemoveService={(serviceId) => {
-                setSelectedServices(services => services.filter(s => s.id !== serviceId));
-              }}
+              onAddService={handleServiceAdd}
+              onUpdateQuantity={handleServiceUpdate}
+              onRemoveService={handleServiceRemove}
               totalAmount={totalAmount}
               canAccessDelivery={canAccessDelivery}
             />
