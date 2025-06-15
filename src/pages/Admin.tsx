@@ -1,10 +1,9 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminTabs } from '@/components/admin/AdminTabs';
-import { NotificationManager } from '@/components/admin/NotificationManager';
 import { SearchProvider } from '@/components/admin/AdminSearch';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { useAdminData } from '@/hooks/useAdminData';
@@ -13,6 +12,7 @@ import { useLiveTracking } from '@/hooks/useLiveTracking';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showFullFeatures, setShowFullFeatures] = useState(false);
   const isMobile = useIsMobile();
   
   // Enable live tracking for admin page - simplified
@@ -31,7 +31,18 @@ const Admin = () => {
     setSelectedJob
   } = useAdminData();
 
-  console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading);
+  // Show full features after initial load is complete
+  useEffect(() => {
+    if (!isLoading && printJobs.length >= 0) {
+      const timer = setTimeout(() => {
+        setShowFullFeatures(true);
+      }, 1000); // Small delay to ensure smooth loading
+      
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading, printJobs.length]);
+
+  console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading, 'showFullFeatures:', showFullFeatures);
 
   if (!isAuthenticated) {
     return (
@@ -51,8 +62,8 @@ const Admin = () => {
             onRefresh={loadData}
           />
 
-          {/* Simplified Admin Monitor - no heavy features during loading */}
-          {!isLoading && (
+          {/* Only show monitor after full features are loaded */}
+          {showFullFeatures && (
             <OnlineUsersMonitor 
               showMilestones={true}
               className="admin-monitor"
@@ -74,17 +85,10 @@ const Admin = () => {
               {isLoading && (
                 <div className="mt-2 text-sm text-blue-600 flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  Loading data...
+                  Loading dashboard...
                 </div>
               )}
             </div>
-
-            {/* Only show notifications when not loading */}
-            {!isLoading && (
-              <div className={isMobile ? 'mb-4' : 'mb-6'}>
-                <NotificationManager />
-              </div>
-            )}
 
             <AdminTabs
               printJobs={printJobs}
