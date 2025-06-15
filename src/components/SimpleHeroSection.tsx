@@ -1,9 +1,15 @@
 
+import React, { Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Sparkles } from 'lucide-react';
+import { getAdaptiveConfig } from '@/utils/connectionUtils';
+
+// Always load the 3D scene but adapt it based on connection
+const Hero3DScene = React.lazy(() => import('@/components/hero/Hero3DScene'));
 
 const SimpleHeroSection = () => {
   const navigate = useNavigate();
+  const { simplifiedUI } = getAdaptiveConfig();
 
   const handleStartPrinting = () => {
     navigate('/printing');
@@ -56,6 +62,21 @@ const SimpleHeroSection = () => {
               View Gallery
             </span>
           </button>
+        </div>
+
+        {/* 3D Scene - Always show but with simplified fallback */}
+        <div className="mb-12 flex justify-center">
+          <Suspense fallback={
+            <div className="h-96 w-full max-w-md bg-gradient-to-br from-blue-100/50 to-purple-100/50 rounded-2xl flex items-center justify-center border-2 border-blue-200">
+              <div className="text-center">
+                <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4" 
+                     style={{ animation: 'spin 1s linear infinite' }} />
+                <p className="text-blue-600 font-semibold">Loading Fortune Ball...</p>
+              </div>
+            </div>
+          }>
+            <Hero3DScene />
+          </Suspense>
         </div>
 
         {/* Simple Features Grid */}
