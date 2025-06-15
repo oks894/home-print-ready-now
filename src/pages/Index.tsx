@@ -51,11 +51,7 @@ const Index = () => {
             <Header />
           </ErrorBoundary>
           
-          {/* Always show live monitor - no lazy loading */}
-          <ErrorBoundary fallback={null}>
-            {/* The live monitor widget should NOT appear here anymore if LiveStatsWidget is used below */}
-            {/* (Remove any previous duplicate location) */}
-          </ErrorBoundary>
+          {/* Live monitor ErrorBoundary with no children REMOVED TO FIX ERROR */}
           
           <motion.main
             initial={{ opacity: 0, y: enableHeavyAnimations ? 20 : 0 }}
