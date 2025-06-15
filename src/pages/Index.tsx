@@ -5,6 +5,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { SimpleLoader } from '@/components/SimpleLoader';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { getAdaptiveConfig } from '@/utils/connectionUtils';
 
 // Get adaptive configuration
@@ -12,8 +14,7 @@ const adaptiveConfig = getAdaptiveConfig();
 
 // Conditional loading based on connection speed
 const AnimatedHeroSection = React.lazy(() => {
-  if (adaptiveConfig.simplifiedUI) {
-    // For slow connections, load a simpler version
+  if (adaptiveConfig.simplifiedUI || adaptiveConfig.ultraLightMode) {
     return import('@/components/SimpleHeroSection');
   }
   return import('@/components/AnimatedHeroSection');
@@ -25,51 +26,70 @@ const MainContentSections = React.lazy(() =>
   }))
 );
 
-// Always show online monitor but load it lazily
 const OnlineUsersMonitor = React.lazy(() => 
   import('@/components/OnlineUsersMonitor')
 );
 
 const Index = () => {
-  const { animationDuration, enableHeavyAnimations, simplifiedUI } = adaptiveConfig;
+  const { animationDuration, enableHeavyAnimations, simplifiedUI, ultraLightMode } = adaptiveConfig;
 
   return (
-    <MobileLayout className={`min-h-screen ${simplifiedUI ? 'connection-3g' : ''}`}>
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: animationDuration }}
-      >
-        <Header />
-        
-        <Suspense fallback={null}>
-          <OnlineUsersMonitor />
-        </Suspense>
-        
-        <motion.main
-          initial={{ opacity: 0, y: enableHeavyAnimations ? 20 : 0 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: animationDuration * 0.75, delay: enableHeavyAnimations ? 0.1 : 0 }}
-          className="overflow-x-hidden"
+    <ErrorBoundary fallback={<SimpleLoader message="Loading home page..." />}>
+      <MobileLayout className={`min-h-screen ${simplifiedUI ? 'connection-3g' : ''} ${ultraLightMode ? 'ultra-light' : ''}`}>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: animationDuration }}
         >
-          <Suspense fallback={<LoadingSpinner />}>
-            <AnimatedHeroSection />
-          </Suspense>
+          <ErrorBoundary fallback={<div className="h-16 bg-white" />}>
+            <Header />
+          </ErrorBoundary>
           
-          <Suspense fallback={
-            <div className={`h-32 flex items-center justify-center text-sm text-gray-600 ${
-              simplifiedUI ? 'animate-none' : 'animate-pulse'
-            }`}>
-              Loading content...
-            </div>
-          }>
-            <MainContentSections />
-          </Suspense>
-        </motion.main>
-        
-        <Footer />
-      </motion.div>
-    </MobileLayout>
+          {!ultraLightMode && (
+            <ErrorBoundary fallback={null}>
+              <Suspense fallback={null}>
+                <OnlineUsersMonitor />
+              </Suspense>
+            </ErrorBoundary>
+          )}
+          
+          <motion.main
+            initial={{ opacity: 0, y: enableHeavyAnimations ? 20 : 0 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: animationDuration * 0.75, delay: enableHeavyAnimations ? 0.1 : 0 }}
+            className="overflow-x-hidden"
+          >
+            <ErrorBoundary fallback={<SimpleLoader message="Loading content..." />}>
+              <Suspense fallback={ultraLightMode ? <SimpleLoader /> : <LoadingSpinner />}>
+                <AnimatedHeroSection />
+              </Suspense>
+            </ErrorBoundary>
+            
+            {!ultraLightMode && (
+              <ErrorBoundary fallback={
+                <div className="h-32 flex items-center justify-center text-sm text-gray-600">
+                  Content temporarily unavailable
+                </div>
+              }>
+                <Suspense fallback={
+                  <div className={`h-32 flex items-center justify-center text-sm text-gray-600 ${
+                    simplifiedUI ? 'animate-none' : 'animate-pulse'
+                  }`}>
+                    Loading content...
+                  </div>
+                }>
+                  <MainContentSections />
+                </Suspense>
+              </ErrorBoundary>
+            )}
+          </motion.main>
+          
+          <ErrorBoundary fallback={<div className="h-16 bg-gray-100" />}>
+            <Footer />
+          </ErrorBoundary>
+        </motion.div>
+      </MobileLayout>
+    </ErrorBoundary>
   );
 };
 
