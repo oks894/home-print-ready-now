@@ -1,24 +1,14 @@
 
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
-
-// Check for slow connection with proper type checking
-const getConnectionSpeed = () => {
-  const connection = (navigator as any).connection;
-  if (!connection) return 'unknown';
-  
-  return connection.effectiveType === 'slow-2g' || 
-         connection.effectiveType === '2g' || 
-         connection.effectiveType === '3g' ? 'slow' : 'fast';
-};
-
-const isSlowConnection = getConnectionSpeed() === 'slow';
+import { getAdaptiveConfig } from '@/utils/connectionUtils';
 
 export const LoadingSpinner = () => {
   const isMobile = useIsMobile();
+  const { simplifiedUI, enableHeavyAnimations } = getAdaptiveConfig();
   
   // Use simpler loading for slow connections
-  if (isSlowConnection) {
+  if (simplifiedUI) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -41,7 +31,7 @@ export const LoadingSpinner = () => {
         className="flex flex-col items-center gap-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: enableHeavyAnimations ? 0.5 : 0.2 }}
       >
         <motion.div
           className={`border-4 border-blue-500 border-t-transparent rounded-full ${
@@ -54,10 +44,10 @@ export const LoadingSpinner = () => {
           className={`font-semibold text-gray-700 ${
             isMobile ? 'text-lg text-center px-4' : 'text-xl'
           }`}
-          animate={{ opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          animate={enableHeavyAnimations ? { opacity: [0.5, 1, 0.5] } : {}}
+          transition={enableHeavyAnimations ? { duration: 2, repeat: Infinity } : {}}
         >
-          Loading Premium Experience...
+          {enableHeavyAnimations ? 'Loading Premium Experience...' : 'Loading...'}
         </motion.p>
       </motion.div>
     </div>

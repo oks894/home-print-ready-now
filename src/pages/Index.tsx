@@ -5,22 +5,14 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
+import { getAdaptiveConfig } from '@/utils/connectionUtils';
 
-// Conditional loading for 3G optimization with proper type checking
-const getConnectionSpeed = () => {
-  const connection = (navigator as any).connection;
-  if (!connection) return 'unknown';
-  
-  return connection.effectiveType === 'slow-2g' || 
-         connection.effectiveType === '2g' || 
-         connection.effectiveType === '3g' ? 'slow' : 'fast';
-};
+// Get adaptive configuration
+const adaptiveConfig = getAdaptiveConfig();
 
-const isSlowConnection = getConnectionSpeed() === 'slow';
-
-// Lazy load components with preload hints for faster networks
+// Conditional loading based on connection speed
 const AnimatedHeroSection = React.lazy(() => {
-  if (isSlowConnection) {
+  if (adaptiveConfig.simplifiedUI) {
     // For slow connections, load a simpler version
     return import('@/components/SimpleHeroSection');
   }
@@ -39,11 +31,10 @@ const OnlineUsersMonitor = React.lazy(() =>
 );
 
 const Index = () => {
-  // Reduce animations for slow connections
-  const animationDuration = isSlowConnection ? 0.2 : 0.8;
+  const { animationDuration, enableHeavyAnimations, simplifiedUI } = adaptiveConfig;
 
   return (
-    <MobileLayout className="min-h-screen">
+    <MobileLayout className={`min-h-screen ${simplifiedUI ? 'connection-3g' : ''}`}>
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -56,9 +47,9 @@ const Index = () => {
         </Suspense>
         
         <motion.main
-          initial={{ opacity: 0, y: isSlowConnection ? 0 : 20 }}
+          initial={{ opacity: 0, y: enableHeavyAnimations ? 20 : 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: animationDuration * 0.75, delay: 0.1 }}
+          transition={{ duration: animationDuration * 0.75, delay: enableHeavyAnimations ? 0.1 : 0 }}
           className="overflow-x-hidden"
         >
           <Suspense fallback={<LoadingSpinner />}>
@@ -66,7 +57,9 @@ const Index = () => {
           </Suspense>
           
           <Suspense fallback={
-            <div className="h-32 flex items-center justify-center text-sm text-gray-600">
+            <div className={`h-32 flex items-center justify-center text-sm text-gray-600 ${
+              simplifiedUI ? 'animate-none' : 'animate-pulse'
+            }`}>
               Loading content...
             </div>
           }>

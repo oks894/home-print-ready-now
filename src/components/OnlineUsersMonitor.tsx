@@ -2,24 +2,14 @@
 import { motion } from 'framer-motion';
 import { Users, Wifi, WifiOff } from 'lucide-react';
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
-
-// Check for slow connection with proper type checking
-const getConnectionSpeed = () => {
-  const connection = (navigator as any).connection;
-  if (!connection) return 'unknown';
-  
-  return connection.effectiveType === 'slow-2g' || 
-         connection.effectiveType === '2g' || 
-         connection.effectiveType === '3g' ? 'slow' : 'fast';
-};
-
-const isSlowConnection = getConnectionSpeed() === 'slow';
+import { getAdaptiveConfig } from '@/utils/connectionUtils';
 
 const OnlineUsersMonitor = () => {
   const { onlineCount, isConnected } = useOnlineUsers();
+  const { simplifiedUI, enableHeavyAnimations, enableBackdropBlur } = getAdaptiveConfig();
 
   // Simple version for slow connections
-  if (isSlowConnection) {
+  if (simplifiedUI) {
     return (
       <div className="fixed top-20 right-4 z-40 bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-md">
         <div className="flex items-center gap-2 text-sm">
@@ -40,13 +30,18 @@ const OnlineUsersMonitor = () => {
     <motion.div
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="fixed top-20 right-4 z-40 bg-white/90 backdrop-blur-sm border border-gray-200 rounded-lg px-3 py-2 shadow-lg"
+      transition={{ duration: enableHeavyAnimations ? 0.3 : 0.1 }}
+      className={`fixed top-20 right-4 z-40 ${
+        enableBackdropBlur 
+          ? 'bg-white/90 backdrop-blur-sm' 
+          : 'bg-white'
+      } border border-gray-200 rounded-lg px-3 py-2 shadow-lg`}
     >
       <div className="flex items-center gap-2 text-sm">
         {isConnected ? (
           <motion.div
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={enableHeavyAnimations ? { scale: [1, 1.1, 1] } : {}}
+            transition={enableHeavyAnimations ? { duration: 2, repeat: Infinity } : {}}
           >
             <Wifi className="w-4 h-4 text-green-500" />
           </motion.div>
@@ -58,8 +53,9 @@ const OnlineUsersMonitor = () => {
         
         <motion.span
           key={onlineCount}
-          initial={{ scale: 1.2 }}
+          initial={enableHeavyAnimations ? { scale: 1.2 } : {}}
           animate={{ scale: 1 }}
+          transition={{ duration: enableHeavyAnimations ? 0.2 : 0.1 }}
           className="font-semibold text-blue-600"
         >
           {onlineCount}
