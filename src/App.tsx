@@ -10,6 +10,7 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import Track from "./pages/Track";
 import Admin from "./pages/Admin";
+import Printing from "./pages/Printing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -22,6 +23,7 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
+          <Route path="/printing" element={<Printing />} />
           <Route path="/services" element={<Services />} />
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/contact" element={<Contact />} />
