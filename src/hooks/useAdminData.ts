@@ -9,7 +9,6 @@ import { useFeedback } from '@/hooks/useFeedback';
 export const useAdminData = () => {
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastFetchTime, setLastFetchTime] = useState(0);
   const [hasInitialized, setHasInitialized] = useState(false);
   
   const { toast } = useToast();
@@ -26,16 +25,9 @@ export const useAdminData = () => {
     deleteFeedback: deleteFeedbackInternal 
   } = useFeedback();
 
-  const CACHE_DURATION = 30000; // 30 seconds
-  const REFRESH_INTERVAL = 120000; // 2 minutes
-
-  const shouldRefetchData = useCallback(() => {
-    return Date.now() - lastFetchTime > CACHE_DURATION;
-  }, [lastFetchTime]);
-
   const loadData = useCallback(async (force = false) => {
-    if (!force && !shouldRefetchData() && hasInitialized) {
-      console.log('useAdminData: Using cached data, skipping fetch');
+    if (!force && hasInitialized) {
+      console.log('useAdminData: Skipping reload, already initialized');
       return;
     }
 
@@ -43,26 +35,48 @@ export const useAdminData = () => {
     setIsLoading(true);
     
     try {
-      await retryWithBackoff(async () => {
-        console.log('useAdminData: Attempting to load print jobs and feedback...');
-        const promises = [loadPrintJobs(), loadFeedback()];
-        await Promise.allSettled(promises);
-        setLastFetchTime(Date.now());
+      // Load data without aggressive timeouts - let the database queries complete naturally
+      const results = await Promise.allSettled([
+        loadPrintJobs(),
+        loadFeedback()
+      ]);
+
+      // Check results and handle partial failures
+      const printJobsResult = results[0];
+      const feedbackResult = results[1];
+
+      if (printJobsResult.status === 'rejected') {
+        console.warn('Print jobs failed to load:', printJobsResult.reason);
+        toast({
+          title: "Print jobs loading failed",
+          description: "Unable to load print jobs. Please try refreshing.",
+          variant: "destructive"
+        });
+      }
+      
+      if (feedbackResult.status === 'rejected') {
+        console.warn('Feedback failed to load:', feedbackResult.reason);
+      }
+
+      // Don't throw error if only one fails - partial data is better than no data
+      if (printJobsResult.status === 'fulfilled' || feedbackResult.status === 'fulfilled') {
         setHasInitialized(true);
         console.log('useAdminData: Admin data loaded successfully');
-      });
+      } else {
+        throw new Error('Both print jobs and feedback failed to load');
+      }
     } catch (error) {
-      console.error('useAdminData: Failed to load data after retries:', error);
+      console.error('useAdminData: Failed to load data:', error);
       toast({
-        title: "Connection issues",
-        description: "Having trouble loading data. Please check your internet connection and try again.",
+        title: "Loading failed",
+        description: "Failed to load admin data. Please refresh the page.",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
       setIsRetrying(false);
     }
-  }, [shouldRefetchData, hasInitialized, retryWithBackoff, loadPrintJobs, loadFeedback, toast, setIsRetrying]);
+  }, [hasInitialized, loadPrintJobs, loadFeedback, toast, setIsRetrying]);
 
   const updateJobStatus = async (jobId: string, status: PrintJob['status']) => {
     console.log('useAdminData: Updating job status:', jobId, status);
@@ -87,29 +101,15 @@ export const useAdminData = () => {
     await deleteFeedbackInternal(feedbackId, retryWithBackoff);
   };
 
-  // Load data on component mount
+  // Load data on component mount - only once with error recovery
   useEffect(() => {
     if (!hasInitialized) {
-      console.log('useAdminData: Component mounted, loading data...');
+      console.log('useAdminData: Initial load triggered');
       loadData(true);
     }
   }, [loadData, hasInitialized]);
 
-  // Auto-refresh data periodically but less frequently
-  useEffect(() => {
-    if (!hasInitialized) return;
-
-    const interval = setInterval(() => {
-      if (!isLoading && !isRetrying) {
-        console.log('useAdminData: Auto-refresh triggered');
-        loadData(false);
-      }
-    }, REFRESH_INTERVAL);
-
-    return () => clearInterval(interval);
-  }, [isLoading, isRetrying, hasInitialized, loadData]);
-
-  console.log('useAdminData: Current state - printJobs:', printJobs.length, 'feedback:', feedback.length, 'isLoading:', isLoading, 'hasInitialized:', hasInitialized);
+  console.log('useAdminData: Current state - printJobs:', printJobs.length, 'feedback:', feedback.length, 'isLoading:', isLoading);
 
   return {
     printJobs,
@@ -121,7 +121,6 @@ export const useAdminData = () => {
     updateJobStatus,
     deleteJob,
     deleteFeedback,
-    setSelectedJob,
-    shouldRefetchData
+    setSelectedJob
   };
 };

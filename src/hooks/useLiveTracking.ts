@@ -1,36 +1,46 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useOnlineUsers } from './useOnlineUsers';
 
 export const useLiveTracking = (pageName?: string) => {
   const { onlineCount, isConnected, peakCount, milestones } = useOnlineUsers();
+  const lastActivityRef = useRef<number>(0);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Track page views and user activity
+    const currentPage = pageName || window.location.pathname;
+    
+    // Simple activity tracking without throttling initially
     const trackActivity = () => {
-      console.log(`Live tracking active on ${pageName || window.location.pathname}`);
+      const currentTime = Date.now();
+      lastActivityRef.current = currentTime;
+      console.log(`Live tracking: ${currentPage} - ${onlineCount} users online`);
     };
 
-    // Track when user becomes active/inactive
+    // Track activity on visibility change
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        console.log('User became active');
         trackActivity();
       }
     };
 
-    // Set up tracking
+    // Initial tracking
     trackActivity();
+    
+    // Set up event listeners
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Track periodic activity
-    const interval = setInterval(trackActivity, 30000); // Every 30 seconds
+    // Set up interval for periodic tracking (less frequent)
+    intervalRef.current = setInterval(trackActivity, 120000); // Every 2 minutes
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
     };
-  }, [pageName]);
+  }, [pageName, onlineCount]);
 
   return {
     onlineCount,
