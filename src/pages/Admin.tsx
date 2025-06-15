@@ -1,22 +1,21 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminTabs } from '@/components/admin/AdminTabs';
+import { NotificationManager } from '@/components/admin/NotificationManager';
 import { SearchProvider } from '@/components/admin/AdminSearch';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { useAdminData } from '@/hooks/useAdminData';
 import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-const AdminContent = () => {
+const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showFullFeatures, setShowFullFeatures] = useState(false);
   const isMobile = useIsMobile();
   
-  // Enable live tracking for admin page - simplified
+  // Enable live tracking for admin page
   useLiveTracking('admin');
   
   const {
@@ -32,16 +31,7 @@ const AdminContent = () => {
     setSelectedJob
   } = useAdminData();
 
-  // Show full features after initial load is complete with fallback
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowFullFeatures(true);
-    }, 2000); // Show features after 2 seconds regardless of loading state
-    
-    return () => clearTimeout(timer);
-  }, []);
-
-  console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading, 'showFullFeatures:', showFullFeatures);
+  console.log('Admin render - Print jobs:', printJobs.length, 'Feedback:', feedback.length);
 
   if (!isAuthenticated) {
     return (
@@ -54,26 +44,24 @@ const AdminContent = () => {
   return (
     <SearchProvider>
       <MobileLayout>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30">
           <AdminHeader 
             onLogout={() => setIsAuthenticated(false)}
             isRetrying={isRetrying}
             onRefresh={loadData}
           />
 
-          {/* Show monitor after delay to prevent loading issues */}
-          {showFullFeatures && (
-            <OnlineUsersMonitor 
-              showMilestones={true}
-              className="admin-monitor"
-            />
-          )}
+          {/* Admin Live Monitor with Milestones */}
+          <OnlineUsersMonitor 
+            showMilestones={true}
+            className="admin-monitor"
+          />
 
           <div className={`max-w-7xl mx-auto safe-area-inset ${
             isMobile ? 'px-2 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
           }`}>
             <div className={isMobile ? 'mb-6' : 'mb-8'}>
-              <h1 className={`font-bold text-gray-900 ${
+              <h1 className={`font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent ${
                 isMobile ? 'text-2xl' : 'text-3xl'
               }`}>
                 Dashboard Overview
@@ -84,9 +72,14 @@ const AdminContent = () => {
               {isLoading && (
                 <div className="mt-2 text-sm text-blue-600 flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  Loading dashboard...
+                  Loading data...
                 </div>
               )}
+            </div>
+
+            {/* Add Notification Manager */}
+            <div className={isMobile ? 'mb-4' : 'mb-6'}>
+              <NotificationManager />
             </div>
 
             <AdminTabs
@@ -104,31 +97,6 @@ const AdminContent = () => {
         </div>
       </MobileLayout>
     </SearchProvider>
-  );
-};
-
-const Admin = () => {
-  return (
-    <ErrorBoundary fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Admin Panel Error
-          </h2>
-          <p className="text-gray-600 mb-4">
-            The admin panel encountered an error. Please refresh the page.
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Refresh Page
-          </button>
-        </div>
-      </div>
-    }>
-      <AdminContent />
-    </ErrorBoundary>
   );
 };
 
