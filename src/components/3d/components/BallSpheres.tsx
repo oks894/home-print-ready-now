@@ -12,13 +12,15 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
   const innerSphereRef = useRef<THREE.Mesh>(null);
   const imageRef = useRef<THREE.Mesh>(null);
 
-  // Load the uploaded image with error handling
-  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/5ca8915a-acb5-4262-a94c-47ae0bc196f0.png');
+  // Load the new uploaded image
+  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/41429559-f828-40dd-9799-33dc1eedc3c2.png');
 
-  // Ensure texture is properly configured
+  // Configure texture for better visibility
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.flipY = false;
+  texture.minFilter = THREE.LinearFilter;
+  texture.magFilter = THREE.LinearFilter;
 
   useFrame((state, delta) => {
     if (innerSphereRef.current) {
@@ -36,7 +38,7 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
 
   return (
     <>
-      {/* Outer mystical sphere - more transparent to see inside clearly */}
+      {/* Outer mystical sphere - transparent to see inside clearly */}
       <mesh ref={ref}>
         <sphereGeometry args={[1.6, 128, 128]} />
         <meshPhysicalMaterial
@@ -56,20 +58,22 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
       </mesh>
       
       {/* Image texture - clearly visible inside the crystal ball */}
-      <mesh ref={imageRef} scale={[1.2, 1.2, 1.2]}>
-        <sphereGeometry args={[1.25, 64, 64]} />
+      <mesh ref={imageRef} scale={[1.3, 1.3, 1.3]}>
+        <sphereGeometry args={[1.2, 64, 64]} />
         <meshStandardMaterial
           map={texture}
           transparent={false}
           opacity={1.0}
           side={THREE.DoubleSide}
-          emissive={isGlowing ? "#ffffff" : "#222222"}
-          emissiveIntensity={isGlowing ? 0.3 : 0.1}
+          emissive={isGlowing ? "#ffffff" : "#444444"}
+          emissiveIntensity={isGlowing ? 0.4 : 0.2}
           color="#ffffff"
+          metalness={0}
+          roughness={0.3}
         />
       </mesh>
       
-      {/* Inner glowing core - much smaller and more subtle */}
+      {/* Inner glowing core - smaller and subtle */}
       <mesh ref={innerSphereRef}>
         <sphereGeometry args={[0.3, 64, 64]} />
         <meshPhysicalMaterial
