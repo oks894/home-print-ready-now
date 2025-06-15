@@ -109,7 +109,7 @@ const AdminContent = () => {
                   toast({
                     title: "Order deleted",
                     description: "The print job was successfully deleted.",
-                    variant: "success",
+                    variant: "default",
                   });
                   // Refresh data after deletion
                   await loadData();
