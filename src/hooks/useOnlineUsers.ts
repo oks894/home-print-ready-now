@@ -8,6 +8,16 @@ interface Milestone {
   timestamp: number;
 }
 
+// Utility to get/save a persistent user ID for presence
+function getPresenceUserId() {
+  let uid = localStorage.getItem('presence_uid');
+  if (!uid) {
+    uid = `user_${Math.random().toString(36).slice(2)}_${Date.now()}`;
+    localStorage.setItem('presence_uid', uid);
+  }
+  return uid;
+}
+
 export const useOnlineUsers = () => {
   const [onlineCount, setOnlineCount] = useState(1);
   const [isConnected, setIsConnected] = useState(false);
@@ -16,17 +26,19 @@ export const useOnlineUsers = () => {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const isInitializedRef = useRef(false);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const userId = useRef(getPresenceUserId());
 
   const cleanup = () => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
-    
     if (channelRef.current) {
       try {
         channelRef.current.untrack().catch(() => {});
         supabase.removeChannel(channelRef.current);
+        // Enhanced log for debugging
+        console.info('useOnlineUsers: Channel cleanup complete');
       } catch (error) {
         console.warn('useOnlineUsers: Cleanup warning:', error);
       }
@@ -38,31 +50,29 @@ export const useOnlineUsers = () => {
     cleanup();
 
     try {
-      // Use a simpler channel ID
       const channelId = `online_users`;
       channelRef.current = supabase.channel(channelId);
 
       const userStatus = {
-        user_id: `user_${Date.now()}`,
+        user_id: userId.current,
         online_at: new Date().toISOString(),
         page: window.location.pathname,
       };
 
-      console.log('useOnlineUsers: Connecting to presence...');
+      // Logging for debugging reconnections & errors
+      console.log('[useOnlineUsers] Attempting to join presence:', userStatus);
 
       channelRef.current
         .on('presence', { event: 'sync' }, () => {
           if (channelRef.current) {
             const newState = channelRef.current.presenceState();
             const count = Math.max(Object.keys(newState).length, 1);
-            
+
             setOnlineCount(count);
             setIsConnected(true);
-            
-            // Update peak count
-            setPeakCount(prev => Math.max(prev, count));
 
-            // Check for milestones
+            setPeakCount(prev => Math.max(prev, count));
+            // Milestone logic
             if (count % 10 === 0 && count > 0) {
               const milestoneThresholds = [10, 25, 50, 100];
               milestoneThresholds.forEach(threshold => {
@@ -77,46 +87,38 @@ export const useOnlineUsers = () => {
                 }
               });
             }
-            
-            console.log('useOnlineUsers: Synced, online count:', count);
+
+            console.debug('[useOnlineUsers] Presence synced - count:', count, 'state:', newState);
           }
         })
-        .on('presence', { event: 'join' }, () => {
-          console.log('useOnlineUsers: User joined');
+        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+          console.log('[useOnlineUsers] User joined:', key, newPresences);
         })
-        .on('presence', { event: 'leave' }, () => {
-          console.log('useOnlineUsers: User left');
+        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+          console.log('[useOnlineUsers] User left:', key, leftPresences);
         })
         .subscribe(async (status) => {
-          console.log('useOnlineUsers: Status:', status);
-          
+          console.log('[useOnlineUsers] Channel status:', status);
           if (status === 'SUBSCRIBED' && channelRef.current) {
             try {
               await channelRef.current.track(userStatus);
               setIsConnected(true);
-              console.log('useOnlineUsers: Successfully tracking presence');
+              console.log('[useOnlineUsers] Successfully tracking presence');
             } catch (error) {
-              console.error('useOnlineUsers: Track error:', error);
+              console.error('[useOnlineUsers] Track error:', error);
               setIsConnected(false);
-              // Retry connection after a delay
-              reconnectTimeoutRef.current = setTimeout(() => {
-                connectToPresence();
-              }, 3000);
+              reconnectTimeoutRef.current = setTimeout(connectToPresence, 3000);
             }
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-            console.warn('useOnlineUsers: Connection issue:', status);
             setIsConnected(false);
-            // Retry connection after a delay
-            reconnectTimeoutRef.current = setTimeout(() => {
-              connectToPresence();
-            }, 3000);
+            reconnectTimeoutRef.current = setTimeout(connectToPresence, 3000);
+            console.warn('[useOnlineUsers] Connection lost, will retry in 3s:', status);
           }
         });
 
     } catch (error) {
-      console.error('useOnlineUsers: Setup error:', error);
+      console.error('[useOnlineUsers] Setup error:', error);
       setIsConnected(false);
-      // Fallback to offline mode
       setOnlineCount(1);
     }
   };
@@ -125,14 +127,13 @@ export const useOnlineUsers = () => {
     if (isInitializedRef.current) return;
     isInitializedRef.current = true;
 
-    // Load persisted data
+    // Persisted data load
     const savedPeakCount = localStorage.getItem('online_users_peak');
     const savedMilestones = localStorage.getItem('online_users_milestones');
-    
+
     if (savedPeakCount) {
       setPeakCount(parseInt(savedPeakCount, 10));
     }
-    
     if (savedMilestones) {
       try {
         setMilestones(JSON.parse(savedMilestones));
@@ -141,7 +142,6 @@ export const useOnlineUsers = () => {
       }
     }
 
-    // Start connection
     connectToPresence();
 
     return () => {
@@ -151,7 +151,7 @@ export const useOnlineUsers = () => {
     };
   }, []);
 
-  // Persist data
+  // Persist peak/milestones
   useEffect(() => {
     if (peakCount > 0) {
       localStorage.setItem('online_users_peak', peakCount.toString());
