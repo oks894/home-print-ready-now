@@ -1,10 +1,21 @@
 
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { Printer, FileText, Clock, CheckCircle, Sparkles, Zap, Star } from 'lucide-react';
 import Scene3D from './3d/Scene3D';
 import { Suspense } from 'react';
 
 const AnimatedHeroSection = () => {
+  const navigate = useNavigate();
+
+  const handleStartPrinting = () => {
+    navigate('/printing');
+  };
+
+  const handleViewGallery = () => {
+    navigate('/services');
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -153,6 +164,7 @@ const AnimatedHeroSection = () => {
             className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
           >
             <motion.button
+              onClick={handleStartPrinting}
               className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 text-white px-12 py-6 rounded-2xl font-bold text-xl shadow-2xl"
               whileHover={{ scale: 1.05, y: -5 }}
               whileTap={{ scale: 0.95 }}
@@ -167,6 +179,7 @@ const AnimatedHeroSection = () => {
             </motion.button>
             
             <motion.button
+              onClick={handleViewGallery}
               className="group bg-white/30 backdrop-blur-xl border-2 border-white/20 text-gray-800 px-12 py-6 rounded-2xl font-bold text-xl shadow-xl hover:bg-white/50 transition-all duration-300"
               whileHover={{ scale: 1.05, y: -5 }}
               whileTap={{ scale: 0.95 }}
