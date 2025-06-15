@@ -33,7 +33,13 @@ export const usePrintJobs = () => {
         institute: job.institute || '',
         time_slot: job.time_slot || '',
         notes: job.notes || '',
-        files: Array.isArray(job.files) ? job.files : [],
+        files: Array.isArray(job.files) ? 
+          (job.files as any[]).map(file => ({
+            name: file?.name || 'Unknown file',
+            size: file?.size || 0,
+            type: file?.type || 'application/octet-stream',
+            data: file?.data
+          })) : [],
         timestamp: job.timestamp,
         status: (job.status as PrintJob['status']) || 'pending',
         selected_services: job.selected_services || [],
