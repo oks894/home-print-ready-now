@@ -32,6 +32,19 @@ export const AdminTabsContent = ({
   onDeleteJob,
   onDeleteFeedback
 }: AdminTabsContentProps) => {
+  // Handler to delete job and clear selected job if it was deleted
+  const handleDeleteJob = async (jobId: string) => {
+    const success = await onDeleteJob(jobId);
+    if (success && selectedJob && selectedJob.id === jobId) {
+      onJobSelect(null);
+    }
+  };
+
+  // Always call async version for status update
+  const handleStatusUpdate = async (jobId: string, status: PrintJob['status']) => {
+    await onStatusUpdate(jobId, status);
+  };
+
   return (
     <>
       <TabsContent value="orders" className="space-y-4">
@@ -56,8 +69,8 @@ export const AdminTabsContent = ({
         {selectedJob ? (
           <JobDetails
             selectedJob={selectedJob}
-            onStatusUpdate={onStatusUpdate}
-            onDeleteJob={onDeleteJob}
+            onStatusUpdate={handleStatusUpdate}
+            onDeleteJob={handleDeleteJob}
           />
         ) : (
           <Card>
