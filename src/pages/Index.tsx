@@ -6,11 +6,17 @@ import Footer from '@/components/Footer';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 
-// Conditional loading for 3G optimization
-const isSlowConnection = navigator.connection && 
-  (navigator.connection.effectiveType === 'slow-2g' || 
-   navigator.connection.effectiveType === '2g' || 
-   navigator.connection.effectiveType === '3g');
+// Conditional loading for 3G optimization with proper type checking
+const getConnectionSpeed = () => {
+  const connection = (navigator as any).connection;
+  if (!connection) return 'unknown';
+  
+  return connection.effectiveType === 'slow-2g' || 
+         connection.effectiveType === '2g' || 
+         connection.effectiveType === '3g' ? 'slow' : 'fast';
+};
+
+const isSlowConnection = getConnectionSpeed() === 'slow';
 
 // Lazy load components with preload hints for faster networks
 const AnimatedHeroSection = React.lazy(() => {
