@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 
 export const usePeakCount = () => {
-  // Always define hooks at the top
   const [peakCount, setPeakCount] = useState(0);
 
   useEffect(() => {
@@ -29,12 +28,11 @@ export const usePeakCount = () => {
     }
   }, [peakCount]);
 
+  // Never call hooks in this function!
   const updatePeakCount = (currentCount: number) => {
     setPeakCount(prev => Math.max(prev, currentCount));
   };
 
-  return {
-    peakCount,
-    updatePeakCount
-  };
+  // Always return shape
+  return { peakCount, updatePeakCount };
 };

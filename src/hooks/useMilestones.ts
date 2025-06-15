@@ -8,11 +8,11 @@ interface Milestone {
 }
 
 export const useMilestones = () => {
-  const adaptiveConfig = getAdaptiveConfig();
-  // Always define hooks at the top
+  // Always declare hooks at top level
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const adaptiveConfig = getAdaptiveConfig();
 
-  // All logic runs inside effects or functions ONLY
+  // All logic in useEffect/functions, never before hooks
   useEffect(() => {
     if (!adaptiveConfig.ultraLightMode) {
       try {
@@ -39,6 +39,7 @@ export const useMilestones = () => {
     }
   }, [milestones, adaptiveConfig.ultraLightMode]);
 
+  // Only call setMilestones in this function; do not call hooks here!
   const addMilestone = (count: number) => {
     if (count % 10 === 0 && count > 0 && !adaptiveConfig.ultraLightMode) {
       setMilestones(prev => {
@@ -51,8 +52,6 @@ export const useMilestones = () => {
     }
   };
 
-  return {
-    milestones,
-    addMilestone
-  };
+  // ALWAYS return the same shape, no code before hooks above!
+  return { milestones, addMilestone };
 };
