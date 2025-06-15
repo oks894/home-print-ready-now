@@ -1,14 +1,26 @@
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { Check } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
+
+const OnlineUsersMonitor = React.lazy(() => 
+  import('@/components/OnlineUsersMonitor')
+);
 
 const Pricing = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white flex flex-col">
       <Header />
+      
+      {/* Live Monitor */}
+      <ErrorBoundary fallback={null}>
+        <Suspense fallback={null}>
+          <OnlineUsersMonitor />
+        </Suspense>
+      </ErrorBoundary>
       
       <section className="py-16 px-4 flex-1">
         <div className="max-w-6xl mx-auto">

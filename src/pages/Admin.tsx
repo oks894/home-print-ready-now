@@ -8,6 +8,7 @@ import { NotificationManager } from '@/components/admin/NotificationManager';
 import { SearchProvider } from '@/components/admin/AdminSearch';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { useAdminData } from '@/hooks/useAdminData';
+import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -43,6 +44,12 @@ const Admin = () => {
             onLogout={() => setIsAuthenticated(false)}
             isRetrying={isRetrying}
             onRefresh={loadData}
+          />
+
+          {/* Admin Live Monitor with Milestones */}
+          <OnlineUsersMonitor 
+            showMilestones={true}
+            className="admin-monitor"
           />
 
           <div className={`max-w-7xl mx-auto safe-area-inset ${

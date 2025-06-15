@@ -8,6 +8,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { SimpleLoader } from '@/components/SimpleLoader';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { getAdaptiveConfig } from '@/utils/connectionUtils';
+import { useLiveTracking } from '@/hooks/useLiveTracking';
 
 // Get adaptive configuration
 const adaptiveConfig = getAdaptiveConfig();
@@ -35,6 +36,9 @@ const OnlineUsersMonitor = React.lazy(() =>
 
 const Index = () => {
   const { animationDuration, enableHeavyAnimations, simplifiedUI, ultraLightMode } = adaptiveConfig;
+  
+  // Enable live tracking for the home page
+  useLiveTracking('home');
 
   console.log('Index: Rendering with config - ultraLightMode:', ultraLightMode, 'simplifiedUI:', simplifiedUI);
 
@@ -50,13 +54,12 @@ const Index = () => {
             <Header />
           </ErrorBoundary>
           
-          {!ultraLightMode && (
-            <ErrorBoundary fallback={null}>
-              <Suspense fallback={null}>
-                <OnlineUsersMonitor />
-              </Suspense>
-            </ErrorBoundary>
-          )}
+          {/* Always show live monitor on all pages */}
+          <ErrorBoundary fallback={null}>
+            <Suspense fallback={null}>
+              <OnlineUsersMonitor showMilestones={false} />
+            </Suspense>
+          </ErrorBoundary>
           
           <motion.main
             initial={{ opacity: 0, y: enableHeavyAnimations ? 20 : 0 }}
