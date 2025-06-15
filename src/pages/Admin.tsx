@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLogin } from '@/components/admin/AdminLogin';
@@ -12,11 +13,11 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const AdminContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showFullFeatures, setShowFullFeatures] = useState(false);
+  const [showMonitor, setShowMonitor] = useState(false);
   const isMobile = useIsMobile();
   
-  // Enable live tracking for admin page - simplified
-  useLiveTracking('admin');
+  // Enable live tracking for admin page - only after authentication
+  useLiveTracking(isAuthenticated ? 'admin' : null);
   
   const {
     printJobs,
@@ -31,21 +32,22 @@ const AdminContent = () => {
     setSelectedJob
   } = useAdminData();
 
-  // Show full features after initial load is complete with fallback
+  // Show monitor after authentication and initial load
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowFullFeatures(true);
-    }, 2000); // Show features after 2 seconds regardless of loading state
-    
-    return () => clearTimeout(timer);
-  }, []);
+    if (isAuthenticated && !isLoading) {
+      const timer = setTimeout(() => setShowMonitor(true), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated, isLoading]);
 
-  console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading, 'showFullFeatures:', showFullFeatures);
+  console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading, 'showMonitor:', showMonitor);
 
   if (!isAuthenticated) {
     return (
       <MobileLayout>
-        <AdminLogin onLogin={() => setIsAuthenticated(true)} />
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+          <AdminLogin onLogin={() => setIsAuthenticated(true)} />
+        </div>
       </MobileLayout>
     );
   }
@@ -55,13 +57,16 @@ const AdminContent = () => {
       <MobileLayout>
         <div className="min-h-screen bg-gray-50">
           <AdminHeader 
-            onLogout={() => setIsAuthenticated(false)}
+            onLogout={() => {
+              setIsAuthenticated(false);
+              setShowMonitor(false);
+            }}
             isRetrying={isRetrying}
             onRefresh={loadData}
           />
 
-          {/* Show monitor after delay to prevent loading issues - with proper admin positioning */}
-          {showFullFeatures && (
+          {/* Only show monitor after everything is ready */}
+          {showMonitor && (
             <OnlineUsersMonitor 
               showMilestones={!isMobile}
               className="admin-monitor"
@@ -83,7 +88,13 @@ const AdminContent = () => {
               {isLoading && (
                 <div className="mt-2 text-sm text-blue-600 flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  Loading dashboard...
+                  Loading dashboard data...
+                </div>
+              )}
+              {isRetrying && (
+                <div className="mt-2 text-sm text-orange-600 flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+                  Retrying connection...
                 </div>
               )}
             </div>
@@ -111,18 +122,27 @@ const Admin = () => {
     <ErrorBoundary fallback={
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
         <div className="text-center max-w-md">
+          <div className="text-6xl mb-4">⚠️</div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">
             Admin Panel Error
           </h2>
           <p className="text-gray-600 mb-4">
-            The admin panel encountered an error. Please refresh the page.
+            The admin panel encountered an error. This might be due to a connection issue.
           </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-          >
-            Refresh Page
-          </button>
+          <div className="space-y-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+            >
+              Refresh Page
+            </button>
+            <button
+              onClick={() => window.location.href = '/'}
+              className="w-full bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+            >
+              Go to Home
+            </button>
+          </div>
         </div>
       </div>
     }>
