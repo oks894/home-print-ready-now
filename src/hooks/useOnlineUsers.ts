@@ -21,7 +21,7 @@ function getPresenceUserId() {
 
 export const useOnlineUsers = () => {
   const [onlineCount, setOnlineCount] = useState(1);
-  const [isConnected, setIsConnected] = useState(true); // Default to true for immediate display
+  const [isConnected, setIsConnected] = useState(true);
   const [peakCount, setPeakCount] = useState(0);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -54,27 +54,28 @@ export const useOnlineUsers = () => {
 
   const connectToPresence = () => {
     cleanup();
-    setIsConnected(false); // Set to false when attempting connection
+    setIsConnected(false);
 
     try {
-      // Use simpler channel name for better reliability
-      const channelId = `presence_${Date.now()}`;
+      // Optimized for slow servers - use simpler channel configuration
+      const channelId = `presence_${Math.floor(Date.now() / 10000)}`; // Group connections in 10-second windows
       channelRef.current = supabase.channel(channelId, {
         config: {
           presence: {
             key: userId.current,
           },
+          broadcast: { self: false }, // Reduce bandwidth
+          postgres_changes: [], // Disable postgres changes for better performance
         },
       });
 
       const userStatus = {
         user_id: userId.current,
         online_at: new Date().toISOString(),
-        page: window.location.pathname,
         device: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) ? 'mobile' : 'desktop',
       };
 
-      console.log('[useOnlineUsers] Connecting with:', userStatus);
+      console.log('[useOnlineUsers] Connecting with optimized config:', userStatus);
 
       channelRef.current
         .on('presence', { event: 'sync' }, () => {
@@ -87,29 +88,24 @@ export const useOnlineUsers = () => {
 
             setPeakCount(prev => Math.max(prev, count));
             
-            // Milestone logic with network adaptation
-            if (count % 5 === 0 && count > 0 && !adaptiveConfig.ultraLightMode) {
-              const milestoneThresholds = [5, 10, 25, 50, 100];
-              milestoneThresholds.forEach(threshold => {
-                if (count >= threshold) {
-                  setMilestones(prev => {
-                    const exists = prev.some(m => m.count === threshold);
-                    if (!exists) {
-                      return [...prev, { count: threshold, timestamp: Date.now() }];
-                    }
-                    return prev;
-                  });
+            // Simplified milestone logic for slow servers
+            if (count % 10 === 0 && count > 0 && !adaptiveConfig.ultraLightMode) {
+              setMilestones(prev => {
+                const exists = prev.some(m => m.count === count);
+                if (!exists) {
+                  return [...prev.slice(-3), { count, timestamp: Date.now() }]; // Keep only last 3
                 }
+                return prev;
               });
             }
 
             console.debug('[useOnlineUsers] Presence synced - count:', count);
           }
         })
-        .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+        .on('presence', { event: 'join' }, ({ key }) => {
           console.log('[useOnlineUsers] User joined:', key);
         })
-        .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+        .on('presence', { event: 'leave' }, ({ key }) => {
           console.log('[useOnlineUsers] User left:', key);
         })
         .subscribe(async (status) => {
@@ -120,8 +116,8 @@ export const useOnlineUsers = () => {
               setIsConnected(true);
               console.log('[useOnlineUsers] Successfully tracking presence');
 
-              // Set up heartbeat for slow connections
-              if (adaptiveConfig.simplifiedUI || adaptiveConfig.ultraLightMode) {
+              // Optimized heartbeat for slow servers
+              if (adaptiveConfig.simplifiedUI) {
                 heartbeatRef.current = setInterval(async () => {
                   if (channelRef.current) {
                     try {
@@ -133,16 +129,17 @@ export const useOnlineUsers = () => {
                       console.warn('[useOnlineUsers] Heartbeat failed:', error);
                     }
                   }
-                }, 30000); // Every 30 seconds for slow connections
+                }, 45000); // Longer interval for slow servers
               }
             } catch (error) {
               console.error('[useOnlineUsers] Track error:', error);
               setIsConnected(false);
-              reconnectTimeoutRef.current = setTimeout(connectToPresence, 3000);
+              const retryDelay = adaptiveConfig.ultraLightMode ? 8000 : 5000; // Longer delays for slow servers
+              reconnectTimeoutRef.current = setTimeout(connectToPresence, retryDelay);
             }
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             setIsConnected(false);
-            const retryDelay = adaptiveConfig.ultraLightMode ? 5000 : 3000;
+            const retryDelay = adaptiveConfig.ultraLightMode ? 10000 : 6000; // Extended retry delays
             reconnectTimeoutRef.current = setTimeout(connectToPresence, retryDelay);
             console.warn('[useOnlineUsers] Connection lost, will retry in', retryDelay / 1000, 's:', status);
           }
@@ -152,8 +149,7 @@ export const useOnlineUsers = () => {
       console.error('[useOnlineUsers] Setup error:', error);
       setIsConnected(false);
       setOnlineCount(1);
-      // Retry connection after error
-      reconnectTimeoutRef.current = setTimeout(connectToPresence, 5000);
+      reconnectTimeoutRef.current = setTimeout(connectToPresence, 8000); // Longer initial retry
     }
   };
 
@@ -161,23 +157,26 @@ export const useOnlineUsers = () => {
     if (isInitializedRef.current) return;
     isInitializedRef.current = true;
 
-    // Persisted data load
-    const savedPeakCount = localStorage.getItem('online_users_peak');
-    const savedMilestones = localStorage.getItem('online_users_milestones');
-
-    if (savedPeakCount) {
-      setPeakCount(parseInt(savedPeakCount, 10));
-    }
-    if (savedMilestones && !adaptiveConfig.ultraLightMode) {
-      try {
-        setMilestones(JSON.parse(savedMilestones));
-      } catch (e) {
-        console.error('useOnlineUsers: Error parsing milestones:', e);
+    // Optimized data loading for slow servers
+    try {
+      const savedPeakCount = localStorage.getItem('online_users_peak');
+      if (savedPeakCount) {
+        setPeakCount(parseInt(savedPeakCount, 10));
       }
+
+      if (!adaptiveConfig.ultraLightMode) {
+        const savedMilestones = localStorage.getItem('online_users_milestones');
+        if (savedMilestones) {
+          setMilestones(JSON.parse(savedMilestones));
+        }
+      }
+    } catch (e) {
+      console.error('useOnlineUsers: Error loading saved data:', e);
     }
 
-    // Start connection immediately
-    connectToPresence();
+    // Delayed connection start for slow servers
+    const connectionDelay = adaptiveConfig.ultraLightMode ? 2000 : 1000;
+    reconnectTimeoutRef.current = setTimeout(connectToPresence, connectionDelay);
 
     return () => {
       console.log('useOnlineUsers: Cleaning up...');
@@ -186,16 +185,22 @@ export const useOnlineUsers = () => {
     };
   }, []);
 
-  // Persist peak/milestones with network adaptation
+  // Throttled persistence for slow servers
   useEffect(() => {
     if (peakCount > 0) {
-      localStorage.setItem('online_users_peak', peakCount.toString());
+      const timeoutId = setTimeout(() => {
+        localStorage.setItem('online_users_peak', peakCount.toString());
+      }, 1000);
+      return () => clearTimeout(timeoutId);
     }
   }, [peakCount]);
 
   useEffect(() => {
     if (milestones.length > 0 && !adaptiveConfig.ultraLightMode) {
-      localStorage.setItem('online_users_milestones', JSON.stringify(milestones));
+      const timeoutId = setTimeout(() => {
+        localStorage.setItem('online_users_milestones', JSON.stringify(milestones));
+      }, 2000);
+      return () => clearTimeout(timeoutId);
     }
   }, [milestones, adaptiveConfig.ultraLightMode]);
 

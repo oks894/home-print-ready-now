@@ -42,6 +42,15 @@ const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: Onl
     );
   }, [isConnected, adaptiveConfig.simplifiedUI]);
 
+  // Memoize the user count icon - use Wifi for 1 user, Users for multiple
+  const userCountIcon = useMemo(() => {
+    return onlineCount === 1 ? (
+      <Wifi className="w-4 h-4 text-blue-600" />
+    ) : (
+      <Users className="w-4 h-4 text-blue-600" />
+    );
+  }, [onlineCount]);
+
   // Desktop positioning
   const isAdminPage = window.location.pathname.includes('/admin');
   const positionClasses = useMemo(() => {
@@ -54,9 +63,14 @@ const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: Onl
     <div className={`${positionClasses} bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg px-2 py-1 shadow-sm transition-opacity duration-300 ${className}`}>
       <div className="flex items-center gap-1 text-sm">
         {connectionIcon}
-        <Users className="w-4 h-4 text-blue-600" />
+        {userCountIcon}
         <span className="font-semibold text-blue-600 min-w-[2ch] tabular-nums">{onlineCount}</span>
-        <span className="text-gray-600 text-xs">online</span>
+        
+        {/* Green dot instead of "online" text */}
+        <div className="flex items-center gap-1">
+          <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-orange-500'} ${isConnected ? 'animate-pulse' : ''}`}></div>
+        </div>
+        
         {!isConnected && (
           <span className="text-xs text-orange-500">
             {adaptiveConfig.simplifiedUI ? '...' : 'reconnecting...'}

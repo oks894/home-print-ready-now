@@ -28,13 +28,25 @@ const MobileLiveMonitor = memo(({ className = '' }: MobileLiveMonitorProps) => {
     );
   }, [isConnected]);
 
+  // Use Wifi icon for 1 user, Users for multiple
+  const userCountIcon = useMemo(() => {
+    return onlineCount === 1 ? (
+      <Wifi className="w-3 h-3 text-blue-600" />
+    ) : (
+      <Users className="w-3 h-3 text-blue-600" />
+    );
+  }, [onlineCount]);
+
   return (
     <div className={`${positionClasses} bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg px-3 py-2 shadow-sm transition-all duration-300 ${className}`}>
       <div className="flex items-center gap-2 text-xs">
         {connectionIcon}
-        <Users className="w-3 h-3 text-blue-600" />
+        {userCountIcon}
         <span className="font-semibold text-blue-600 min-w-[2ch] tabular-nums">{onlineCount}</span>
-        <span className="text-gray-600">on</span>
+        
+        {/* Green dot instead of "on" text */}
+        <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-orange-500'} ${isConnected ? 'animate-pulse' : ''}`}></div>
+        
         {!isConnected && (
           <span className="text-orange-500">...</span>
         )}
