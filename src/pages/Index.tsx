@@ -10,6 +10,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { getAdaptiveConfig } from '@/utils/connectionUtils';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
 import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
+import LiveStatsWidget from '@/components/LiveStatsWidget';
 
 // Get adaptive configuration
 const adaptiveConfig = getAdaptiveConfig();
@@ -54,6 +55,11 @@ const Index = () => {
           {/* Always show live monitor - no lazy loading */}
           <ErrorBoundary fallback={null}>
             <OnlineUsersMonitor showMilestones={false} />
+          </ErrorBoundary>
+          
+          {/* --- LIVE stats widget visible to all users --- */}
+          <ErrorBoundary fallback={null}>
+            <LiveStatsWidget />
           </ErrorBoundary>
           
           <motion.main

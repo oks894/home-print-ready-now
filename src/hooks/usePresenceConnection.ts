@@ -22,7 +22,6 @@ export const usePresenceConnection = () => {
   const connectionAttemptsRef = useRef(0);
   const adaptiveConfig = getAdaptiveConfig();
 
-  // All logic is in callbacks, no hooks inside conditionals
   const cleanup = useCallback(() => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
@@ -65,7 +64,8 @@ export const usePresenceConnection = () => {
     onConnectionChange(false);
 
     try {
-      const channelId = `presence_${Math.floor(Date.now() / 30000)}`;
+      // Use a STATIC global presence channel so all users join the same!
+      const channelId = `presence_global`;
       channelRef.current = supabase.channel(channelId, {
         config: {
           presence: {
