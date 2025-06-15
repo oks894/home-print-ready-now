@@ -50,15 +50,15 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
         />
       </mesh>
       
-      {/* Image texture - much more prominent and closer to surface */}
-      <mesh ref={imageRef} scale={[1.4, 1.4, 1.4]}>
+      {/* Image texture - visible from inside, like looking into a crystal ball */}
+      <mesh ref={imageRef} scale={[1.3, 1.3, 1.3]}>
         <sphereGeometry args={[1.0, 64, 64]} />
         <meshStandardMaterial
           map={texture}
           transparent={false}
-          side={THREE.DoubleSide}
+          side={THREE.BackSide}
           emissive={isGlowing ? "#ffffff" : "#000000"}
-          emissiveIntensity={isGlowing ? 0.3 : 0}
+          emissiveIntensity={isGlowing ? 0.2 : 0}
         />
       </mesh>
       
