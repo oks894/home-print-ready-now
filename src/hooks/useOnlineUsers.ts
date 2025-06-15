@@ -15,6 +15,7 @@ export const useOnlineUsers = () => {
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const isInitializedRef = useRef(false);
+  const connectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Prevent multiple initializations
@@ -31,24 +32,36 @@ export const useOnlineUsers = () => {
         // Clean up any existing channel first
         if (channelRef.current) {
           console.log('useOnlineUsers: Cleaning up existing channel');
-          channelRef.current.untrack();
+          await channelRef.current.untrack();
           supabase.removeChannel(channelRef.current);
         }
 
         // Create new channel with unique identifier
-        const channelId = `online_users_${Math.random().toString(36).substring(7)}`;
+        const channelId = `online_users_${Date.now()}_${Math.random().toString(36).substring(7)}`;
         channelRef.current = supabase.channel(channelId);
 
         const userStatus = {
-          user_id: Math.random().toString(36).substring(7),
+          user_id: `user_${Date.now()}_${Math.random().toString(36).substring(7)}`,
           online_at: new Date().toISOString(),
           page: window.location.pathname,
         };
 
         console.log('useOnlineUsers: Setting up channel with status:', userStatus);
 
+        // Set connection timeout
+        connectionTimeoutRef.current = setTimeout(() => {
+          console.warn('useOnlineUsers: Connection timeout, setting fallback state');
+          setOnlineCount(1); // Show at least current user
+          setIsConnected(false);
+        }, 10000); // 10 second timeout
+
         channelRef.current
           .on('presence', { event: 'sync' }, () => {
+            if (connectionTimeoutRef.current) {
+              clearTimeout(connectionTimeoutRef.current);
+              connectionTimeoutRef.current = null;
+            }
+            
             if (channelRef.current) {
               const newState = channelRef.current.presenceState();
               const count = Object.keys(newState).length;
@@ -91,17 +104,27 @@ export const useOnlineUsers = () => {
           .subscribe(async (status) => {
             console.log('useOnlineUsers: Channel subscription status:', status);
             if (status === 'SUBSCRIBED' && channelRef.current) {
-              const trackResult = await channelRef.current.track(userStatus);
-              console.log('useOnlineUsers: Track result:', trackResult);
-            } else if (status === 'CHANNEL_ERROR') {
-              console.error('useOnlineUsers: Channel subscription error');
+              try {
+                const trackResult = await channelRef.current.track(userStatus);
+                console.log('useOnlineUsers: Track result:', trackResult);
+              } catch (error) {
+                console.error('useOnlineUsers: Track error:', error);
+                // Fallback to showing current user
+                setOnlineCount(1);
+                setIsConnected(false);
+              }
+            } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+              console.error('useOnlineUsers: Channel subscription error/timeout');
               setIsConnected(false);
+              // Show fallback count
+              setOnlineCount(1);
             }
           });
 
       } catch (error) {
         console.error('useOnlineUsers: Error initializing channel:', error);
         setIsConnected(false);
+        setOnlineCount(1); // Fallback to showing current user
       }
     };
 
@@ -126,8 +149,11 @@ export const useOnlineUsers = () => {
     // Cleanup function
     return () => {
       console.log('useOnlineUsers: Cleaning up...');
+      if (connectionTimeoutRef.current) {
+        clearTimeout(connectionTimeoutRef.current);
+      }
       if (channelRef.current) {
-        channelRef.current.untrack();
+        channelRef.current.untrack().catch(console.error);
         supabase.removeChannel(channelRef.current);
         channelRef.current = null;
       }

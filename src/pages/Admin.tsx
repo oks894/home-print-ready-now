@@ -9,8 +9,9 @@ import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { useAdminData } from '@/hooks/useAdminData';
 import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
-const Admin = () => {
+const AdminContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showFullFeatures, setShowFullFeatures] = useState(false);
   const isMobile = useIsMobile();
@@ -31,16 +32,14 @@ const Admin = () => {
     setSelectedJob
   } = useAdminData();
 
-  // Show full features after initial load is complete
+  // Show full features after initial load is complete with fallback
   useEffect(() => {
-    if (!isLoading && printJobs.length >= 0) {
-      const timer = setTimeout(() => {
-        setShowFullFeatures(true);
-      }, 1000); // Small delay to ensure smooth loading
-      
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading, printJobs.length]);
+    const timer = setTimeout(() => {
+      setShowFullFeatures(true);
+    }, 2000); // Show features after 2 seconds regardless of loading state
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading, 'showFullFeatures:', showFullFeatures);
 
@@ -62,7 +61,7 @@ const Admin = () => {
             onRefresh={loadData}
           />
 
-          {/* Only show monitor after full features are loaded */}
+          {/* Show monitor after delay to prevent loading issues */}
           {showFullFeatures && (
             <OnlineUsersMonitor 
               showMilestones={true}
@@ -105,6 +104,31 @@ const Admin = () => {
         </div>
       </MobileLayout>
     </SearchProvider>
+  );
+};
+
+const Admin = () => {
+  return (
+    <ErrorBoundary fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Admin Panel Error
+          </h2>
+          <p className="text-gray-600 mb-4">
+            The admin panel encountered an error. Please refresh the page.
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    }>
+      <AdminContent />
+    </ErrorBoundary>
   );
 };
 

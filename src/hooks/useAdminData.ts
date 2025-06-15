@@ -35,20 +35,46 @@ export const useAdminData = () => {
     setIsLoading(true);
     
     try {
-      // Load data with timeout to prevent hanging
-      const loadPromise = Promise.allSettled([loadPrintJobs(), loadFeedback()]);
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Load timeout')), 10000)
-      );
+      // Load data with shorter timeout and better error handling
+      const results = await Promise.allSettled([
+        Promise.race([
+          loadPrintJobs(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Print jobs timeout')), 5000)
+          )
+        ]),
+        Promise.race([
+          loadFeedback(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Feedback timeout')), 5000)
+          )
+        ])
+      ]);
+
+      // Check results and handle partial failures
+      const printJobsResult = results[0];
+      const feedbackResult = results[1];
+
+      if (printJobsResult.status === 'rejected') {
+        console.warn('Print jobs failed to load:', printJobsResult.reason);
+      }
       
-      await Promise.race([loadPromise, timeoutPromise]);
+      if (feedbackResult.status === 'rejected') {
+        console.warn('Feedback failed to load:', feedbackResult.reason);
+      }
+
+      // If both failed, show error
+      if (printJobsResult.status === 'rejected' && feedbackResult.status === 'rejected') {
+        throw new Error('Both print jobs and feedback failed to load');
+      }
+
       setHasInitialized(true);
       console.log('useAdminData: Admin data loaded successfully');
     } catch (error) {
       console.error('useAdminData: Failed to load data:', error);
       toast({
-        title: "Loading failed",
-        description: "Could not load admin data. Please refresh the page.",
+        title: "Partial loading failure",
+        description: "Some data may not be available. Click refresh to try again.",
         variant: "destructive"
       });
     } finally {
@@ -80,7 +106,7 @@ export const useAdminData = () => {
     await deleteFeedbackInternal(feedbackId, retryWithBackoff);
   };
 
-  // Load data on component mount - only once
+  // Load data on component mount - only once with error recovery
   useEffect(() => {
     if (!hasInitialized) {
       console.log('useAdminData: Initial load triggered');
