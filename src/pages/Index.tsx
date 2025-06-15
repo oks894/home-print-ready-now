@@ -53,7 +53,8 @@ const Index = () => {
           
           {/* Always show live monitor - no lazy loading */}
           <ErrorBoundary fallback={null}>
-            <OnlineUsersMonitor showMilestones={false} />
+            {/* The live monitor widget should NOT appear here anymore if LiveStatsWidget is used below */}
+            {/* (Remove any previous duplicate location) */}
           </ErrorBoundary>
           
           <motion.main
@@ -86,8 +87,8 @@ const Index = () => {
               </ErrorBoundary>
             )}
 
-            {/* LIVE stats widget just above the footer (horizontal layout) */}
-            <div className="flex justify-center w-full pb-4">
+            {/* Show ONLY ONE, horizontal, modern stats widget just above the footer */}
+            <div className="flex justify-center w-full pb-6">
               <LiveStatsWidget />
             </div>
           </motion.main>

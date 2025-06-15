@@ -8,42 +8,55 @@ const LiveStatsWidget: React.FC = () => {
   const { stats, isLoading: isLoadingStats } = useStats();
   const { onlineCount } = useOnlineUsers();
 
+  // Format for plus sign if nonzero
+  const totalUsersDisplay = isLoadingStats
+    ? '—'
+    : stats.totalUsers > 5
+      ? `${stats.totalUsers}+`
+      : stats.totalUsers;
+
+  const printJobsDisplay = isLoadingStats
+    ? '—'
+    : stats.totalJobs > 14
+      ? `${stats.totalJobs}+`
+      : stats.totalJobs;
+
   return (
-    <div className="relative w-full max-w-4xl bg-[#2563eb] rounded-2xl shadow-lg mx-auto flex flex-row items-center justify-between px-2 py-4 sm:py-5 sm:px-6 text-white min-h-[86px]">
+    <div className="relative w-full max-w-3xl bg-[#2563eb] rounded-xl shadow-xl mx-auto flex flex-row items-center justify-between px-3 py-5 sm:px-10 sm:py-7 text-white min-h-[92px] animate-fade-in">
       {/* LIVE Badge */}
-      <span className="absolute -top-3 left-1 sm:left-6 flex items-center gap-1 bg-green-500/90 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide z-20 shadow-md border border-green-400">
+      <span className="absolute -top-3 left-1 sm:left-6 flex items-center gap-1 bg-green-500/95 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider z-30 shadow border border-green-400 animate-pulse">
         LIVE
-        <span className="w-2 h-2 rounded-full bg-green-300 animate-pulse ml-1" />
+        <span className="w-2 h-2 rounded-full bg-green-300 animate-ping ml-1" />
       </span>
-      {/* Stats - horizontal */}
-      <div className="flex flex-1 flex-row justify-between items-center w-full relative z-10">
+      {/* Stats - horizontal layout with dividers */}
+      <div className="flex flex-1 flex-row justify-between items-center w-full relative z-20">
         {/* Happy Customers */}
-        <div className="flex flex-col items-center flex-1 basis-0 min-w-[94px]">
-          <Users className="w-7 h-7 mb-1" />
-          <span className="text-lg font-bold">{isLoadingStats ? '—' : stats.totalUsers}</span>
-          <span className="text-xs mt-1 opacity-90 whitespace-nowrap">Happy Customers</span>
+        <div className="flex flex-col items-center flex-1 min-w-[90px]">
+          <Users className="w-8 h-8 mb-2" />
+          <span className="text-2xl font-black leading-tight">{totalUsersDisplay}</span>
+          <span className="text-sm mt-1 opacity-90 whitespace-nowrap font-medium">Happy Customers</span>
         </div>
         {/* Divider */}
-        <div className="h-12 border-l border-white/60 mx-2" />
+        <div className="h-11 border-l border-white/40 mx-4" />
         {/* Average Rating */}
-        <div className="flex flex-col items-center flex-1 basis-0 min-w-[94px]">
-          <Star className="w-7 h-7 mb-1 fill-yellow-300 text-yellow-300" />
-          <span className="text-lg font-bold">
+        <div className="flex flex-col items-center flex-1 min-w-[90px]">
+          <Star className="w-8 h-8 mb-2 fill-yellow-400 text-yellow-400 drop-shadow-md" />
+          <span className="text-2xl font-black leading-tight">
             {isLoadingStats
               ? '—'
               : stats.averageRating > 0
                 ? stats.averageRating.toFixed(1)
                 : '5.0'}
           </span>
-          <span className="text-xs mt-1 opacity-90 whitespace-nowrap">Average Rating</span>
+          <span className="text-sm mt-1 opacity-90 whitespace-nowrap font-medium">Average Rating</span>
         </div>
         {/* Divider */}
-        <div className="h-12 border-l border-white/60 mx-2" />
+        <div className="h-11 border-l border-white/40 mx-4" />
         {/* Print Jobs */}
-        <div className="flex flex-col items-center flex-1 basis-0 min-w-[94px]">
-          <FileText className="w-7 h-7 mb-1" />
-          <span className="text-lg font-bold">{isLoadingStats ? '—' : stats.totalJobs}</span>
-          <span className="text-xs mt-1 opacity-90 whitespace-nowrap">Print Jobs</span>
+        <div className="flex flex-col items-center flex-1 min-w-[90px]">
+          <FileText className="w-8 h-8 mb-2" />
+          <span className="text-2xl font-black leading-tight">{printJobsDisplay}</span>
+          <span className="text-sm mt-1 opacity-90 whitespace-nowrap font-medium">Print Jobs</span>
         </div>
       </div>
     </div>
