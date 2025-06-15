@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -63,6 +64,16 @@ export const usePrintJobSubmission = () => {
     });
     
     return Promise.all(filePromises);
+  };
+
+  const copyToClipboard = async (text: string): Promise<boolean> => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+      return false;
+    }
   };
 
   const submitPrintJob = async (
@@ -132,9 +143,12 @@ export const usePrintJobSubmission = () => {
         return null;
       }
 
+      // Auto-copy tracking ID to clipboard
+      const copySuccess = await copyToClipboard(newTrackingId);
+      
       toast({
-        title: "Order Submitted!",
-        description: `Your tracking ID is ${newTrackingId}. Total: ₹${totalAmount.toFixed(2)}${totalAmount > 0 && selectedServices.some(s => s.quantity >= 50) ? ' (Bulk discount applied!)' : ''}`,
+        title: "Order Submitted Successfully!",
+        description: `Your tracking ID is ${newTrackingId}${copySuccess ? ' (Auto-copied!)' : ''}. You will receive a call within 30 minutes to confirm your order. Total: ₹${totalAmount.toFixed(2)}${totalAmount > 0 && selectedServices.some(s => s.quantity >= 50) ? ' (Bulk discount applied!)' : ''}`,
       });
 
       return newTrackingId;

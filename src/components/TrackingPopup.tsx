@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { X, ExternalLink, RotateCcw, CheckCircle, Package, Phone } from 'lucide-react';
+import { X, ExternalLink, RotateCcw, CheckCircle, Package, Phone, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -21,7 +21,7 @@ const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) 
     if (trackingId) {
       navigator.clipboard.writeText(trackingId).then(() => {
         toast({
-          title: "Tracking ID Copied!",
+          title: "Tracking ID Auto-Copied!",
           description: "Your tracking ID has been automatically copied to clipboard.",
         });
       }).catch(() => {
@@ -77,38 +77,49 @@ const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) 
               Order Submitted Successfully!
             </CardTitle>
             <CardDescription className="text-base text-gray-600 mt-2">
-              Your print job has been received and is being processed
+              Your print job has been received and tracking ID auto-copied
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-6">
+            {/* Call Notification */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.25 }}
+              className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200"
+            >
+              <div className="flex items-center gap-3 mb-2">
+                <Phone className="w-5 h-5 text-blue-600" />
+                <span className="font-semibold text-gray-700">Confirmation Call</span>
+                <Clock className="w-4 h-4 text-blue-500" />
+              </div>
+              <p className="text-blue-700 font-medium">You will receive a call within 30 minutes to confirm your order details</p>
+            </motion.div>
+
             {/* Tracking ID Display */}
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.3 }}
-              className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-xl border border-blue-200"
+              className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-xl border border-purple-200"
             >
               <div className="flex items-center gap-3 mb-2">
-                <Package className="w-5 h-5 text-blue-600" />
+                <Package className="w-5 h-5 text-purple-600" />
                 <span className="font-semibold text-gray-700">Your Tracking ID</span>
                 <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">Auto-copied!</span>
               </div>
               <div className="flex items-center justify-between bg-white p-3 rounded-lg border">
-                <span className="font-mono text-lg font-bold text-blue-600">{trackingId}</span>
+                <span className="font-mono text-lg font-bold text-purple-600">{trackingId}</span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleCopy}
-                  className="text-xs hover:bg-blue-50"
+                  className="text-xs hover:bg-purple-50"
                 >
                   Copy Again
                 </Button>
               </div>
-              <p className="text-sm text-gray-500 mt-2 flex items-center gap-1">
-                <Phone className="w-4 h-4" />
-                Format: Phone number + letter (e.g., 9876543210A)
-              </p>
             </motion.div>
 
             {/* What's Next */}
@@ -122,7 +133,7 @@ const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) 
               <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                  <span>We'll call you shortly to confirm your order details</span>
+                  <span>We'll call you within 30 minutes to confirm details</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
@@ -166,7 +177,7 @@ const TrackingPopup = ({ trackingId, onClose, onNewOrder }: TrackingPopupProps) 
               className="text-xs text-gray-500 text-center"
             >
               Save your tracking ID to check your order status anytime
-            </motion.p>
+            </p>
           </CardContent>
         </Card>
       </motion.div>

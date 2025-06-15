@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -17,8 +17,12 @@ const SuccessMessage = ({ onNewOrder }: SuccessMessageProps) => {
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
           <CardTitle className="text-2xl text-green-600">Order Confirmed!</CardTitle>
-          <CardDescription>
-            Your print job has been submitted successfully. We'll call you to confirm the details.
+          <CardDescription className="space-y-2">
+            <p>Your print job has been submitted successfully and tracking ID has been auto-copied.</p>
+            <div className="flex items-center justify-center gap-2 text-blue-600 font-medium">
+              <Phone className="w-4 h-4" />
+              <span>You will receive a call within 30 minutes</span>
+            </div>
           </CardDescription>
         </CardHeader>
         <CardContent>
