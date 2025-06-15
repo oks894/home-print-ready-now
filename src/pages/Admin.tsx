@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLogin } from '@/components/admin/AdminLogin';
@@ -61,10 +60,10 @@ const AdminContent = () => {
             onRefresh={loadData}
           />
 
-          {/* Show monitor after delay to prevent loading issues */}
+          {/* Show monitor after delay to prevent loading issues - with proper admin positioning */}
           {showFullFeatures && (
             <OnlineUsersMonitor 
-              showMilestones={true}
+              showMilestones={!isMobile}
               className="admin-monitor"
             />
           )}

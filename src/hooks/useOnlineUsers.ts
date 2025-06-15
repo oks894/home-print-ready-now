@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
+import { getAdaptiveConfig } from '@/utils/connectionUtils';
 
 interface Milestone {
   count: number;
@@ -26,18 +27,23 @@ export const useOnlineUsers = () => {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const isInitializedRef = useRef(false);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const heartbeatRef = useRef<NodeJS.Timeout | null>(null);
   const userId = useRef(getPresenceUserId());
+  const adaptiveConfig = getAdaptiveConfig();
 
   const cleanup = () => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);
       reconnectTimeoutRef.current = null;
     }
+    if (heartbeatRef.current) {
+      clearInterval(heartbeatRef.current);
+      heartbeatRef.current = null;
+    }
     if (channelRef.current) {
       try {
         channelRef.current.untrack().catch(() => {});
         supabase.removeChannel(channelRef.current);
-        // Enhanced log for debugging
         console.info('useOnlineUsers: Channel cleanup complete');
       } catch (error) {
         console.warn('useOnlineUsers: Cleanup warning:', error);
@@ -50,17 +56,24 @@ export const useOnlineUsers = () => {
     cleanup();
 
     try {
-      const channelId = `online_users`;
-      channelRef.current = supabase.channel(channelId);
+      // Use simpler channel name for better reliability
+      const channelId = `presence`;
+      channelRef.current = supabase.channel(channelId, {
+        config: {
+          presence: {
+            key: userId.current,
+          },
+        },
+      });
 
       const userStatus = {
         user_id: userId.current,
         online_at: new Date().toISOString(),
         page: window.location.pathname,
+        device: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) ? 'mobile' : 'desktop',
       };
 
-      // Logging for debugging reconnections & errors
-      console.log('[useOnlineUsers] Attempting to join presence:', userStatus);
+      console.log('[useOnlineUsers] Connecting with:', userStatus);
 
       channelRef.current
         .on('presence', { event: 'sync' }, () => {
@@ -72,9 +85,10 @@ export const useOnlineUsers = () => {
             setIsConnected(true);
 
             setPeakCount(prev => Math.max(prev, count));
-            // Milestone logic
-            if (count % 10 === 0 && count > 0) {
-              const milestoneThresholds = [10, 25, 50, 100];
+            
+            // Milestone logic with network adaptation
+            if (count % 5 === 0 && count > 0 && !adaptiveConfig.ultraLightMode) {
+              const milestoneThresholds = [5, 10, 25, 50, 100];
               milestoneThresholds.forEach(threshold => {
                 if (count >= threshold) {
                   setMilestones(prev => {
@@ -88,14 +102,14 @@ export const useOnlineUsers = () => {
               });
             }
 
-            console.debug('[useOnlineUsers] Presence synced - count:', count, 'state:', newState);
+            console.debug('[useOnlineUsers] Presence synced - count:', count);
           }
         })
         .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-          console.log('[useOnlineUsers] User joined:', key, newPresences);
+          console.log('[useOnlineUsers] User joined:', key);
         })
         .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-          console.log('[useOnlineUsers] User left:', key, leftPresences);
+          console.log('[useOnlineUsers] User left:', key);
         })
         .subscribe(async (status) => {
           console.log('[useOnlineUsers] Channel status:', status);
@@ -104,15 +118,32 @@ export const useOnlineUsers = () => {
               await channelRef.current.track(userStatus);
               setIsConnected(true);
               console.log('[useOnlineUsers] Successfully tracking presence');
+
+              // Set up heartbeat for slow connections
+              if (adaptiveConfig.simplifiedUI || adaptiveConfig.ultraLightMode) {
+                heartbeatRef.current = setInterval(async () => {
+                  if (channelRef.current) {
+                    try {
+                      await channelRef.current.track({
+                        ...userStatus,
+                        last_heartbeat: new Date().toISOString(),
+                      });
+                    } catch (error) {
+                      console.warn('[useOnlineUsers] Heartbeat failed:', error);
+                    }
+                  }
+                }, 30000); // Every 30 seconds for slow connections
+              }
             } catch (error) {
               console.error('[useOnlineUsers] Track error:', error);
               setIsConnected(false);
-              reconnectTimeoutRef.current = setTimeout(connectToPresence, 3000);
+              reconnectTimeoutRef.current = setTimeout(connectToPresence, adaptiveConfig.ultraLightMode ? 10000 : 3000);
             }
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             setIsConnected(false);
-            reconnectTimeoutRef.current = setTimeout(connectToPresence, 3000);
-            console.warn('[useOnlineUsers] Connection lost, will retry in 3s:', status);
+            const retryDelay = adaptiveConfig.ultraLightMode ? 10000 : adaptiveConfig.simplifiedUI ? 5000 : 3000;
+            reconnectTimeoutRef.current = setTimeout(connectToPresence, retryDelay);
+            console.warn('[useOnlineUsers] Connection lost, will retry in', retryDelay / 1000, 's:', status);
           }
         });
 
@@ -134,7 +165,7 @@ export const useOnlineUsers = () => {
     if (savedPeakCount) {
       setPeakCount(parseInt(savedPeakCount, 10));
     }
-    if (savedMilestones) {
+    if (savedMilestones && !adaptiveConfig.ultraLightMode) {
       try {
         setMilestones(JSON.parse(savedMilestones));
       } catch (e) {
@@ -142,7 +173,9 @@ export const useOnlineUsers = () => {
       }
     }
 
-    connectToPresence();
+    // Delay connection for ultra light mode
+    const connectionDelay = adaptiveConfig.ultraLightMode ? 2000 : 0;
+    setTimeout(connectToPresence, connectionDelay);
 
     return () => {
       console.log('useOnlineUsers: Cleaning up...');
@@ -151,7 +184,7 @@ export const useOnlineUsers = () => {
     };
   }, []);
 
-  // Persist peak/milestones
+  // Persist peak/milestones with network adaptation
   useEffect(() => {
     if (peakCount > 0) {
       localStorage.setItem('online_users_peak', peakCount.toString());
@@ -159,10 +192,10 @@ export const useOnlineUsers = () => {
   }, [peakCount]);
 
   useEffect(() => {
-    if (milestones.length > 0) {
+    if (milestones.length > 0 && !adaptiveConfig.ultraLightMode) {
       localStorage.setItem('online_users_milestones', JSON.stringify(milestones));
     }
-  }, [milestones]);
+  }, [milestones, adaptiveConfig.ultraLightMode]);
 
   return { onlineCount, isConnected, peakCount, milestones };
 };

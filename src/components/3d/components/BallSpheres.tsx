@@ -12,8 +12,8 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
   const innerSphereRef = useRef<THREE.Mesh>(null);
   const imageRef = useRef<THREE.Mesh>(null);
 
-  // Load the new artistic image
-  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/2830db9f-9823-4e67-b6a8-db96f3368687.png');
+  // Load the new uploaded image
+  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/5a82c3c0-b32c-4317-9740-f2109955472e.png');
 
   useFrame((state, delta) => {
     if (innerSphereRef.current) {
@@ -31,7 +31,7 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
 
   return (
     <>
-      {/* Outer mystical sphere - more transparent */}
+      {/* Outer mystical sphere - more transparent to see inside clearly */}
       <mesh ref={ref}>
         <sphereGeometry args={[1.6, 128, 128]} />
         <meshPhysicalMaterial
@@ -42,24 +42,24 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
           roughness={0.05}
           clearcoat={1}
           clearcoatRoughness={0}
-          transmission={0.8}
-          thickness={0.2}
+          transmission={0.9}
+          thickness={0.1}
           ior={1.5}
           transparent
-          opacity={0.2}
+          opacity={0.15}
         />
       </mesh>
       
-      {/* Image texture - visible as if looking inside the crystal ball */}
-      <mesh ref={imageRef} scale={[1.1, 1.1, 1.1]}>
-        <sphereGeometry args={[1.2, 64, 64]} />
+      {/* Image texture - clearly visible inside the crystal ball */}
+      <mesh ref={imageRef} scale={[1.0, 1.0, 1.0]}>
+        <sphereGeometry args={[1.3, 64, 64]} />
         <meshStandardMaterial
           map={texture}
-          transparent={true}
+          transparent={false}
           opacity={1.0}
-          side={THREE.DoubleSide}
+          side={THREE.FrontSide}
           emissive={isGlowing ? "#ffffff" : "#000000"}
-          emissiveIntensity={isGlowing ? 0.1 : 0}
+          emissiveIntensity={isGlowing ? 0.2 : 0}
         />
       </mesh>
       
