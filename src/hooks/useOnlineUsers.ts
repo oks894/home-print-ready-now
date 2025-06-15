@@ -65,7 +65,6 @@ export const useOnlineUsers = () => {
             key: userId.current,
           },
           broadcast: { self: false }, // Reduce bandwidth
-          postgres_changes: [], // Disable postgres changes for better performance
         },
       });
 
