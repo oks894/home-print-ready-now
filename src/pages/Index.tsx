@@ -9,6 +9,7 @@ import { SimpleLoader } from '@/components/SimpleLoader';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { getAdaptiveConfig } from '@/utils/connectionUtils';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
+import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
 
 // Get adaptive configuration
 const adaptiveConfig = getAdaptiveConfig();
@@ -28,10 +29,6 @@ const MainContentSections = React.lazy(() =>
   import('@/components/MainContentSections').then(module => ({ 
     default: module.default 
   }))
-);
-
-const OnlineUsersMonitor = React.lazy(() => 
-  import('@/components/OnlineUsersMonitor')
 );
 
 const Index = () => {
@@ -54,11 +51,9 @@ const Index = () => {
             <Header />
           </ErrorBoundary>
           
-          {/* Always show live monitor on all pages */}
+          {/* Always show live monitor - no lazy loading */}
           <ErrorBoundary fallback={null}>
-            <Suspense fallback={null}>
-              <OnlineUsersMonitor showMilestones={false} />
-            </Suspense>
+            <OnlineUsersMonitor showMilestones={false} />
           </ErrorBoundary>
           
           <motion.main

@@ -12,8 +12,13 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
   const innerSphereRef = useRef<THREE.Mesh>(null);
   const imageRef = useRef<THREE.Mesh>(null);
 
-  // Load the new uploaded image
-  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/5a82c3c0-b32c-4317-9740-f2109955472e.png');
+  // Load the uploaded image with error handling
+  const texture = useLoader(THREE.TextureLoader, '/lovable-uploads/5ca8915a-acb5-4262-a94c-47ae0bc196f0.png');
+
+  // Ensure texture is properly configured
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.flipY = false;
 
   useFrame((state, delta) => {
     if (innerSphereRef.current) {
@@ -51,15 +56,16 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
       </mesh>
       
       {/* Image texture - clearly visible inside the crystal ball */}
-      <mesh ref={imageRef} scale={[1.0, 1.0, 1.0]}>
-        <sphereGeometry args={[1.3, 64, 64]} />
+      <mesh ref={imageRef} scale={[1.2, 1.2, 1.2]}>
+        <sphereGeometry args={[1.25, 64, 64]} />
         <meshStandardMaterial
           map={texture}
           transparent={false}
           opacity={1.0}
-          side={THREE.FrontSide}
-          emissive={isGlowing ? "#ffffff" : "#000000"}
-          emissiveIntensity={isGlowing ? 0.2 : 0}
+          side={THREE.DoubleSide}
+          emissive={isGlowing ? "#ffffff" : "#222222"}
+          emissiveIntensity={isGlowing ? 0.3 : 0.1}
+          color="#ffffff"
         />
       </mesh>
       

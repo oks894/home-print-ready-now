@@ -15,10 +15,8 @@ const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: Onl
   const isMobile = useIsMobile();
   const adaptiveConfig = getAdaptiveConfig();
 
-  // Don't show in ultra light mode to save resources
-  if (adaptiveConfig.ultraLightMode) {
-    return null;
-  }
+  // Always show the monitor - don't hide it
+  console.log('OnlineUsersMonitor rendering:', { onlineCount, isConnected, adaptiveConfig });
 
   // Memoize milestone display to prevent unnecessary re-renders
   const milestoneDisplay = useMemo(() => {
@@ -44,12 +42,12 @@ const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: Onl
   const positionClasses = useMemo(() => {
     if (isAdminPage) {
       return isMobile 
-        ? 'fixed top-24 right-2 z-[60]' // Higher z-index and lower position for admin mobile
-        : 'fixed top-20 right-4 z-[60]'; // Higher z-index for admin desktop
+        ? 'fixed top-32 right-2 z-[70]' // Even higher z-index and lower position for admin mobile
+        : 'fixed top-28 right-4 z-[70]'; // Even higher z-index for admin desktop
     }
     return isMobile 
-      ? 'fixed top-16 right-2 z-40' // Standard position for mobile
-      : 'fixed top-20 right-4 z-40'; // Standard position for desktop
+      ? 'fixed top-16 right-2 z-50' // Higher z-index for mobile
+      : 'fixed top-20 right-4 z-50'; // Higher z-index for desktop
   }, [isAdminPage, isMobile]);
 
   return (

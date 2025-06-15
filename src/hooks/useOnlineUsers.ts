@@ -21,7 +21,7 @@ function getPresenceUserId() {
 
 export const useOnlineUsers = () => {
   const [onlineCount, setOnlineCount] = useState(1);
-  const [isConnected, setIsConnected] = useState(false);
+  const [isConnected, setIsConnected] = useState(true); // Default to true for immediate display
   const [peakCount, setPeakCount] = useState(0);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const channelRef = useRef<RealtimeChannel | null>(null);
@@ -54,10 +54,11 @@ export const useOnlineUsers = () => {
 
   const connectToPresence = () => {
     cleanup();
+    setIsConnected(false); // Set to false when attempting connection
 
     try {
       // Use simpler channel name for better reliability
-      const channelId = `presence`;
+      const channelId = `presence_${Date.now()}`;
       channelRef.current = supabase.channel(channelId, {
         config: {
           presence: {
@@ -137,11 +138,11 @@ export const useOnlineUsers = () => {
             } catch (error) {
               console.error('[useOnlineUsers] Track error:', error);
               setIsConnected(false);
-              reconnectTimeoutRef.current = setTimeout(connectToPresence, adaptiveConfig.ultraLightMode ? 10000 : 3000);
+              reconnectTimeoutRef.current = setTimeout(connectToPresence, 3000);
             }
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
             setIsConnected(false);
-            const retryDelay = adaptiveConfig.ultraLightMode ? 10000 : adaptiveConfig.simplifiedUI ? 5000 : 3000;
+            const retryDelay = adaptiveConfig.ultraLightMode ? 5000 : 3000;
             reconnectTimeoutRef.current = setTimeout(connectToPresence, retryDelay);
             console.warn('[useOnlineUsers] Connection lost, will retry in', retryDelay / 1000, 's:', status);
           }
@@ -151,6 +152,8 @@ export const useOnlineUsers = () => {
       console.error('[useOnlineUsers] Setup error:', error);
       setIsConnected(false);
       setOnlineCount(1);
+      // Retry connection after error
+      reconnectTimeoutRef.current = setTimeout(connectToPresence, 5000);
     }
   };
 
@@ -173,9 +176,8 @@ export const useOnlineUsers = () => {
       }
     }
 
-    // Delay connection for ultra light mode
-    const connectionDelay = adaptiveConfig.ultraLightMode ? 2000 : 0;
-    setTimeout(connectToPresence, connectionDelay);
+    // Start connection immediately
+    connectToPresence();
 
     return () => {
       console.log('useOnlineUsers: Cleaning up...');
