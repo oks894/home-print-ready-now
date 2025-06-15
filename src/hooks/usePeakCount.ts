@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 
 export const usePeakCount = () => {
+  // Always define hooks at the top
   const [peakCount, setPeakCount] = useState(0);
 
-  // Load saved peak count on mount
   useEffect(() => {
     try {
       const savedPeakCount = localStorage.getItem('online_users_peak');
@@ -16,7 +16,6 @@ export const usePeakCount = () => {
     }
   }, []);
 
-  // Save peak count with throttling
   useEffect(() => {
     if (peakCount > 0) {
       const timeoutId = setTimeout(() => {

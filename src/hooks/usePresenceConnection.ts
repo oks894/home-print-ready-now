@@ -22,6 +22,7 @@ export const usePresenceConnection = () => {
   const connectionAttemptsRef = useRef(0);
   const adaptiveConfig = getAdaptiveConfig();
 
+  // All logic is in callbacks, no hooks inside conditionals
   const cleanup = useCallback(() => {
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current);

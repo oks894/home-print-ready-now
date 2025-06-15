@@ -8,10 +8,11 @@ interface Milestone {
 }
 
 export const useMilestones = () => {
-  const [milestones, setMilestones] = useState<Milestone[]>([]);
   const adaptiveConfig = getAdaptiveConfig();
+  // Always define hooks at the top
+  const [milestones, setMilestones] = useState<Milestone[]>([]);
 
-  // Load saved milestones on mount
+  // All logic runs inside effects or functions ONLY
   useEffect(() => {
     if (!adaptiveConfig.ultraLightMode) {
       try {
@@ -25,7 +26,6 @@ export const useMilestones = () => {
     }
   }, [adaptiveConfig.ultraLightMode]);
 
-  // Save milestones with throttling
   useEffect(() => {
     if (milestones.length > 0 && !adaptiveConfig.ultraLightMode) {
       const timeoutId = setTimeout(() => {

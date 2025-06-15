@@ -5,6 +5,7 @@ import { usePresenceConnection } from './usePresenceConnection';
 import { useMilestones } from './useMilestones';
 import { usePeakCount } from './usePeakCount';
 
+// Ensure all hooks are called ALWAYS, no return statements before hooks
 export const useOnlineUsers = () => {
   const [onlineCount, setOnlineCount] = useState(1);
   const [isConnected, setIsConnected] = useState(false);
