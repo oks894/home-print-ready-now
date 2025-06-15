@@ -11,42 +11,39 @@ export const usePrintJobs = () => {
   const loadPrintJobs = useCallback(async () => {
     console.log('usePrintJobs: Loading print jobs...');
     try {
+      // Optimized query - only recent jobs to speed up loading
       const { data, error } = await supabase
         .from('print_jobs')
         .select('*')
         .order('timestamp', { ascending: false })
-        .limit(100); // Limit to improve performance
+        .limit(50); // Reduced limit for faster loading
 
       if (error) {
         console.error('usePrintJobs: Error loading print jobs:', error);
         throw new Error(`Failed to load print jobs: ${error.message}`);
       }
 
-      console.log('usePrintJobs: Raw print jobs data:', data?.length || 0, 'items');
+      console.log('usePrintJobs: Loaded', data?.length || 0, 'print jobs');
 
-      const typedJobs: PrintJob[] = (data || []).map(job => {
-        return {
-          id: job.id,
-          tracking_id: job.tracking_id || `TID-${job.id.slice(0, 8)}`,
-          name: job.name || '',
-          phone: job.phone || '',
-          institute: job.institute || '',
-          time_slot: job.time_slot || '',
-          notes: job.notes || '',
-          files: Array.isArray(job.files) ? job.files as Array<{ name: string; size: number; type: string; data?: string }> : [],
-          timestamp: job.timestamp,
-          status: (job.status as PrintJob['status']) || 'pending',
-          selected_services: job.selected_services as Array<{ id: string; name: string; quantity: number; price: number }> || [],
-          total_amount: job.total_amount || 0,
-          delivery_requested: job.delivery_requested || false
-        };
-      });
+      const typedJobs: PrintJob[] = (data || []).map(job => ({
+        id: job.id,
+        tracking_id: job.tracking_id || `TID-${job.id.slice(0, 8)}`,
+        name: job.name || '',
+        phone: job.phone || '',
+        institute: job.institute || '',
+        time_slot: job.time_slot || '',
+        notes: job.notes || '',
+        files: Array.isArray(job.files) ? job.files : [],
+        timestamp: job.timestamp,
+        status: (job.status as PrintJob['status']) || 'pending',
+        selected_services: job.selected_services || [],
+        total_amount: job.total_amount || 0,
+        delivery_requested: job.delivery_requested || false
+      }));
 
-      console.log('usePrintJobs: Processed print jobs:', typedJobs.length, 'items');
       setPrintJobs(typedJobs);
     } catch (error) {
       console.error('usePrintJobs: Error in loadPrintJobs:', error);
-      // Don't re-throw to prevent infinite loading
       setPrintJobs([]);
     }
   }, []);

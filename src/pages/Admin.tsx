@@ -15,7 +15,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const isMobile = useIsMobile();
   
-  // Enable live tracking for admin page
+  // Enable live tracking for admin page - simplified
   useLiveTracking('admin');
   
   const {
@@ -31,7 +31,7 @@ const Admin = () => {
     setSelectedJob
   } = useAdminData();
 
-  console.log('Admin render - Print jobs:', printJobs.length, 'Feedback:', feedback.length);
+  console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading);
 
   if (!isAuthenticated) {
     return (
@@ -44,24 +44,26 @@ const Admin = () => {
   return (
     <SearchProvider>
       <MobileLayout>
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30">
+        <div className="min-h-screen bg-gray-50">
           <AdminHeader 
             onLogout={() => setIsAuthenticated(false)}
             isRetrying={isRetrying}
             onRefresh={loadData}
           />
 
-          {/* Admin Live Monitor with Milestones */}
-          <OnlineUsersMonitor 
-            showMilestones={true}
-            className="admin-monitor"
-          />
+          {/* Simplified Admin Monitor - no heavy features during loading */}
+          {!isLoading && (
+            <OnlineUsersMonitor 
+              showMilestones={true}
+              className="admin-monitor"
+            />
+          )}
 
           <div className={`max-w-7xl mx-auto safe-area-inset ${
             isMobile ? 'px-2 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
           }`}>
             <div className={isMobile ? 'mb-6' : 'mb-8'}>
-              <h1 className={`font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent ${
+              <h1 className={`font-bold text-gray-900 ${
                 isMobile ? 'text-2xl' : 'text-3xl'
               }`}>
                 Dashboard Overview
@@ -77,10 +79,12 @@ const Admin = () => {
               )}
             </div>
 
-            {/* Add Notification Manager */}
-            <div className={isMobile ? 'mb-4' : 'mb-6'}>
-              <NotificationManager />
-            </div>
+            {/* Only show notifications when not loading */}
+            {!isLoading && (
+              <div className={isMobile ? 'mb-4' : 'mb-6'}>
+                <NotificationManager />
+              </div>
+            )}
 
             <AdminTabs
               printJobs={printJobs}
