@@ -33,7 +33,7 @@ const MainContentSections = React.lazy(() =>
   }))
 );
 
-// Only load online monitor for faster connections
+// Always show online monitor but load it lazily
 const OnlineUsersMonitor = React.lazy(() => 
   import('@/components/OnlineUsersMonitor')
 );
@@ -41,7 +41,6 @@ const OnlineUsersMonitor = React.lazy(() =>
 const Index = () => {
   // Reduce animations for slow connections
   const animationDuration = isSlowConnection ? 0.2 : 0.8;
-  const shouldShowOnlineMonitor = !isSlowConnection;
 
   return (
     <MobileLayout className="min-h-screen">
@@ -52,11 +51,9 @@ const Index = () => {
       >
         <Header />
         
-        {shouldShowOnlineMonitor && (
-          <Suspense fallback={null}>
-            <OnlineUsersMonitor />
-          </Suspense>
-        )}
+        <Suspense fallback={null}>
+          <OnlineUsersMonitor />
+        </Suspense>
         
         <motion.main
           initial={{ opacity: 0, y: isSlowConnection ? 0 : 20 }}
