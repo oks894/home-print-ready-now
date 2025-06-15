@@ -125,74 +125,78 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   };
 
   return (
-    <section className={`${isMobile ? 'py-6 px-0' : 'py-16 px-4'} bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50`}>
+    <section className={`${isMobile ? 'py-8 px-0' : 'py-16 px-4'} bg-gradient-to-br from-white via-blue-50 to-purple-50`}>
       <MobileContainer className={isMobile ? 'px-0' : ''}>
-        <FormHeader />
+        <div className={isMobile ? 'p-6' : 'p-8'}>
+          <FormHeader />
 
-        {/* Mobile-optimized Progress Indicator */}
-        <div className={isMobile ? 'px-2' : ''}>
-          <StepProgress steps={steps} currentStep={currentStep} />
-        </div>
+          {/* Mobile-optimized Progress Indicator */}
+          <div className={isMobile ? 'px-0 my-6' : 'my-6'}>
+            <StepProgress steps={steps} currentStep={currentStep} />
+          </div>
 
-        {/* Loading State Notification */}
-        {servicesLoading && (
-          <MobileStepNotification 
-            message="Loading available services..." 
-            type="info" 
-          />
-        )}
-
-        {/* Validation Message */}
-        {validationMessage && !canProceedBoolean && (
-          <MobileStepNotification 
-            message={validationMessage} 
-            type="warning" 
-          />
-        )}
-
-        {/* Mobile-optimized Step Content */}
-        <FormContent
-          currentStep={currentStep}
-          files={files}
-          onFilesChange={setFiles}
-          services={services}
-          selectedServices={selectedServices}
-          onAddService={serviceHandlers.handleServiceAdd}
-          onUpdateQuantity={serviceHandlers.handleServiceUpdate}
-          onRemoveService={serviceHandlers.handleServiceRemove}
-          totalAmount={totalAmount}
-          canAccessDelivery={canAccessDelivery}
-          formData={formData}
-          onFormDataChange={setFormData}
-          deliveryRequested={deliveryRequestedBoolean}
-          onDeliveryRequestedChange={handleDeliveryRequestedChange}
-        />
-
-        {/* Success Message for Completed Steps */}
-        {canProceedBoolean && currentStep === steps.length - 1 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className={isMobile ? 'mt-4' : 'mt-6'}
-          >
+          {/* Loading State Notification */}
+          {servicesLoading && (
             <MobileStepNotification 
-              message="All information completed! Ready to submit your print job." 
-              type="success" 
+              message="Loading available services..." 
+              type="info" 
             />
-          </motion.div>
-        )}
+          )}
 
-        {/* Mobile-optimized Navigation */}
-        <div className={isMobile ? 'px-2' : ''}>
-          <NavigationButtons
-            currentStep={currentStep}
-            totalSteps={steps.length}
-            canProceed={canProceedBoolean}
-            isSubmitting={isSubmitting}
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            onSubmit={handleSubmit}
-          />
+          {/* Validation Message */}
+          {validationMessage && !canProceedBoolean && (
+            <MobileStepNotification 
+              message={validationMessage} 
+              type="warning" 
+            />
+          )}
+
+          {/* Mobile-optimized Step Content */}
+          <div className={isMobile ? 'my-6' : 'my-8'}>
+            <FormContent
+              currentStep={currentStep}
+              files={files}
+              onFilesChange={setFiles}
+              services={services}
+              selectedServices={selectedServices}
+              onAddService={serviceHandlers.handleServiceAdd}
+              onUpdateQuantity={serviceHandlers.handleServiceUpdate}
+              onRemoveService={serviceHandlers.handleServiceRemove}
+              totalAmount={totalAmount}
+              canAccessDelivery={canAccessDelivery}
+              formData={formData}
+              onFormDataChange={setFormData}
+              deliveryRequested={deliveryRequestedBoolean}
+              onDeliveryRequestedChange={handleDeliveryRequestedChange}
+            />
+          </div>
+
+          {/* Success Message for Completed Steps */}
+          {canProceedBoolean && currentStep === steps.length - 1 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className={isMobile ? 'mt-6' : 'mt-8'}
+            >
+              <MobileStepNotification 
+                message="All information completed! Ready to submit your print job." 
+                type="success" 
+              />
+            </motion.div>
+          )}
+
+          {/* Mobile-optimized Navigation */}
+          <div className={isMobile ? 'mt-6' : 'mt-8'}>
+            <NavigationButtons
+              currentStep={currentStep}
+              totalSteps={steps.length}
+              canProceed={canProceedBoolean}
+              isSubmitting={isSubmitting}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              onSubmit={handleSubmit}
+            />
+          </div>
         </div>
       </MobileContainer>
     </section>

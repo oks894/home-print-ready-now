@@ -18,7 +18,7 @@ export const MobileLayout = ({ children, showBottomNav = false, className = '' }
 
   return (
     <motion.div 
-      className={`min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 safe-area-inset ${className}`}
+      className={`min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 safe-area-inset ${className}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
@@ -29,7 +29,7 @@ export const MobileLayout = ({ children, showBottomNav = false, className = '' }
         </main>
         
         {showBottomNav && (
-          <div className="fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 safe-area-inset z-50">
+          <div className="fixed bottom-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-t border-gray-200 safe-area-inset z-50 shadow-lg">
             {/* Bottom navigation will be added here */}
           </div>
         )}
