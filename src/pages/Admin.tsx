@@ -9,7 +9,6 @@ import { useAdminData } from '@/hooks/useAdminData';
 import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import AdminLiveStats from '@/components/admin/AdminLiveStats';
 import { toast } from "@/components/ui/use-toast";
 
 const AdminContent = () => {
@@ -65,9 +64,6 @@ const AdminContent = () => {
             showMilestones={!isMobile}
             className="admin-monitor"
           />
-
-          {/* LIVE Stats Widget */}
-          <AdminLiveStats />
 
           <div className={`max-w-7xl mx-auto safe-area-inset ${
             isMobile ? 'px-2 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'

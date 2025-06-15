@@ -57,11 +57,6 @@ const Index = () => {
             <OnlineUsersMonitor showMilestones={false} />
           </ErrorBoundary>
           
-          {/* --- LIVE stats widget visible to all users --- */}
-          <ErrorBoundary fallback={null}>
-            <LiveStatsWidget />
-          </ErrorBoundary>
-          
           <motion.main
             initial={{ opacity: 0, y: enableHeavyAnimations ? 20 : 0 }}
             animate={{ opacity: 1, y: 0 }}
@@ -91,6 +86,11 @@ const Index = () => {
                 </Suspense>
               </ErrorBoundary>
             )}
+
+            {/* LIVE stats widget just above the footer */}
+            <div className="flex justify-center my-8">
+              <LiveStatsWidget />
+            </div>
           </motion.main>
           
           <ErrorBoundary fallback={<div className="h-16 bg-gray-100" />}>
