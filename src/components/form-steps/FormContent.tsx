@@ -50,16 +50,16 @@ export const FormContent = ({
   const isMobile = useIsMobile();
 
   const stepVariants = {
-    hidden: { opacity: 0, x: isMobile ? 50 : 100, scale: 0.95 },
+    hidden: { opacity: 0, x: isMobile ? 20 : 100, scale: 0.98 },
     visible: { opacity: 1, x: 0, scale: 1 },
-    exit: { opacity: 0, x: isMobile ? -50 : -100, scale: 0.95 }
+    exit: { opacity: 0, x: isMobile ? -20 : -100, scale: 0.98 }
   };
 
   return (
-    <Card className={`border-0 shadow-2xl bg-white/80 backdrop-blur-sm ${
-      isMobile ? 'mx-2 rounded-xl' : ''
+    <Card className={`border-0 shadow-xl bg-white/90 backdrop-blur-sm ${
+      isMobile ? 'mx-0 rounded-2xl overflow-hidden' : ''
     }`}>
-      <CardContent className={isMobile ? 'p-4 sm:p-6' : 'p-8 md:p-12'}>
+      <CardContent className={isMobile ? 'p-3' : 'p-8 md:p-12'}>
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -67,7 +67,7 @@ export const FormContent = ({
             animate="visible"
             exit="exit"
             variants={stepVariants}
-            transition={{ duration: isMobile ? 0.2 : 0.3 }}
+            transition={{ duration: isMobile ? 0.15 : 0.3, ease: "easeOut" }}
           >
             <StepContent
               currentStep={currentStep}

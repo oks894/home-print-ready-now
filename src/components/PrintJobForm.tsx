@@ -125,34 +125,38 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   };
 
   return (
-    <section className={`${isMobile ? 'py-8 px-0' : 'py-16 px-4'} bg-gradient-to-br from-white via-blue-50 to-purple-50`}>
-      <MobileContainer className={isMobile ? 'px-0' : ''}>
-        <div className={isMobile ? 'p-6' : 'p-8'}>
+    <section className={`${isMobile ? 'py-6 px-0' : 'py-16 px-4'} bg-gradient-to-br from-white via-blue-50 to-purple-50 min-h-screen`}>
+      <MobileContainer className={isMobile ? 'px-3 max-w-full' : ''}>
+        <div className={isMobile ? 'p-4' : 'p-8'}>
           <FormHeader />
 
           {/* Mobile-optimized Progress Indicator */}
-          <div className={isMobile ? 'px-0 my-6' : 'my-6'}>
+          <div className={isMobile ? 'px-0 my-4' : 'my-6'}>
             <StepProgress steps={steps} currentStep={currentStep} />
           </div>
 
           {/* Loading State Notification */}
           {servicesLoading && (
-            <MobileStepNotification 
-              message="Loading available services..." 
-              type="info" 
-            />
+            <div className={isMobile ? 'mb-4' : 'mb-6'}>
+              <MobileStepNotification 
+                message="Loading available services..." 
+                type="info" 
+              />
+            </div>
           )}
 
           {/* Validation Message */}
           {validationMessage && !canProceedBoolean && (
-            <MobileStepNotification 
-              message={validationMessage} 
-              type="warning" 
-            />
+            <div className={isMobile ? 'mb-4' : 'mb-6'}>
+              <MobileStepNotification 
+                message={validationMessage} 
+                type="warning" 
+              />
+            </div>
           )}
 
           {/* Mobile-optimized Step Content */}
-          <div className={isMobile ? 'my-6' : 'my-8'}>
+          <div className={isMobile ? 'my-4' : 'my-8'}>
             <FormContent
               currentStep={currentStep}
               files={files}
@@ -176,7 +180,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className={isMobile ? 'mt-6' : 'mt-8'}
+              className={isMobile ? 'mt-4 mb-4' : 'mt-8'}
             >
               <MobileStepNotification 
                 message="All information completed! Ready to submit your print job." 
@@ -186,7 +190,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
           )}
 
           {/* Mobile-optimized Navigation */}
-          <div className={isMobile ? 'mt-6' : 'mt-8'}>
+          <div className={isMobile ? 'mt-4 sticky bottom-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg p-4 border' : 'mt-8'}>
             <NavigationButtons
               currentStep={currentStep}
               totalSteps={steps.length}

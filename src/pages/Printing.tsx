@@ -25,19 +25,21 @@ const Printing = () => {
         <Header />
         
         <motion.main
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: isMobile ? 10 : 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50"
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 ${
+            isMobile ? 'pb-safe' : ''
+          }`}
         >
-          <div className={`${isMobile ? 'pt-4 pb-8' : 'pt-8 pb-12'}`}>
-            <div className="text-center mb-8">
+          <div className={`${isMobile ? 'pt-2 pb-4' : 'pt-8 pb-12'}`}>
+            <div className={`text-center ${isMobile ? 'mb-4' : 'mb-8'}`}>
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className={`font-bold text-gray-900 mb-4 ${
-                  isMobile ? 'text-2xl px-4' : 'text-4xl'
+                className={`font-bold text-gray-900 mb-2 ${
+                  isMobile ? 'text-xl px-4' : 'text-4xl'
                 }`}
               >
                 Submit Your Print Job
@@ -47,7 +49,7 @@ const Printing = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
                 className={`text-gray-600 ${
-                  isMobile ? 'text-base px-4' : 'text-lg'
+                  isMobile ? 'text-sm px-4 leading-relaxed' : 'text-lg'
                 }`}
               >
                 Upload your files and get professional printing with doorstep delivery
@@ -58,7 +60,7 @@ const Printing = () => {
           </div>
         </motion.main>
         
-        <Footer />
+        {!isMobile && <Footer />}
       </motion.div>
     </MobileLayout>
   );
