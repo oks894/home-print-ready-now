@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { PrintJob } from '@/types/printJob';
@@ -8,14 +8,13 @@ export const usePrintJobs = () => {
   const [printJobs, setPrintJobs] = useState<PrintJob[]>([]);
   const { toast } = useToast();
 
-  const loadPrintJobs = useCallback(async () => {
+  const loadPrintJobs = async () => {
     console.log('usePrintJobs: Loading print jobs...');
     try {
       const { data, error } = await supabase
         .from('print_jobs')
         .select('*')
-        .order('timestamp', { ascending: false })
-        .limit(100); // Limit to improve performance
+        .order('timestamp', { ascending: false });
 
       if (error) {
         console.error('usePrintJobs: Error loading print jobs:', error);
@@ -25,9 +24,10 @@ export const usePrintJobs = () => {
       console.log('usePrintJobs: Raw print jobs data:', data?.length || 0, 'items');
 
       const typedJobs: PrintJob[] = (data || []).map(job => {
+        console.log('usePrintJobs: Processing job:', job.id);
         return {
           id: job.id,
-          tracking_id: job.tracking_id || `TID-${job.id.slice(0, 8)}`,
+          tracking_id: job.tracking_id || '',
           name: job.name || '',
           phone: job.phone || '',
           institute: job.institute || '',
@@ -35,7 +35,7 @@ export const usePrintJobs = () => {
           notes: job.notes || '',
           files: Array.isArray(job.files) ? job.files as Array<{ name: string; size: number; type: string; data?: string }> : [],
           timestamp: job.timestamp,
-          status: (job.status as PrintJob['status']) || 'pending',
+          status: job.status as PrintJob['status'] || 'pending',
           selected_services: job.selected_services as Array<{ id: string; name: string; quantity: number; price: number }> || [],
           total_amount: job.total_amount || 0,
           delivery_requested: job.delivery_requested || false
@@ -46,10 +46,9 @@ export const usePrintJobs = () => {
       setPrintJobs(typedJobs);
     } catch (error) {
       console.error('usePrintJobs: Error in loadPrintJobs:', error);
-      // Don't re-throw to prevent infinite loading
-      setPrintJobs([]);
+      throw error;
     }
-  }, []);
+  };
 
   const updateJobStatus = async (jobId: string, status: PrintJob['status'], retryFn: (fn: () => Promise<void>) => Promise<void>) => {
     const originalJobs = [...printJobs];

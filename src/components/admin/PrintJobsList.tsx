@@ -1,5 +1,5 @@
 
-import { FileText, Clock, ChevronRight, Filter, SortDesc, RefreshCw } from 'lucide-react';
+import { FileText, Clock, ChevronRight, Filter, SortDesc } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -15,7 +15,7 @@ interface PrintJobsListProps {
 }
 
 const JobSkeleton = () => (
-  <div className="p-4 border rounded-xl bg-white shadow-sm animate-pulse">
+  <div className="p-4 border rounded-xl bg-white shadow-sm">
     <div className="flex items-start justify-between mb-3">
       <div className="space-y-2 flex-1">
         <Skeleton className="h-4 w-32" />
@@ -66,7 +66,7 @@ export const PrintJobsList = ({ printJobs, selectedJob, onJobSelect, isLoading, 
               </div>
               Print Jobs
               {isRetrying && (
-                <RefreshCw className="w-4 h-4 text-blue-600 animate-spin" />
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
               )}
             </CardTitle>
             <CardDescription className="mt-1">
@@ -99,7 +99,7 @@ export const PrintJobsList = ({ printJobs, selectedJob, onJobSelect, isLoading, 
             <div className="p-4 bg-gray-100 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
               <FileText className="w-8 h-8 opacity-50" />
             </div>
-            <p className="text-lg font-medium mb-2">No print jobs found</p>
+            <p className="text-lg font-medium mb-2">No print jobs yet</p>
             <p className="text-sm">Jobs will appear here when customers submit orders</p>
           </div>
         ) : (

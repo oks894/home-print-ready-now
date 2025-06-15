@@ -9,15 +9,10 @@ import { SearchProvider } from '@/components/admin/AdminSearch';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { useAdminData } from '@/hooks/useAdminData';
 import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
-import { useLiveTracking } from '@/hooks/useLiveTracking';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const isMobile = useIsMobile();
-  
-  // Enable live tracking for admin page
-  useLiveTracking('admin');
-  
   const {
     printJobs,
     feedback,
@@ -70,10 +65,7 @@ const Admin = () => {
                 Manage your print services and track customer orders
               </p>
               {isLoading && (
-                <div className="mt-2 text-sm text-blue-600 flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  Loading data...
-                </div>
+                <div className="mt-2 text-sm text-blue-600">Loading data...</div>
               )}
             </div>
 
