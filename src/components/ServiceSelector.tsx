@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Info } from 'lucide-react';
 import { Service, SelectedService } from '@/types/service';
 import ServiceCard from './service-selector/ServiceCard';
+import PrintingOptionsCard from './service-selector/PrintingOptionsCard';
 import OrderSummary from './service-selector/OrderSummary';
 import DeliveryOption from './service-selector/DeliveryOption';
 
@@ -42,8 +42,11 @@ export const ServiceSelector: React.FC<ServiceSelectorProps> = ({
     );
   }
 
-  const nonDeliveryServices = services.filter(s => s.category !== 'Delivery');
-  console.log('Non-delivery services:', nonDeliveryServices);
+  const printingServices = services.filter(s => s.category === 'Printing' || s.category === 'Color');
+  const otherServices = services.filter(s => s.category !== 'Printing' && s.category !== 'Color' && s.category !== 'Delivery');
+  
+  console.log('Printing services:', printingServices);
+  console.log('Other services:', otherServices);
 
   return (
     <div className="space-y-6">
@@ -59,25 +62,56 @@ export const ServiceSelector: React.FC<ServiceSelectorProps> = ({
           <p className="text-sm text-green-700">
             Get <span className="font-bold">₹2.5 per page</span> when you print 50+ pages (Black & White or Color)
           </p>
+          <p className="text-xs text-green-600 mt-1">
+            Example: 30 pages × 1 copy = ₹105 | 3 pages × 17 copies = 51 pages = ₹127.5
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
-          {nonDeliveryServices.map(service => {
-            console.log('Rendering service:', service);
-            const selectedService = selectedServices.find(s => s.id === service.id);
-            
-            return (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                selectedService={selectedService}
-                onAddService={onAddService}
-                onUpdateQuantity={onUpdateQuantity}
-                onRemoveService={onRemoveService}
-              />
-            );
-          })}
-        </div>
+        {/* Printing Services with detailed options */}
+        {printingServices.length > 0 && (
+          <div className="mb-6">
+            <h4 className="text-md font-medium mb-3 text-gray-700">Printing Services</h4>
+            <div className="grid md:grid-cols-2 gap-4">
+              {printingServices.map(service => {
+                const selectedService = selectedServices.find(s => s.id === service.id);
+                
+                return (
+                  <PrintingOptionsCard
+                    key={service.id}
+                    service={service}
+                    selectedService={selectedService}
+                    onAddService={onAddService}
+                    onUpdateQuantity={onUpdateQuantity}
+                    onRemoveService={onRemoveService}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Other Services */}
+        {otherServices.length > 0 && (
+          <div>
+            <h4 className="text-md font-medium mb-3 text-gray-700">Other Services</h4>
+            <div className="grid md:grid-cols-2 gap-4">
+              {otherServices.map(service => {
+                const selectedService = selectedServices.find(s => s.id === service.id);
+                
+                return (
+                  <ServiceCard
+                    key={service.id}
+                    service={service}
+                    selectedService={selectedService}
+                    onAddService={onAddService}
+                    onUpdateQuantity={onUpdateQuantity}
+                    onRemoveService={onRemoveService}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Delivery Option */}

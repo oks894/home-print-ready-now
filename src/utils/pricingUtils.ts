@@ -47,14 +47,51 @@ export const getBulkDiscountInfo = (quantity: number): { hasBulkDiscount: boolea
   };
 };
 
-export const calculateServicePrice = (service: any, quantity: number): number => {
+export const calculateTotalPages = (pages: number, copies: number, doubleSided: boolean = false): number => {
+  const totalPages = pages * copies;
+  // If double-sided, we print on half the number of sheets but still charge for total pages
+  return totalPages;
+};
+
+export const calculateServicePrice = (service: any, quantity: number, options?: {
+  pages?: number;
+  copies?: number;
+  doubleSided?: boolean;
+}): number => {
   const basePrice = parsePriceFromString(service.price);
   
-  // Apply bulk pricing for printing services
+  // For printing services, calculate based on total pages
   if (service.category === 'Printing' || service.category === 'Color') {
+    if (options?.pages && options?.copies) {
+      const totalPages = calculateTotalPages(options.pages, options.copies, options.doubleSided);
+      return calculateBulkPrice(basePrice, totalPages);
+    }
+    // Fallback to quantity-based pricing
     return calculateBulkPrice(basePrice, quantity);
   }
   
   // For other services, use regular pricing
   return basePrice * quantity;
+};
+
+export const getPrintingPriceBreakdown = (pages: number, copies: number, isColor: boolean = false, doubleSided: boolean = false) => {
+  const totalPages = calculateTotalPages(pages, copies, doubleSided);
+  const basePrice = isColor ? 5 : 3.5; // Color: ₹5, B&W: ₹3.5
+  
+  const finalPrice = calculateBulkPrice(basePrice, totalPages);
+  const pricePerPage = totalPages >= 50 ? 2.5 : basePrice;
+  const hasBulkDiscount = totalPages >= 50;
+  
+  return {
+    pages,
+    copies,
+    totalPages,
+    doubleSided,
+    isColor,
+    basePrice,
+    pricePerPage,
+    finalPrice,
+    hasBulkDiscount,
+    savings: hasBulkDiscount ? (totalPages * basePrice) - finalPrice : 0
+  };
 };
