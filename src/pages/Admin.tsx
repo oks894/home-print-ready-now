@@ -16,9 +16,8 @@ const AdminContent = () => {
   const [showMonitor, setShowMonitor] = useState(false);
   const isMobile = useIsMobile();
   
-  // Enable live tracking for admin page - only after authentication
-  useLiveTracking(isAuthenticated ? 'admin' : null);
-  
+  // Always call hooks at the top level
+  const adminDataHook = useAdminData();
   const {
     printJobs,
     feedback,
@@ -30,18 +29,24 @@ const AdminContent = () => {
     deleteJob,
     deleteFeedback,
     setSelectedJob
-  } = useAdminData();
+  } = adminDataHook;
+
+  // Enable live tracking only after authentication
+  useLiveTracking(isAuthenticated ? 'admin' : null);
 
   // Show monitor after authentication and initial load
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       const timer = setTimeout(() => setShowMonitor(true), 1000);
       return () => clearTimeout(timer);
+    } else {
+      setShowMonitor(false);
     }
   }, [isAuthenticated, isLoading]);
 
   console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading, 'showMonitor:', showMonitor);
 
+  // Login screen
   if (!isAuthenticated) {
     return (
       <MobileLayout>
@@ -52,6 +57,7 @@ const AdminContent = () => {
     );
   }
 
+  // Main admin interface
   return (
     <SearchProvider>
       <MobileLayout>

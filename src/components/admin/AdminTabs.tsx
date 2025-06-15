@@ -33,39 +33,50 @@ export const AdminTabs = ({
   onDeleteFeedback
 }: AdminTabsProps) => {
   const [activeTab, setActiveTab] = useState('orders');
-  const { filteredPrintJobs, filteredFeedback, setData, searchQuery } = useSearch();
+  
+  // Always call hooks at the top level - no conditional usage
+  const searchHook = useSearch();
+  const { filteredPrintJobs, filteredFeedback, setData, searchQuery } = searchHook;
 
   // Update search data when props change
   React.useEffect(() => {
-    setData(printJobs, feedback);
+    try {
+      setData(printJobs, feedback);
+    } catch (error) {
+      console.error('Error updating search data:', error);
+    }
   }, [printJobs, feedback, setData]);
+
+  // Ensure we have fallback data to prevent rendering issues
+  const safePrintJobs = filteredPrintJobs || [];
+  const safeFeedback = filteredFeedback || [];
 
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <AdminStats
-        printJobs={filteredPrintJobs}
-        feedback={filteredFeedback}
+        printJobs={safePrintJobs}
+        feedback={safeFeedback}
         isLoading={isLoading}
-        searchQuery={searchQuery}
+        searchQuery={searchQuery || ''}
       />
 
       <AdminSearchInfo
-        searchQuery={searchQuery}
-        printJobsCount={filteredPrintJobs.length}
-        feedbackCount={filteredFeedback.length}
+        searchQuery={searchQuery || ''}
+        printJobsCount={safePrintJobs.length}
+        feedbackCount={safeFeedback.length}
         isLoading={isLoading}
       />
 
       <AdminTabsNavigation
-        printJobs={filteredPrintJobs}
-        feedback={filteredFeedback}
+        printJobs={safePrintJobs}
+        feedback={safeFeedback}
         selectedJob={selectedJob}
         isLoading={isLoading}
       />
 
       <AdminTabsContent
-        printJobs={filteredPrintJobs}
-        feedback={filteredFeedback}
+        printJobs={safePrintJobs}
+        feedback={safeFeedback}
         selectedJob={selectedJob}
         isLoading={isLoading}
         isRetrying={isRetrying}

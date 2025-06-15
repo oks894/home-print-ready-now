@@ -10,7 +10,6 @@ export const useAdminData = () => {
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasInitialized, setHasInitialized] = useState(false);
-  const [loadAttempts, setLoadAttempts] = useState(0);
   
   const { toast } = useToast();
   const { isRetrying, retryWithBackoff, setIsRetrying } = useRetry();
@@ -27,87 +26,61 @@ export const useAdminData = () => {
   } = useFeedback();
 
   const loadData = useCallback(async (force = false) => {
-    // Prevent infinite loops and excessive loading
-    if (!force && hasInitialized) {
-      console.log('useAdminData: Skipping reload, already initialized');
+    // Prevent multiple simultaneous loads
+    if (isLoading && !force) {
+      console.log('useAdminData: Already loading, skipping');
       return;
     }
 
-    if (loadAttempts > 3) {
-      console.warn('useAdminData: Too many load attempts, stopping');
-      setIsLoading(false);
-      setIsRetrying(false);
+    if (hasInitialized && !force) {
+      console.log('useAdminData: Already initialized, skipping');
       return;
     }
 
-    console.log('useAdminData: Loading admin data...', { force, hasInitialized, attempt: loadAttempts + 1 });
+    console.log('useAdminData: Starting data load...');
     setIsLoading(true);
-    setLoadAttempts(prev => prev + 1);
     
     try {
-      // Load with timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Loading timeout')), 15000)
-      );
+      // Simple parallel loading with error handling
+      const [printJobsResult, feedbackResult] = await Promise.allSettled([
+        loadPrintJobs(),
+        loadFeedback()
+      ]);
 
-      const loadPromises = [
-        Promise.race([loadPrintJobs(), timeoutPromise]),
-        Promise.race([loadFeedback(), timeoutPromise])
-      ];
+      let hasErrors = false;
 
-      const results = await Promise.allSettled(loadPromises);
-
-      // Check results and handle partial failures gracefully
-      const printJobsResult = results[0];
-      const feedbackResult = results[1];
-
-      let hasAnySuccess = false;
-
-      if (printJobsResult.status === 'fulfilled') {
-        hasAnySuccess = true;
-        console.log('useAdminData: Print jobs loaded successfully');
-      } else {
-        console.warn('useAdminData: Print jobs failed:', printJobsResult.reason);
+      if (printJobsResult.status === 'rejected') {
+        console.error('Print jobs failed:', printJobsResult.reason);
+        hasErrors = true;
       }
       
-      if (feedbackResult.status === 'fulfilled') {
-        hasAnySuccess = true;
-        console.log('useAdminData: Feedback loaded successfully');
-      } else {
-        console.warn('useAdminData: Feedback failed:', feedbackResult.reason);
+      if (feedbackResult.status === 'rejected') {
+        console.error('Feedback failed:', feedbackResult.reason);
+        hasErrors = true;
       }
 
-      if (hasAnySuccess) {
-        setHasInitialized(true);
-        console.log('useAdminData: Admin data loaded with partial success');
-        
-        // Only show error toast if print jobs failed (more critical)
-        if (printJobsResult.status === 'rejected') {
-          toast({
-            title: "Print jobs loading issue",
-            description: "Some data may not be fully loaded. Try refreshing if needed.",
-            variant: "destructive"
-          });
-        }
-      } else {
-        throw new Error('All data loading failed');
-      }
-    } catch (error) {
-      console.error('useAdminData: Failed to load data:', error);
-      
-      // Don't show error toast on every failure to avoid spam
-      if (loadAttempts <= 2) {
+      if (hasErrors) {
         toast({
-          title: "Connection issue",
-          description: "Having trouble loading data. Please check your connection and try again.",
+          title: "Partial loading issue",
+          description: "Some data may not be available. Try refreshing.",
           variant: "destructive"
         });
       }
+
+      setHasInitialized(true);
+      console.log('useAdminData: Data loaded successfully');
+    } catch (error) {
+      console.error('useAdminData: Critical loading error:', error);
+      toast({
+        title: "Loading failed",
+        description: "Failed to load admin data. Please refresh the page.",
+        variant: "destructive"
+      });
     } finally {
       setIsLoading(false);
       setIsRetrying(false);
     }
-  }, [hasInitialized, loadAttempts, loadPrintJobs, loadFeedback, toast, setIsRetrying]);
+  }, [isLoading, hasInitialized, loadPrintJobs, loadFeedback, toast, setIsRetrying]);
 
   const updateJobStatus = async (jobId: string, status: PrintJob['status']) => {
     console.log('useAdminData: Updating job status:', jobId, status);
@@ -132,17 +105,14 @@ export const useAdminData = () => {
     await deleteFeedbackInternal(feedbackId, retryWithBackoff);
   };
 
-  // Load data on component mount - with better control
+  // Initial load effect - simplified and more reliable
   useEffect(() => {
-    if (!hasInitialized && loadAttempts === 0) {
-      console.log('useAdminData: Initial load triggered');
-      // Small delay to ensure component is mounted properly
-      const timer = setTimeout(() => loadData(true), 200);
+    if (!hasInitialized) {
+      console.log('useAdminData: Triggering initial load');
+      const timer = setTimeout(() => loadData(true), 100);
       return () => clearTimeout(timer);
     }
-  }, [loadData, hasInitialized, loadAttempts]);
-
-  console.log('useAdminData: Current state - printJobs:', printJobs.length, 'feedback:', feedback.length, 'isLoading:', isLoading, 'attempts:', loadAttempts);
+  }, [hasInitialized, loadData]);
 
   return {
     printJobs,
@@ -150,10 +120,7 @@ export const useAdminData = () => {
     selectedJob,
     isLoading,
     isRetrying,
-    loadData: () => {
-      setLoadAttempts(0); // Reset attempts on manual reload
-      loadData(true);
-    },
+    loadData: () => loadData(true),
     updateJobStatus,
     deleteJob,
     deleteFeedback,
