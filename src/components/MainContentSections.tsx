@@ -29,3 +29,5 @@ export const MainContentSections = () => {
     </>
   );
 };
+
+export default MainContentSections;

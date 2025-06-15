@@ -1,5 +1,5 @@
 
-import { Suspense } from 'react';
+import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -8,7 +8,7 @@ import { LoadingSpinner } from '@/components/LoadingSpinner';
 
 // Lazy load heavy components to reduce initial bundle size
 const AnimatedHeroSection = React.lazy(() => import('@/components/AnimatedHeroSection'));
-const MainContentSections = React.lazy(() => import('@/components/MainContentSections'));
+const MainContentSections = React.lazy(() => import('@/components/MainContentSections').then(module => ({ default: module.MainContentSections })));
 
 const Index = () => {
   return (
