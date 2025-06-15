@@ -6,7 +6,7 @@ const ContactSection = () => {
     <section className="py-8 px-4 bg-blue-600">
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-          Need Help? Contact Us Now!
+          Need Help? Quick Support Available!
         </h2>
         <p className="text-blue-100 mb-6 text-lg">
           Quick support for all your printing needs

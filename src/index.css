@@ -93,7 +93,7 @@
 
   body {
     @apply bg-background text-foreground;
-    /* Optimize for mobile performance */
+    /* Optimize for mobile performance and slow connections */
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
     text-rendering: optimizeLegibility;
@@ -151,6 +151,23 @@
     
     .mobile-form-input {
       @apply w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all;
+    }
+  }
+
+  /* Reduce animations on slow connections */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  /* Optimize for slow connections */
+  @media (max-width: 768px) and (max-resolution: 150dpi) {
+    .reduce-animations * {
+      animation: none !important;
+      transition: none !important;
     }
   }
 }
@@ -223,15 +240,15 @@
     @apply absolute bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full;
   }
 
-  /* Mobile-optimized animations */
+  /* Optimized animations for slow connections */
   .mobile-fade-in {
-    animation: mobile-fade-in 0.3s ease-out;
+    animation: mobile-fade-in 0.15s ease-out;
   }
 
   @keyframes mobile-fade-in {
     from {
       opacity: 0;
-      transform: translateY(10px);
+      transform: translateY(5px);
     }
     to {
       opacity: 1;
@@ -244,6 +261,18 @@
     .mobile-high-contrast {
       @apply contrast-125;
     }
+  }
+
+  /* Low bandwidth optimizations */
+  .low-bandwidth {
+    will-change: auto;
+    transform: none;
+    filter: none;
+  }
+
+  .reduce-motion {
+    animation: none !important;
+    transition: none !important;
   }
 }
 
@@ -267,5 +296,15 @@
 
   .mobile-toast {
     @apply fixed bottom-4 left-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50;
+  }
+
+  /* Lightweight button styles for slow connections */
+  .lite-button {
+    @apply px-4 py-2 rounded-md font-medium text-center cursor-pointer select-none;
+    transition: background-color 0.1s ease;
+  }
+
+  .lite-button:hover {
+    filter: brightness(0.95);
   }
 }

@@ -14,10 +14,10 @@ const Contact = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 sm:mb-12">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
-              Contact Us
+              Quick Support
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto px-2">
-              Get in touch with us for all your printing needs
+              Get instant help for all your printing needs
             </p>
           </div>
 

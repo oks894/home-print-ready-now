@@ -48,12 +48,12 @@ const AnimatedContactSection = () => {
             }}
             transition={{ duration: 3, repeat: Infinity }}
           >
-            Ready for the <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Future</span>?
+            Need <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Quick Support</span>?
           </motion.h3>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
             <motion.a 
-              href="tel:+918787665349" 
+              href="tel:+917005498122" 
               className="group relative overflow-hidden"
               whileHover={{ scale: 1.1, y: -5 }}
               whileTap={{ scale: 0.95 }}
@@ -66,12 +66,12 @@ const AnimatedContactSection = () => {
                 >
                   <Phone className="w-6 h-6" />
                 </motion.div>
-                Call: +91 8787665349
+                Call: +91 7005498122
               </div>
             </motion.a>
             
             <motion.a 
-              href="https://wa.me/918787665349" 
+              href="https://wa.me/917005498122" 
               target="_blank" 
               rel="noopener noreferrer"
               className="group relative overflow-hidden"
