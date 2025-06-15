@@ -12,8 +12,11 @@ import { getAdaptiveConfig } from '@/utils/connectionUtils';
 // Get adaptive configuration
 const adaptiveConfig = getAdaptiveConfig();
 
+console.log('Index: Adaptive config:', adaptiveConfig);
+
 // Conditional loading based on connection speed
 const AnimatedHeroSection = React.lazy(() => {
+  console.log('Index: Loading hero section - simplified UI:', adaptiveConfig.simplifiedUI);
   if (adaptiveConfig.simplifiedUI || adaptiveConfig.ultraLightMode) {
     return import('@/components/SimpleHeroSection');
   }
@@ -32,6 +35,8 @@ const OnlineUsersMonitor = React.lazy(() =>
 
 const Index = () => {
   const { animationDuration, enableHeavyAnimations, simplifiedUI, ultraLightMode } = adaptiveConfig;
+
+  console.log('Index: Rendering with config - ultraLightMode:', ultraLightMode, 'simplifiedUI:', simplifiedUI);
 
   return (
     <ErrorBoundary fallback={<SimpleLoader message="Loading home page..." />}>

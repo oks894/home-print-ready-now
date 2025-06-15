@@ -32,16 +32,17 @@ export const useAdminData = () => {
   }, [lastFetchTime]);
 
   const loadData = async () => {
-    console.log('Loading admin data...');
+    console.log('useAdminData: Loading admin data...');
     setIsLoading(true);
     try {
       await retryWithBackoff(async () => {
+        console.log('useAdminData: Attempting to load print jobs and feedback...');
         await Promise.all([loadPrintJobs(), loadFeedback()]);
         setLastFetchTime(Date.now());
-        console.log('Admin data loaded successfully');
+        console.log('useAdminData: Admin data loaded successfully');
       });
     } catch (error) {
-      console.error('Failed to load data after retries:', error);
+      console.error('useAdminData: Failed to load data after retries:', error);
       toast({
         title: "Connection issues",
         description: "Having trouble loading data. Please check your internet connection and try again.",
@@ -54,7 +55,7 @@ export const useAdminData = () => {
   };
 
   const updateJobStatus = async (jobId: string, status: PrintJob['status']) => {
-    console.log('Updating job status:', jobId, status);
+    console.log('useAdminData: Updating job status:', jobId, status);
     const success = await updateJobStatusInternal(jobId, status, retryWithBackoff);
     if (success && selectedJob?.id === jobId) {
       setSelectedJob(prev => prev ? { ...prev, status } : null);
@@ -63,7 +64,7 @@ export const useAdminData = () => {
   };
 
   const deleteJob = async (jobId: string) => {
-    console.log('Deleting job:', jobId);
+    console.log('useAdminData: Deleting job:', jobId);
     const success = await deleteJobInternal(jobId, retryWithBackoff);
     if (success && selectedJob?.id === jobId) {
       setSelectedJob(null);
@@ -72,12 +73,13 @@ export const useAdminData = () => {
   };
 
   const deleteFeedback = async (feedbackId: string) => {
-    console.log('Deleting feedback:', feedbackId);
+    console.log('useAdminData: Deleting feedback:', feedbackId);
     await deleteFeedbackInternal(feedbackId, retryWithBackoff);
   };
 
   // Load data on component mount
   useEffect(() => {
+    console.log('useAdminData: Component mounted, loading data...');
     loadData();
   }, []);
 
@@ -85,12 +87,15 @@ export const useAdminData = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       if (!isLoading && !isRetrying) {
+        console.log('useAdminData: Auto-refresh triggered');
         loadData();
       }
     }, 60000); // Refresh every minute
 
     return () => clearInterval(interval);
   }, [isLoading, isRetrying]);
+
+  console.log('useAdminData: Current state - printJobs:', printJobs.length, 'feedback:', feedback.length, 'isLoading:', isLoading);
 
   return {
     printJobs,

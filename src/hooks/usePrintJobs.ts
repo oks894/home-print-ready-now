@@ -9,7 +9,7 @@ export const usePrintJobs = () => {
   const { toast } = useToast();
 
   const loadPrintJobs = async () => {
-    console.log('Loading print jobs...');
+    console.log('usePrintJobs: Loading print jobs...');
     try {
       const { data, error } = await supabase
         .from('print_jobs')
@@ -17,14 +17,14 @@ export const usePrintJobs = () => {
         .order('timestamp', { ascending: false });
 
       if (error) {
-        console.error('Error loading print jobs:', error);
-        throw new Error('Failed to load print jobs');
+        console.error('usePrintJobs: Error loading print jobs:', error);
+        throw new Error(`Failed to load print jobs: ${error.message}`);
       }
 
-      console.log('Raw print jobs data:', data);
+      console.log('usePrintJobs: Raw print jobs data:', data?.length || 0, 'items');
 
       const typedJobs: PrintJob[] = (data || []).map(job => {
-        console.log('Processing job:', job.id, job);
+        console.log('usePrintJobs: Processing job:', job.id);
         return {
           id: job.id,
           tracking_id: job.tracking_id || '',
@@ -42,10 +42,10 @@ export const usePrintJobs = () => {
         };
       });
 
-      console.log('Processed print jobs:', typedJobs.length, typedJobs);
+      console.log('usePrintJobs: Processed print jobs:', typedJobs.length, 'items');
       setPrintJobs(typedJobs);
     } catch (error) {
-      console.error('Error in loadPrintJobs:', error);
+      console.error('usePrintJobs: Error in loadPrintJobs:', error);
       throw error;
     }
   };
@@ -77,7 +77,7 @@ export const usePrintJobs = () => {
     } catch (error) {
       setPrintJobs(originalJobs);
       
-      console.error('Error updating job status:', error);
+      console.error('usePrintJobs: Error updating job status:', error);
       toast({
         title: "Update failed",
         description: "Could not update job status. Please try again.",
@@ -113,7 +113,7 @@ export const usePrintJobs = () => {
     } catch (error) {
       setPrintJobs(originalJobs);
       
-      console.error('Error deleting job:', error);
+      console.error('usePrintJobs: Error deleting job:', error);
       toast({
         title: "Delete failed",
         description: "Could not delete job. Please try again.",

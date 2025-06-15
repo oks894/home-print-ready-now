@@ -8,36 +8,59 @@ export const useOnlineUsers = () => {
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const channel: RealtimeChannel = supabase.channel('online_users');
+    console.log('useOnlineUsers: Initializing...');
+    let channel: RealtimeChannel | null = null;
 
-    const userStatus = {
-      user_id: Math.random().toString(36).substring(7), // Generate unique session ID
-      online_at: new Date().toISOString(),
+    const initializeChannel = async () => {
+      try {
+        channel = supabase.channel('online_users');
+
+        const userStatus = {
+          user_id: Math.random().toString(36).substring(7), // Generate unique session ID
+          online_at: new Date().toISOString(),
+        };
+
+        console.log('useOnlineUsers: Setting up channel with status:', userStatus);
+
+        channel
+          .on('presence', { event: 'sync' }, () => {
+            if (channel) {
+              const newState = channel.presenceState();
+              const count = Object.keys(newState).length;
+              console.log('useOnlineUsers: Presence sync - count:', count, 'state:', newState);
+              setOnlineCount(count);
+              setIsConnected(true);
+            }
+          })
+          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
+            console.log('useOnlineUsers: User joined:', key, newPresences);
+          })
+          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
+            console.log('useOnlineUsers: User left:', key, leftPresences);
+          })
+          .subscribe(async (status) => {
+            console.log('useOnlineUsers: Channel subscription status:', status);
+            if (status === 'SUBSCRIBED' && channel) {
+              const trackResult = await channel.track(userStatus);
+              console.log('useOnlineUsers: Track result:', trackResult);
+            }
+          });
+
+      } catch (error) {
+        console.error('useOnlineUsers: Error initializing channel:', error);
+        setIsConnected(false);
+      }
     };
 
-    channel
-      .on('presence', { event: 'sync' }, () => {
-        const newState = channel.presenceState();
-        const count = Object.keys(newState).length;
-        setOnlineCount(count);
-        setIsConnected(true);
-      })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        console.log('User joined:', key, newPresences);
-      })
-      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        console.log('User left:', key, leftPresences);
-      })
-      .subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.track(userStatus);
-        }
-      });
+    initializeChannel();
 
     // Cleanup function
     return () => {
-      channel.untrack();
-      supabase.removeChannel(channel);
+      console.log('useOnlineUsers: Cleaning up...');
+      if (channel) {
+        channel.untrack();
+        supabase.removeChannel(channel);
+      }
     };
   }, []);
 

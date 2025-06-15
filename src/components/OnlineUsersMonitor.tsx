@@ -8,6 +8,8 @@ const OnlineUsersMonitor = () => {
   const { onlineCount, isConnected } = useOnlineUsers();
   const { simplifiedUI, enableHeavyAnimations, enableBackdropBlur } = getAdaptiveConfig();
 
+  console.log('OnlineUsersMonitor render - count:', onlineCount, 'connected:', isConnected);
+
   // Simple version for slow connections
   if (simplifiedUI) {
     return (
