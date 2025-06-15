@@ -42,37 +42,38 @@ export const BallSpheres = forwardRef<THREE.Mesh, BallSpheresProps>(({ isGlowing
           roughness={0.05}
           clearcoat={1}
           clearcoatRoughness={0}
-          transmission={0.7}
-          thickness={0.3}
+          transmission={0.8}
+          thickness={0.2}
           ior={1.5}
           transparent
-          opacity={0.3}
+          opacity={0.2}
         />
       </mesh>
       
-      {/* Image texture - visible from inside, like looking into a crystal ball */}
-      <mesh ref={imageRef} scale={[1.3, 1.3, 1.3]}>
-        <sphereGeometry args={[1.0, 64, 64]} />
+      {/* Image texture - perfectly positioned inside like a crystal ball vision */}
+      <mesh ref={imageRef} scale={[1.2, 1.2, 1.2]}>
+        <sphereGeometry args={[0.9, 64, 64]} />
         <meshStandardMaterial
           map={texture}
-          transparent={false}
+          transparent={true}
+          opacity={0.9}
           side={THREE.BackSide}
           emissive={isGlowing ? "#ffffff" : "#000000"}
-          emissiveIntensity={isGlowing ? 0.2 : 0}
+          emissiveIntensity={isGlowing ? 0.15 : 0}
         />
       </mesh>
       
-      {/* Inner glowing core - much smaller */}
+      {/* Inner glowing core - much smaller and more subtle */}
       <mesh ref={innerSphereRef}>
-        <sphereGeometry args={[0.4, 64, 64]} />
+        <sphereGeometry args={[0.3, 64, 64]} />
         <meshPhysicalMaterial
           color={isGlowing ? "#f59e0b" : "#8b5cf6"}
           emissive={isGlowing ? "#fbbf24" : "#a855f7"}
-          emissiveIntensity={isGlowing ? 1.0 : 0.3}
+          emissiveIntensity={isGlowing ? 0.8 : 0.2}
           metalness={0}
           roughness={0.1}
           transparent
-          opacity={0.4}
+          opacity={0.3}
         />
       </mesh>
     </>
