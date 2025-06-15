@@ -11,8 +11,8 @@ import { JobActions } from '@/components/admin/job-details/JobActions';
 
 interface JobDetailsProps {
   selectedJob: PrintJob | null;
-  onStatusUpdate: (jobId: string, status: PrintJob['status']) => Promise<void>;
-  onDeleteJob: (jobId: string) => Promise<void>;
+  onStatusUpdate: (jobId: string, status: PrintJob['status']) => void;
+  onDeleteJob: (jobId: string) => void;
 }
 
 export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDetailsProps) => {
@@ -32,14 +32,6 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
       </Card>
     );
   }
-
-  // Pass fully async handlers to JobActions
-  const handleStatusUpdate = async (jobId: string, status: PrintJob['status']) => {
-    await onStatusUpdate(jobId, status);
-  };
-  const handleDeleteJob = async (jobId: string) => {
-    await onDeleteJob(jobId);
-  };
 
   return (
     <Card className="h-fit">
@@ -69,8 +61,8 @@ export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDeta
 
         <JobActions
           job={selectedJob}
-          onStatusUpdate={handleStatusUpdate}
-          onDeleteJob={handleDeleteJob}
+          onStatusUpdate={onStatusUpdate}
+          onDeleteJob={onDeleteJob}
         />
       </CardContent>
     </Card>

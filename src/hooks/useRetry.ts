@@ -1,34 +1,24 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 
 export const useRetry = () => {
   const [isRetrying, setIsRetrying] = useState(false);
 
-  const retryWithBackoff = useCallback(async (fn: () => Promise<void>, maxRetries = 2) => {
-    let lastError: any;
-    
+  const retryWithBackoff = async (fn: () => Promise<void>, maxRetries = 3) => {
     for (let i = 0; i < maxRetries; i++) {
       try {
-        setIsRetrying(i > 0);
         await fn();
-        setIsRetrying(false);
         return;
       } catch (error) {
-        lastError = error;
-        if (i === maxRetries - 1) {
-          setIsRetrying(false);
-          throw error;
-        }
+        if (i === maxRetries - 1) throw error;
         
-        // Simple exponential backoff with max delay
-        const delay = Math.min(1000 * Math.pow(2, i), 3000);
+        setIsRetrying(true);
+        const delay = Math.min(1000 * Math.pow(2, i), 5000);
         await new Promise(resolve => setTimeout(resolve, delay));
+        setIsRetrying(false);
       }
     }
-    
-    setIsRetrying(false);
-    throw lastError;
-  }, []);
+  };
 
   return { isRetrying, retryWithBackoff, setIsRetrying };
 };

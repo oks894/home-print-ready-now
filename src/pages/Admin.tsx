@@ -1,22 +1,23 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { AdminTabs } from '@/components/admin/AdminTabs';
+import { NotificationManager } from '@/components/admin/NotificationManager';
 import { SearchProvider } from '@/components/admin/AdminSearch';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { useAdminData } from '@/hooks/useAdminData';
 import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { toast } from "@/components/ui/use-toast";
 
-const AdminContent = () => {
+const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const isMobile = useIsMobile();
   
-  // Always call hooks at the top level
-  const adminDataHook = useAdminData();
+  // Enable live tracking for admin page
+  useLiveTracking('admin');
+  
   const {
     printJobs,
     feedback,
@@ -28,40 +29,31 @@ const AdminContent = () => {
     deleteJob,
     deleteFeedback,
     setSelectedJob
-  } = adminDataHook;
+  } = useAdminData();
 
-  // Enable live tracking only after authentication
-  useLiveTracking(isAuthenticated ? 'admin' : null);
+  console.log('Admin render - Print jobs:', printJobs.length, 'Feedback:', feedback.length);
 
-  console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading);
-
-  // Login screen
   if (!isAuthenticated) {
     return (
       <MobileLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-          <AdminLogin onLogin={() => setIsAuthenticated(true)} />
-        </div>
+        <AdminLogin onLogin={() => setIsAuthenticated(true)} />
       </MobileLayout>
     );
   }
 
-  // Main admin interface
   return (
     <SearchProvider>
       <MobileLayout>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30">
           <AdminHeader 
-            onLogout={() => {
-              setIsAuthenticated(false);
-            }}
+            onLogout={() => setIsAuthenticated(false)}
             isRetrying={isRetrying}
             onRefresh={loadData}
           />
 
-          {/* Always show live monitor instantly in admin, show milestones on desktop */}
+          {/* Admin Live Monitor with Milestones */}
           <OnlineUsersMonitor 
-            showMilestones={!isMobile}
+            showMilestones={true}
             className="admin-monitor"
           />
 
@@ -69,7 +61,7 @@ const AdminContent = () => {
             isMobile ? 'px-2 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
           }`}>
             <div className={isMobile ? 'mb-6' : 'mb-8'}>
-              <h1 className={`font-bold text-gray-900 ${
+              <h1 className={`font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent ${
                 isMobile ? 'text-2xl' : 'text-3xl'
               }`}>
                 Dashboard Overview
@@ -80,15 +72,14 @@ const AdminContent = () => {
               {isLoading && (
                 <div className="mt-2 text-sm text-blue-600 flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  Loading dashboard data...
+                  Loading data...
                 </div>
               )}
-              {isRetrying && (
-                <div className="mt-2 text-sm text-orange-600 flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
-                  Retrying connection...
-                </div>
-              )}
+            </div>
+
+            {/* Add Notification Manager */}
+            <div className={isMobile ? 'mb-4' : 'mb-6'}>
+              <NotificationManager />
             </div>
 
             <AdminTabs
@@ -99,66 +90,13 @@ const AdminContent = () => {
               isRetrying={isRetrying}
               onJobSelect={setSelectedJob}
               onStatusUpdate={updateJobStatus}
-              onDeleteJob={async (jobId: string) => {
-                try {
-                  await deleteJob(jobId);
-                  toast({
-                    title: "Order deleted",
-                    description: "The print job was successfully deleted.",
-                    variant: "default",
-                  });
-                  // Refresh data after deletion
-                  await loadData();
-                  return true;
-                } catch (err) {
-                  toast({
-                    title: "Failed to delete order",
-                    description: "There was an error deleting the print job.",
-                    variant: "destructive",
-                  });
-                  return false;
-                }
-              }}
+              onDeleteJob={deleteJob}
               onDeleteFeedback={deleteFeedback}
             />
-           </div>
-         </div>
-       </MobileLayout>
-     </SearchProvider>
-   );
-};
-
-const Admin = () => {
-  return (
-    <ErrorBoundary fallback={
-      <div className="min-h-screen bg-white flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Admin Panel Error
-          </h2>
-          <p className="text-gray-600 mb-4">
-            The admin panel encountered an error. This might be due to a connection issue.
-          </p>
-          <div className="space-y-2">
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Refresh Page
-            </button>
-            <button
-              onClick={() => window.location.href = '/'}
-              className="w-full bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
-            >
-              Go to Home
-            </button>
           </div>
         </div>
-      </div>
-    }>
-      <AdminContent />
-    </ErrorBoundary>
+      </MobileLayout>
+    </SearchProvider>
   );
 };
 

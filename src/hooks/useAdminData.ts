@@ -9,6 +9,7 @@ import { useFeedback } from '@/hooks/useFeedback';
 export const useAdminData = () => {
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [lastFetchTime, setLastFetchTime] = useState(0);
   const [hasInitialized, setHasInitialized] = useState(false);
   
   const { toast } = useToast();
@@ -25,62 +26,43 @@ export const useAdminData = () => {
     deleteFeedback: deleteFeedbackInternal 
   } = useFeedback();
 
+  const CACHE_DURATION = 30000; // 30 seconds
+  const REFRESH_INTERVAL = 120000; // 2 minutes
+
+  const shouldRefetchData = useCallback(() => {
+    return Date.now() - lastFetchTime > CACHE_DURATION;
+  }, [lastFetchTime]);
+
   const loadData = useCallback(async (force = false) => {
-    // Prevent multiple simultaneous loads
-    if (isLoading && !force) {
-      console.log('useAdminData: Already loading, skipping');
+    if (!force && !shouldRefetchData() && hasInitialized) {
+      console.log('useAdminData: Using cached data, skipping fetch');
       return;
     }
 
-    if (hasInitialized && !force) {
-      console.log('useAdminData: Already initialized, skipping');
-      return;
-    }
-
-    console.log('useAdminData: Starting data load...');
+    console.log('useAdminData: Loading admin data...', { force, hasInitialized });
     setIsLoading(true);
     
     try {
-      // Simple parallel loading with error handling
-      const [printJobsResult, feedbackResult] = await Promise.allSettled([
-        loadPrintJobs(),
-        loadFeedback()
-      ]);
-
-      let hasErrors = false;
-
-      if (printJobsResult.status === 'rejected') {
-        console.error('Print jobs failed:', printJobsResult.reason);
-        hasErrors = true;
-      }
-      
-      if (feedbackResult.status === 'rejected') {
-        console.error('Feedback failed:', feedbackResult.reason);
-        hasErrors = true;
-      }
-
-      if (hasErrors) {
-        toast({
-          title: "Partial loading issue",
-          description: "Some data may not be available. Try refreshing.",
-          variant: "destructive"
-        });
-      }
-
-      setHasInitialized(true);
-      console.log('useAdminData: Data loaded successfully');
+      await retryWithBackoff(async () => {
+        console.log('useAdminData: Attempting to load print jobs and feedback...');
+        const promises = [loadPrintJobs(), loadFeedback()];
+        await Promise.allSettled(promises);
+        setLastFetchTime(Date.now());
+        setHasInitialized(true);
+        console.log('useAdminData: Admin data loaded successfully');
+      });
     } catch (error) {
-      console.error('useAdminData: Critical loading error:', error);
+      console.error('useAdminData: Failed to load data after retries:', error);
       toast({
-        title: "Loading failed",
-        description: "Failed to load admin data. Please refresh the page.",
+        title: "Connection issues",
+        description: "Having trouble loading data. Please check your internet connection and try again.",
         variant: "destructive"
       });
     } finally {
       setIsLoading(false);
       setIsRetrying(false);
     }
-  }, [isLoading, hasInitialized, loadPrintJobs, loadFeedback, toast, setIsRetrying]);
+  }, [shouldRefetchData, hasInitialized, retryWithBackoff, loadPrintJobs, loadFeedback, toast, setIsRetrying]);
 
   const updateJobStatus = async (jobId: string, status: PrintJob['status']) => {
     console.log('useAdminData: Updating job status:', jobId, status);
@@ -105,14 +87,29 @@ export const useAdminData = () => {
     await deleteFeedbackInternal(feedbackId, retryWithBackoff);
   };
 
-  // Initial load effect - simplified and more reliable
+  // Load data on component mount
   useEffect(() => {
     if (!hasInitialized) {
-      console.log('useAdminData: Triggering initial load');
-      const timer = setTimeout(() => loadData(true), 100);
-      return () => clearTimeout(timer);
+      console.log('useAdminData: Component mounted, loading data...');
+      loadData(true);
     }
-  }, [hasInitialized, loadData]);
+  }, [loadData, hasInitialized]);
+
+  // Auto-refresh data periodically but less frequently
+  useEffect(() => {
+    if (!hasInitialized) return;
+
+    const interval = setInterval(() => {
+      if (!isLoading && !isRetrying) {
+        console.log('useAdminData: Auto-refresh triggered');
+        loadData(false);
+      }
+    }, REFRESH_INTERVAL);
+
+    return () => clearInterval(interval);
+  }, [isLoading, isRetrying, hasInitialized, loadData]);
+
+  console.log('useAdminData: Current state - printJobs:', printJobs.length, 'feedback:', feedback.length, 'isLoading:', isLoading, 'hasInitialized:', hasInitialized);
 
   return {
     printJobs,
@@ -124,6 +121,7 @@ export const useAdminData = () => {
     updateJobStatus,
     deleteJob,
     deleteFeedback,
-    setSelectedJob
+    setSelectedJob,
+    shouldRefetchData
   };
 };

@@ -1,3 +1,4 @@
+
 import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
@@ -8,8 +9,6 @@ import { SimpleLoader } from '@/components/SimpleLoader';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { getAdaptiveConfig } from '@/utils/connectionUtils';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
-import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
-import LiveStatsWidget from '@/components/LiveStatsWidget';
 
 // Get adaptive configuration
 const adaptiveConfig = getAdaptiveConfig();
@@ -29,6 +28,10 @@ const MainContentSections = React.lazy(() =>
   import('@/components/MainContentSections').then(module => ({ 
     default: module.default 
   }))
+);
+
+const OnlineUsersMonitor = React.lazy(() => 
+  import('@/components/OnlineUsersMonitor')
 );
 
 const Index = () => {
@@ -51,7 +54,12 @@ const Index = () => {
             <Header />
           </ErrorBoundary>
           
-          {/* Live monitor ErrorBoundary with no children REMOVED TO FIX ERROR */}
+          {/* Always show live monitor on all pages */}
+          <ErrorBoundary fallback={null}>
+            <Suspense fallback={null}>
+              <OnlineUsersMonitor showMilestones={false} />
+            </Suspense>
+          </ErrorBoundary>
           
           <motion.main
             initial={{ opacity: 0, y: enableHeavyAnimations ? 20 : 0 }}
@@ -82,14 +90,8 @@ const Index = () => {
                 </Suspense>
               </ErrorBoundary>
             )}
-
-            {/* Show ONLY ONE, horizontal, modern stats widget just above the footer */}
-            <div className="flex justify-center w-full pb-6">
-              <LiveStatsWidget />
-            </div>
           </motion.main>
           
-          {/* Footer stays below the widget */}
           <ErrorBoundary fallback={<div className="h-16 bg-gray-100" />}>
             <Footer />
           </ErrorBoundary>

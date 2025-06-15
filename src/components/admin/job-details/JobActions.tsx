@@ -6,12 +6,11 @@ import { PrintJob } from '@/types/printJob';
 
 interface JobActionsProps {
   job: PrintJob;
-  onStatusUpdate: (jobId: string, status: PrintJob['status']) => Promise<void>;
-  onDeleteJob: (jobId: string) => Promise<void>;
+  onStatusUpdate: (jobId: string, status: PrintJob['status']) => void;
+  onDeleteJob: (jobId: string) => void;
 }
 
 export const JobActions = ({ job, onStatusUpdate, onDeleteJob }: JobActionsProps) => {
-  // Disabled state for async actions can be added if needed (TODO UX)
   return (
     <div className="space-y-4">
       <div>
