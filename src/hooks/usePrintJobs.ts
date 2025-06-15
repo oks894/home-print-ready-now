@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,12 +10,11 @@ export const usePrintJobs = () => {
   const loadPrintJobs = useCallback(async () => {
     console.log('usePrintJobs: Loading print jobs...');
     try {
-      // Optimized query - only recent jobs to speed up loading
+      // Remove the limit to get all jobs and improve query efficiency
       const { data, error } = await supabase
         .from('print_jobs')
         .select('*')
-        .order('timestamp', { ascending: false })
-        .limit(50); // Reduced limit for faster loading
+        .order('timestamp', { ascending: false });
 
       if (error) {
         console.error('usePrintJobs: Error loading print jobs:', error);
@@ -56,7 +54,8 @@ export const usePrintJobs = () => {
       setPrintJobs(typedJobs);
     } catch (error) {
       console.error('usePrintJobs: Error in loadPrintJobs:', error);
-      setPrintJobs([]);
+      // Don't clear existing jobs on error - keep what we have
+      throw error; // Re-throw to let parent handle
     }
   }, []);
 
