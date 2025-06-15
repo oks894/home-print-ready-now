@@ -1,3 +1,4 @@
+
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment, ContactShadows, Stars } from '@react-three/drei';
 import { Suspense, useState, useEffect } from 'react';
@@ -48,7 +49,7 @@ const Scene3D = () => {
   };
 
   return (
-    <div className="h-[700px] w-full relative bg-gradient-to-b from-slate-900 via-purple-900 to-indigo-900">
+    <div className="h-96 w-full aspect-square relative bg-gradient-to-b from-slate-900 via-purple-900 to-indigo-900">
       <Canvas
         camera={{ position: [0, 0, 7], fov: 45 }}
         className="rounded-3xl"
