@@ -18,7 +18,7 @@ export const MobileLayout = ({ children, showBottomNav = false, className = '' }
 
   return (
     <motion.div 
-      className={`min-h-screen bg-gradient-to-br from-blue-100 via-white to-purple-100 safe-area-inset ${className}`}
+      className={`min-h-screen bg-gradient-to-b from-blue-50 to-white safe-area-inset ${className}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}

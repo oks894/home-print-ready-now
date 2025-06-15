@@ -1,6 +1,5 @@
 
 import { motion } from 'framer-motion';
-import AnimatedContactSection from '@/components/AnimatedContactSection';
 import AnimatedServices from '@/components/AnimatedServices';
 import PaymentQR from '@/components/PaymentQR';
 import Feedback from '@/components/Feedback';
@@ -8,7 +7,6 @@ import Feedback from '@/components/Feedback';
 export const MainContentSections = () => {
   return (
     <>
-      <AnimatedContactSection />
       <AnimatedServices />
       
       <motion.div
