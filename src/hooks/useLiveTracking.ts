@@ -1,49 +1,36 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useOnlineUsers } from './useOnlineUsers';
 
 export const useLiveTracking = (pageName?: string) => {
   const { onlineCount, isConnected, peakCount, milestones } = useOnlineUsers();
-  const lastActivityRef = useRef<number>(0);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    const now = Date.now();
-    const currentPage = pageName || window.location.pathname;
-    
-    // Throttle activity tracking to reduce overhead
+    // Track page views and user activity
     const trackActivity = () => {
-      const currentTime = Date.now();
-      if (currentTime - lastActivityRef.current < 30000) return; // 30 second throttle
-      
-      lastActivityRef.current = currentTime;
-      console.log(`Live tracking: ${currentPage} - ${onlineCount} users online`);
+      console.log(`Live tracking active on ${pageName || window.location.pathname}`);
     };
 
-    // Optimized visibility change handler
+    // Track when user becomes active/inactive
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
+        console.log('User became active');
         trackActivity();
       }
     };
 
-    // Initial tracking
+    // Set up tracking
     trackActivity();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Set up event listeners with passive options for better performance
-    document.addEventListener('visibilitychange', handleVisibilityChange, { passive: true });
-    
-    // Reduced frequency interval
-    intervalRef.current = setInterval(trackActivity, 60000); // Every 60 seconds
+    // Track periodic activity
+    const interval = setInterval(trackActivity, 30000); // Every 30 seconds
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+      clearInterval(interval);
     };
-  }, [pageName, onlineCount]); // Only re-run when page or count changes
+  }, [pageName]);
 
   return {
     onlineCount,
