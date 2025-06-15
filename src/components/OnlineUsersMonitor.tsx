@@ -3,25 +3,26 @@ import { motion } from 'framer-motion';
 import { Users, Wifi, WifiOff, Trophy } from 'lucide-react';
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
 import { getAdaptiveConfig } from '@/utils/connectionUtils';
+import { memo } from 'react';
 
 interface OnlineUsersMonitorProps {
   showMilestones?: boolean;
   className?: string;
 }
 
-const OnlineUsersMonitor = ({ showMilestones = false, className = '' }: OnlineUsersMonitorProps) => {
+const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: OnlineUsersMonitorProps) => {
   const { onlineCount, isConnected, peakCount, milestones } = useOnlineUsers();
   const { simplifiedUI, enableHeavyAnimations, enableBackdropBlur } = getAdaptiveConfig();
 
   console.log('OnlineUsersMonitor render - count:', onlineCount, 'connected:', isConnected, 'peak:', peakCount);
 
-  // Check if we've hit a milestone
+  // Check if we've hit a milestone recently
   const recentMilestone = milestones.find(m => m.count <= onlineCount && Date.now() - m.timestamp < 10000);
 
-  // Simple version for slow connections
+  // Simple version for slow connections - no flickering animations
   if (simplifiedUI) {
     return (
-      <div className={`fixed top-20 right-4 z-40 bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-md ${className}`}>
+      <div className={`fixed top-20 right-4 z-40 bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-md transition-none ${className}`}>
         <div className="flex items-center gap-2 text-sm">
           {isConnected ? (
             <Wifi className="w-4 h-4 text-green-500" />
@@ -29,7 +30,7 @@ const OnlineUsersMonitor = ({ showMilestones = false, className = '' }: OnlineUs
             <WifiOff className="w-4 h-4 text-gray-400" />
           )}
           <Users className="w-4 h-4 text-blue-600" />
-          <span className="font-semibold text-blue-600">{onlineCount}</span>
+          <span className="font-semibold text-blue-600 min-w-[2ch]">{onlineCount}</span>
           <span className="text-gray-600 text-xs">online</span>
         </div>
         
@@ -57,7 +58,7 @@ const OnlineUsersMonitor = ({ showMilestones = false, className = '' }: OnlineUs
         enableBackdropBlur 
           ? 'bg-white/90 backdrop-blur-sm' 
           : 'bg-white'
-      } border border-gray-200 rounded-lg px-3 py-2 shadow-lg ${className}`}
+      } border border-gray-200 rounded-lg px-3 py-2 shadow-lg transition-none ${className}`}
     >
       <div className="flex items-center gap-2 text-sm">
         {isConnected ? (
@@ -77,17 +78,17 @@ const OnlineUsersMonitor = ({ showMilestones = false, className = '' }: OnlineUs
           key={onlineCount}
           initial={enableHeavyAnimations ? { scale: 1.2 } : {}}
           animate={{ scale: 1 }}
-          transition={{ duration: enableHeavyAnimations ? 0.2 : 0.1 }}
-          className="font-semibold text-blue-600"
+          transition={{ duration: enableHeavyAnimations ? 0.2 : 0.05 }}
+          className="font-semibold text-blue-600 min-w-[2ch]"
         >
           {onlineCount}
         </motion.span>
         
-        <span className="text-gray-600 text-xs">
+        <span className="text-gray-600 text-xs whitespace-nowrap">
           online
         </span>
 
-        {/* Milestone celebration */}
+        {/* Milestone celebration - only show briefly */}
         {recentMilestone && enableHeavyAnimations && (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
@@ -114,9 +115,9 @@ const OnlineUsersMonitor = ({ showMilestones = false, className = '' }: OnlineUs
           
           {milestones.length > 0 && (
             <div className="mt-1">
-              <div className="text-xs text-gray-500 mb-1">Milestones Reached:</div>
+              <div className="text-xs text-gray-500 mb-1">Milestones:</div>
               <div className="flex flex-wrap gap-1">
-                {milestones.map((milestone, index) => (
+                {milestones.slice(-5).map((milestone, index) => (
                   <span
                     key={index}
                     className="inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-green-100 text-green-700"
@@ -128,11 +129,11 @@ const OnlineUsersMonitor = ({ showMilestones = false, className = '' }: OnlineUs
             </div>
           )}
           
-          {/* Next milestone indicator */}
+          {/* Next milestone progress */}
           {(() => {
             const nextMilestone = [100, 200, 500, 1000, 2000, 5000].find(m => m > peakCount);
             if (nextMilestone) {
-              const progress = (onlineCount / nextMilestone) * 100;
+              const progress = Math.min((onlineCount / nextMilestone) * 100, 100);
               return (
                 <div className="mt-2">
                   <div className="flex justify-between text-xs text-gray-500 mb-1">
@@ -141,8 +142,8 @@ const OnlineUsersMonitor = ({ showMilestones = false, className = '' }: OnlineUs
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-1">
                     <div 
-                      className="bg-blue-500 h-1 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(progress, 100)}%` }}
+                      className="bg-blue-500 h-1 rounded-full transition-all duration-1000 ease-out"
+                      style={{ width: `${progress}%` }}
                     />
                   </div>
                 </div>
@@ -154,6 +155,8 @@ const OnlineUsersMonitor = ({ showMilestones = false, className = '' }: OnlineUs
       )}
     </motion.div>
   );
-};
+});
+
+OnlineUsersMonitor.displayName = 'OnlineUsersMonitor';
 
 export default OnlineUsersMonitor;
