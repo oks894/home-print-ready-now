@@ -8,16 +8,19 @@ export const useLiveTracking = (pageName?: string) => {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    const now = Date.now();
     const currentPage = pageName || window.location.pathname;
     
-    // Simple activity tracking without throttling initially
+    // Throttle activity tracking to reduce overhead
     const trackActivity = () => {
       const currentTime = Date.now();
+      if (currentTime - lastActivityRef.current < 30000) return; // 30 second throttle
+      
       lastActivityRef.current = currentTime;
       console.log(`Live tracking: ${currentPage} - ${onlineCount} users online`);
     };
 
-    // Track activity on visibility change
+    // Optimized visibility change handler
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
         trackActivity();
@@ -27,11 +30,11 @@ export const useLiveTracking = (pageName?: string) => {
     // Initial tracking
     trackActivity();
     
-    // Set up event listeners
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    // Set up event listeners with passive options for better performance
+    document.addEventListener('visibilitychange', handleVisibilityChange, { passive: true });
     
-    // Set up interval for periodic tracking (less frequent)
-    intervalRef.current = setInterval(trackActivity, 120000); // Every 2 minutes
+    // Reduced frequency interval
+    intervalRef.current = setInterval(trackActivity, 60000); // Every 60 seconds
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
@@ -40,7 +43,7 @@ export const useLiveTracking = (pageName?: string) => {
         intervalRef.current = null;
       }
     };
-  }, [pageName, onlineCount]);
+  }, [pageName, onlineCount]); // Only re-run when page or count changes
 
   return {
     onlineCount,

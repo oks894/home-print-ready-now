@@ -35,10 +35,20 @@ export const useAdminData = () => {
     setIsLoading(true);
     
     try {
-      // Load data without aggressive timeouts - let the database queries complete naturally
+      // Load data with shorter timeout and better error handling
       const results = await Promise.allSettled([
-        loadPrintJobs(),
-        loadFeedback()
+        Promise.race([
+          loadPrintJobs(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Print jobs timeout')), 5000)
+          )
+        ]),
+        Promise.race([
+          loadFeedback(),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Feedback timeout')), 5000)
+          )
+        ])
       ]);
 
       // Check results and handle partial failures
@@ -47,29 +57,24 @@ export const useAdminData = () => {
 
       if (printJobsResult.status === 'rejected') {
         console.warn('Print jobs failed to load:', printJobsResult.reason);
-        toast({
-          title: "Print jobs loading failed",
-          description: "Unable to load print jobs. Please try refreshing.",
-          variant: "destructive"
-        });
       }
       
       if (feedbackResult.status === 'rejected') {
         console.warn('Feedback failed to load:', feedbackResult.reason);
       }
 
-      // Don't throw error if only one fails - partial data is better than no data
-      if (printJobsResult.status === 'fulfilled' || feedbackResult.status === 'fulfilled') {
-        setHasInitialized(true);
-        console.log('useAdminData: Admin data loaded successfully');
-      } else {
+      // If both failed, show error
+      if (printJobsResult.status === 'rejected' && feedbackResult.status === 'rejected') {
         throw new Error('Both print jobs and feedback failed to load');
       }
+
+      setHasInitialized(true);
+      console.log('useAdminData: Admin data loaded successfully');
     } catch (error) {
       console.error('useAdminData: Failed to load data:', error);
       toast({
-        title: "Loading failed",
-        description: "Failed to load admin data. Please refresh the page.",
+        title: "Partial loading failure",
+        description: "Some data may not be available. Click refresh to try again.",
         variant: "destructive"
       });
     } finally {
