@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLogin } from '@/components/admin/AdminLogin';
@@ -13,7 +12,6 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const AdminContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showMonitor, setShowMonitor] = useState(false);
   const isMobile = useIsMobile();
   
   // Always call hooks at the top level
@@ -34,17 +32,7 @@ const AdminContent = () => {
   // Enable live tracking only after authentication
   useLiveTracking(isAuthenticated ? 'admin' : null);
 
-  // Show monitor after authentication and initial load
-  useEffect(() => {
-    if (isAuthenticated && !isLoading) {
-      const timer = setTimeout(() => setShowMonitor(true), 1000);
-      return () => clearTimeout(timer);
-    } else {
-      setShowMonitor(false);
-    }
-  }, [isAuthenticated, isLoading]);
-
-  console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading, 'showMonitor:', showMonitor);
+  console.log('Admin render - authenticated:', isAuthenticated, 'loading:', isLoading);
 
   // Login screen
   if (!isAuthenticated) {
@@ -65,19 +53,16 @@ const AdminContent = () => {
           <AdminHeader 
             onLogout={() => {
               setIsAuthenticated(false);
-              setShowMonitor(false);
             }}
             isRetrying={isRetrying}
             onRefresh={loadData}
           />
 
-          {/* Only show monitor after everything is ready */}
-          {showMonitor && (
-            <OnlineUsersMonitor 
-              showMilestones={!isMobile}
-              className="admin-monitor"
-            />
-          )}
+          {/* Always show live monitor instantly in admin, show milestones on desktop */}
+          <OnlineUsersMonitor 
+            showMilestones={!isMobile}
+            className="admin-monitor"
+          />
 
           <div className={`max-w-7xl mx-auto safe-area-inset ${
             isMobile ? 'px-2 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
@@ -116,11 +101,11 @@ const AdminContent = () => {
               onDeleteJob={deleteJob}
               onDeleteFeedback={deleteFeedback}
             />
-          </div>
-        </div>
-      </MobileLayout>
-    </SearchProvider>
-  );
+           </div>
+         </div>
+       </MobileLayout>
+     </SearchProvider>
+   );
 };
 
 const Admin = () => {

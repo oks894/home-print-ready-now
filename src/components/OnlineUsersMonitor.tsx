@@ -62,12 +62,9 @@ const DesktopLiveMonitor: React.FC<{
         {connectionIcon}
         {userCountIcon}
         <span className="font-semibold text-blue-600 min-w-[2ch] tabular-nums">{onlineCount}</span>
-
-        {/* Green dot instead of "online" text */}
         <div className="flex items-center gap-1">
           <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-orange-500'} ${isConnected ? 'animate-pulse' : ''}`}></div>
         </div>
-
         {!isConnected && (
           <span className="text-xs text-orange-500">
             {adaptiveConfig.simplifiedUI ? '...' : 'reconnecting...'}
@@ -75,7 +72,8 @@ const DesktopLiveMonitor: React.FC<{
         )}
       </div>
 
-      {showMilestones && (peakCount > 0 || milestoneDisplay) && (
+      {/* Always show milestones and peak in admin desktop unless simplifiedUI is set */}
+      {showMilestones && (peakCount > 0 || milestoneDisplay) && !adaptiveConfig.simplifiedUI && (
         <div className="mt-1 pt-1 border-t border-gray-100">
           {peakCount > 0 && (
             <div className="flex items-center gap-1 text-xs text-gray-500">
@@ -97,7 +95,7 @@ DesktopLiveMonitor.displayName = 'DesktopLiveMonitor';
 
 // Refactored OnlineUsersMonitor
 const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: OnlineUsersMonitorProps) => {
-  // Always call at top-level
+  // Always call useOnlineUsers at the top level for consistent hook order
   const isMobile = useIsMobile();
   const {
     onlineCount,
