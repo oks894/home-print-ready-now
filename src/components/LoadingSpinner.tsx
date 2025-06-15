@@ -2,8 +2,32 @@
 import { motion } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+// Check for slow connection
+const isSlowConnection = navigator.connection && 
+  (navigator.connection.effectiveType === 'slow-2g' || 
+   navigator.connection.effectiveType === '2g' || 
+   navigator.connection.effectiveType === '3g');
+
 export const LoadingSpinner = () => {
   const isMobile = useIsMobile();
+  
+  // Use simpler loading for slow connections
+  if (isSlowConnection) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className={`border-4 border-blue-500 border-t-transparent rounded-full ${
+            isMobile ? 'w-8 h-8' : 'w-12 h-12'
+          }`} style={{ animation: 'spin 1s linear infinite' }} />
+          <p className={`font-medium text-gray-700 ${
+            isMobile ? 'text-sm text-center px-4' : 'text-base'
+          }`}>
+            Loading...
+          </p>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">

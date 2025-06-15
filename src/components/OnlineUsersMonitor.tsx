@@ -3,8 +3,32 @@ import { motion } from 'framer-motion';
 import { Users, Wifi, WifiOff } from 'lucide-react';
 import { useOnlineUsers } from '@/hooks/useOnlineUsers';
 
+// Check for slow connection
+const isSlowConnection = navigator.connection && 
+  (navigator.connection.effectiveType === 'slow-2g' || 
+   navigator.connection.effectiveType === '2g' || 
+   navigator.connection.effectiveType === '3g');
+
 const OnlineUsersMonitor = () => {
   const { onlineCount, isConnected } = useOnlineUsers();
+
+  // Simple version for slow connections
+  if (isSlowConnection) {
+    return (
+      <div className="fixed top-20 right-4 z-40 bg-white border border-gray-200 rounded-lg px-3 py-2 shadow-md">
+        <div className="flex items-center gap-2 text-sm">
+          {isConnected ? (
+            <Wifi className="w-4 h-4 text-green-500" />
+          ) : (
+            <WifiOff className="w-4 h-4 text-gray-400" />
+          )}
+          <Users className="w-4 h-4 text-blue-600" />
+          <span className="font-semibold text-blue-600">{onlineCount}</span>
+          <span className="text-gray-600 text-xs">online</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <motion.div

@@ -154,6 +154,32 @@
     }
   }
 
+  /* Optimizations for slow connections (3G and below) */
+  @media (max-width: 768px) and (max-resolution: 150dpi) {
+    .slow-connection * {
+      animation: none !important;
+      transition: none !important;
+      backdrop-filter: none !important;
+      filter: none !important;
+    }
+    
+    .slow-connection .gradient-text {
+      background: none !important;
+      color: #1d4ed8 !important;
+    }
+    
+    .slow-connection .backdrop-blur {
+      backdrop-filter: none !important;
+      background: rgba(255, 255, 255, 0.95) !important;
+    }
+  }
+
+  /* Force basic styles for very slow connections */
+  .connection-3g * {
+    animation-duration: 0.1s !important;
+    transition-duration: 0.1s !important;
+  }
+
   /* Reduce animations on slow connections */
   @media (prefers-reduced-motion: reduce) {
     * {
@@ -163,11 +189,10 @@
     }
   }
 
-  /* Optimize for slow connections */
-  @media (max-width: 768px) and (max-resolution: 150dpi) {
-    .reduce-animations * {
-      animation: none !important;
-      transition: none !important;
+  /* Basic spinner for slow connections */
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 }
@@ -263,16 +288,24 @@
     }
   }
 
-  /* Low bandwidth optimizations */
-  .low-bandwidth {
-    will-change: auto;
-    transform: none;
-    filter: none;
+  /* Specific optimizations for 3G */
+  .connection-3g {
+    will-change: auto !important;
+    transform: none !important;
+    filter: none !important;
+    backdrop-filter: none !important;
   }
 
   .reduce-motion {
     animation: none !important;
     transition: none !important;
+  }
+
+  /* Lightweight mode for extremely slow connections */
+  .ultra-light * {
+    box-shadow: none !important;
+    text-shadow: none !important;
+    border-radius: 4px !important;
   }
 }
 
@@ -306,5 +339,15 @@
 
   .lite-button:hover {
     filter: brightness(0.95);
+  }
+
+  /* 3G optimized components */
+  .connection-3g .mobile-card {
+    @apply shadow-sm border border-gray-200;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .connection-3g .gradient-bg {
+    background: #f8fafc !important;
   }
 }
