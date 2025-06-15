@@ -42,7 +42,13 @@ export const usePrintJobs = () => {
           })) : [],
         timestamp: job.timestamp,
         status: (job.status as PrintJob['status']) || 'pending',
-        selected_services: job.selected_services || [],
+        selected_services: Array.isArray(job.selected_services) ? 
+          (job.selected_services as any[]).map(service => ({
+            id: service?.id || '',
+            name: service?.name || '',
+            quantity: service?.quantity || 1,
+            price: service?.price || 0
+          })) : [],
         total_amount: job.total_amount || 0,
         delivery_requested: job.delivery_requested || false
       }));
