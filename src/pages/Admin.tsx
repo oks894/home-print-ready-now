@@ -9,6 +9,8 @@ import { useAdminData } from '@/hooks/useAdminData';
 import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
+import AdminLiveStats from '@/components/admin/AdminLiveStats';
+import { toast } from "@/components/ui/use-toast";
 
 const AdminContent = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -64,6 +66,9 @@ const AdminContent = () => {
             className="admin-monitor"
           />
 
+          {/* LIVE Stats Widget */}
+          <AdminLiveStats />
+
           <div className={`max-w-7xl mx-auto safe-area-inset ${
             isMobile ? 'px-2 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
           }`}>
@@ -98,7 +103,26 @@ const AdminContent = () => {
               isRetrying={isRetrying}
               onJobSelect={setSelectedJob}
               onStatusUpdate={updateJobStatus}
-              onDeleteJob={deleteJob}
+              onDeleteJob={async (jobId: string) => {
+                try {
+                  await deleteJob(jobId);
+                  toast({
+                    title: "Order deleted",
+                    description: "The print job was successfully deleted.",
+                    variant: "success",
+                  });
+                  // Refresh data after deletion
+                  await loadData();
+                  return true;
+                } catch (err) {
+                  toast({
+                    title: "Failed to delete order",
+                    description: "There was an error deleting the print job.",
+                    variant: "destructive",
+                  });
+                  return false;
+                }
+              }}
               onDeleteFeedback={deleteFeedback}
             />
            </div>
