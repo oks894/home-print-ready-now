@@ -11,22 +11,20 @@ interface OnlineUsersMonitorProps {
   className?: string;
 }
 
-const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: OnlineUsersMonitorProps) => {
-  const { onlineCount, isConnected, peakCount, milestones } = useOnlineUsers();
-  const isMobile = useIsMobile();
+// UI for desktop users
+const DesktopLiveMonitor: React.FC<{
+  onlineCount: number;
+  isConnected: boolean;
+  peakCount: number;
+  milestones: { count: number; timestamp: number }[];
+  showMilestones: boolean;
+  className?: string;
+}> = memo(({ onlineCount, isConnected, peakCount, milestones, showMilestones, className }) => {
   const adaptiveConfig = getAdaptiveConfig();
-
-  console.log('OnlineUsersMonitor rendering:', { onlineCount, isConnected, isMobile });
-
-  // Use mobile component for mobile devices
-  if (isMobile) {
-    return <MobileLiveMonitor className={className} />;
-  }
 
   // Memoize milestone display to prevent unnecessary re-renders
   const milestoneDisplay = useMemo(() => {
     if (!showMilestones || milestones.length === 0 || adaptiveConfig.simplifiedUI) return null;
-    
     const recentMilestones = milestones.slice(-2);
     return recentMilestones.map(m => m.count).join(', ');
   }, [showMilestones, milestones, adaptiveConfig.simplifiedUI]);
@@ -34,7 +32,6 @@ const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: Onl
   // Memoize the connection status icon
   const connectionIcon = useMemo(() => {
     if (adaptiveConfig.simplifiedUI) return null;
-    
     return isConnected ? (
       <Wifi className="w-3 h-3 text-green-500" />
     ) : (
@@ -54,7 +51,7 @@ const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: Onl
   // Desktop positioning
   const isAdminPage = window.location.pathname.includes('/admin');
   const positionClasses = useMemo(() => {
-    return isAdminPage 
+    return isAdminPage
       ? 'fixed top-28 right-4 z-[70]'
       : 'fixed top-20 right-4 z-50';
   }, [isAdminPage]);
@@ -65,19 +62,19 @@ const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: Onl
         {connectionIcon}
         {userCountIcon}
         <span className="font-semibold text-blue-600 min-w-[2ch] tabular-nums">{onlineCount}</span>
-        
+
         {/* Green dot instead of "online" text */}
         <div className="flex items-center gap-1">
           <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-orange-500'} ${isConnected ? 'animate-pulse' : ''}`}></div>
         </div>
-        
+
         {!isConnected && (
           <span className="text-xs text-orange-500">
             {adaptiveConfig.simplifiedUI ? '...' : 'reconnecting...'}
           </span>
         )}
       </div>
-      
+
       {showMilestones && (peakCount > 0 || milestoneDisplay) && (
         <div className="mt-1 pt-1 border-t border-gray-100">
           {peakCount > 0 && (
@@ -96,7 +93,42 @@ const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: Onl
     </div>
   );
 });
+DesktopLiveMonitor.displayName = 'DesktopLiveMonitor';
 
+// Refactored OnlineUsersMonitor
+const OnlineUsersMonitor = memo(({ showMilestones = false, className = '' }: OnlineUsersMonitorProps) => {
+  // Always call at top-level
+  const isMobile = useIsMobile();
+  const {
+    onlineCount,
+    isConnected,
+    peakCount,
+    milestones
+  } = useOnlineUsers();
+
+  // Always call useOnlineUsers (never in branch)
+  // Pass down the data as props (DO NOT call hook in child)
+  if (isMobile) {
+    return (
+      <MobileLiveMonitor
+        onlineCount={onlineCount}
+        isConnected={isConnected}
+        className={className}
+      />
+    );
+  }
+
+  return (
+    <DesktopLiveMonitor
+      onlineCount={onlineCount}
+      isConnected={isConnected}
+      peakCount={peakCount}
+      milestones={milestones}
+      showMilestones={showMilestones}
+      className={className}
+    />
+  );
+});
 OnlineUsersMonitor.displayName = 'OnlineUsersMonitor';
 
 export default OnlineUsersMonitor;
