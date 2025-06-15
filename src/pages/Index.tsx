@@ -6,7 +6,6 @@ import Footer from '@/components/Footer';
 import AnimatedHeroSection from '@/components/AnimatedHeroSection';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
-import { ActionButtonsSection } from '@/components/ActionButtonsSection';
 import { MainContentSections } from '@/components/MainContentSections';
 
 const Index = () => {
@@ -27,7 +26,6 @@ const Index = () => {
             className="overflow-x-hidden"
           >
             <AnimatedHeroSection />
-            <ActionButtonsSection />
             <MainContentSections />
           </motion.main>
           
