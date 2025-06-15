@@ -1,4 +1,3 @@
-
 import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
@@ -87,12 +86,13 @@ const Index = () => {
               </ErrorBoundary>
             )}
 
-            {/* LIVE stats widget just above the footer */}
-            <div className="flex justify-center my-8">
+            {/* LIVE stats widget just above the footer (horizontal layout) */}
+            <div className="flex justify-center w-full pb-4">
               <LiveStatsWidget />
             </div>
           </motion.main>
           
+          {/* Footer stays below the widget */}
           <ErrorBoundary fallback={<div className="h-16 bg-gray-100" />}>
             <Footer />
           </ErrorBoundary>
