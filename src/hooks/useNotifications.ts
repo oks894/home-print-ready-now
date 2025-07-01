@@ -2,10 +2,14 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useVibration } from '@/hooks/useVibration';
+import { usePageVisibility } from '@/hooks/usePageVisibility';
 
 export const useNotifications = () => {
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const { toast } = useToast();
+  const { vibrate, patterns, isEnabled: vibrationEnabled } = useVibration();
+  const { isInBackground } = usePageVisibility();
 
   // Request notification permission
   const requestPermission = async () => {
@@ -19,24 +23,49 @@ export const useNotifications = () => {
     return 'denied';
   };
 
-  // Show browser notification
+  // Show browser notification with enhanced options for background
   const showNotification = (title: string, options?: NotificationOptions) => {
     console.log('Attempting to show notification:', title, permission);
     if (permission === 'granted' && 'Notification' in window) {
-      const notification = new Notification(title, {
+      const enhancedOptions = {
         icon: '/favicon.ico',
         badge: '/favicon.ico',
+        requireInteraction: isInBackground, // Require interaction if in background
+        silent: false,
+        tag: 'print-order', // Group similar notifications
         ...options
-      });
+      };
 
-      // Auto close after 5 seconds
+      const notification = new Notification(title, enhancedOptions);
+
+      // Auto close after 10 seconds for background, 5 seconds for foreground
+      const autoCloseDelay = isInBackground ? 10000 : 5000;
       setTimeout(() => {
         notification.close();
-      }, 5000);
+      }, autoCloseDelay);
+
+      // Add click handler to focus the window
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
 
       return notification;
     } else {
       console.log('Cannot show notification. Permission:', permission);
+    }
+  };
+
+  // Trigger vibration for new orders
+  const triggerOrderVibration = () => {
+    if (vibrationEnabled) {
+      if (isInBackground) {
+        // Stronger vibration pattern when in background
+        vibrate(patterns.urgent);
+      } else {
+        // Gentle vibration when tab is active
+        vibrate(patterns.newOrder);
+      }
     }
   };
 
@@ -58,19 +87,24 @@ export const useNotifications = () => {
           
           const job = payload.new;
           
-          // Show browser notification only if permission is granted
+          // Trigger vibration
+          triggerOrderVibration();
+          
+          // Show browser notification with enhanced options for background
           if (permission === 'granted') {
             showNotification('New Print Order!', {
               body: `Order from ${job.name} - Tracking ID: ${job.tracking_id}`,
               tag: `print-job-${job.id}`,
-              requireInteraction: true
+              requireInteraction: isInBackground,
+              data: { jobId: job.id, trackingId: job.tracking_id }
             });
           }
 
-          // Always show toast notification
+          // Always show toast notification with enhanced visibility for background
           toast({
             title: "New Print Order!",
             description: `Order from ${job.name} - ID: ${job.tracking_id}`,
+            duration: isInBackground ? 8000 : 5000, // Longer duration if in background
           });
         }
       )
@@ -96,6 +130,9 @@ export const useNotifications = () => {
     permission,
     requestPermission,
     showNotification,
-    startListening
+    startListening,
+    triggerOrderVibration,
+    isInBackground,
+    vibrationEnabled
   };
 };

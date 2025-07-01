@@ -1,13 +1,17 @@
 
 import { useEffect, useState } from 'react';
-import { Bell, BellOff } from 'lucide-react';
+import { Bell, BellOff, Smartphone, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useVibration } from '@/hooks/useVibration';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
+import { Separator } from '@/components/ui/separator';
 
 export const NotificationManager = () => {
-  const { permission, requestPermission, startListening } = useNotifications();
+  const { permission, requestPermission, startListening, isInBackground, vibrationEnabled } = useNotifications();
+  const { isSupported: vibrationSupported, isEnabled: vibrationEnabled2, enableVibration, disableVibration, vibrate, patterns } = useVibration();
   const [isListening, setIsListening] = useState(false);
   const [cleanup, setCleanup] = useState<(() => void) | null>(null);
 
@@ -29,6 +33,10 @@ export const NotificationManager = () => {
       setCleanup(null);
     }
     setIsListening(false);
+  };
+
+  const handleTestVibration = () => {
+    vibrate(patterns.test);
   };
 
   const getPermissionStatus = () => {
@@ -69,14 +77,14 @@ export const NotificationManager = () => {
           Real-time Notifications
         </CardTitle>
         <CardDescription>
-          Get notified instantly when new print orders arrive
+          Get notified instantly when new print orders arrive with sound, vibration, and visual alerts
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium">Notification Status</p>
-            <p className="text-sm text-gray-600">Browser notification permission</p>
+            <p className="font-medium">Browser Notifications</p>
+            <p className="text-sm text-gray-600">Push notifications from browser</p>
           </div>
           <Badge className={permissionInfo.color}>
             {permissionInfo.status}
@@ -92,6 +100,67 @@ export const NotificationManager = () => {
             {isListening ? 'Active' : 'Inactive'}
           </Badge>
         </div>
+
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium">Tab Status</p>
+            <p className="text-sm text-gray-600">Current tab visibility</p>
+          </div>
+          <Badge className={isInBackground ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}>
+            {isInBackground ? 'Background' : 'Active'}
+          </Badge>
+        </div>
+
+        <Separator />
+
+        {/* Vibration Settings */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Smartphone className="w-4 h-4" />
+            <h4 className="font-medium">Vibration Settings</h4>
+          </div>
+
+          {vibrationSupported ? (
+            <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Vibration Alerts</p>
+                  <p className="text-sm text-gray-600">Haptic feedback for new orders</p>
+                </div>
+                <Switch
+                  checked={vibrationEnabled2}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      enableVibration();
+                    } else {
+                      disableVibration();
+                    }
+                  }}
+                />
+              </div>
+
+              {vibrationEnabled2 && (
+                <Button
+                  onClick={handleTestVibration}
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                >
+                  <Smartphone className="w-4 h-4 mr-2" />
+                  Test Vibration
+                </Button>
+              )}
+            </>
+          ) : (
+            <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+              <p className="text-sm text-gray-600">
+                Vibration is not supported on this device/browser.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <Separator />
 
         <div className="flex gap-2">
           {permission !== 'granted' && (
@@ -137,7 +206,7 @@ export const NotificationManager = () => {
         {permission === 'granted' && isListening && (
           <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
             <p className="text-sm text-green-800">
-              <strong>Notifications Active:</strong> You'll receive alerts for new print orders even when this tab is in the background.
+              <strong>Notifications Active:</strong> You'll receive alerts with {vibrationEnabled2 && vibrationSupported ? 'vibration, ' : ''}sound, and visual notifications for new print orders{isInBackground ? ', with enhanced alerts since the tab is in the background' : ''}.
             </p>
           </div>
         )}
@@ -145,7 +214,7 @@ export const NotificationManager = () => {
         {permission === 'granted' && !isListening && (
           <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800">
-              <strong>Ready to Listen:</strong> Click "Start Listening" to begin receiving real-time notifications.
+              <strong>Ready to Listen:</strong> Click "Start Listening" to begin receiving real-time notifications with enhanced background support.
             </p>
           </div>
         )}
