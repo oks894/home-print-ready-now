@@ -2,19 +2,15 @@
 import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-
-interface FileItem {
-  name: string;
-  size: number;
-  data?: string;
-}
+import { PrintJob } from '@/types/printJob';
 
 interface FilesListProps {
-  files: FileItem[];
+  job: PrintJob;
 }
 
-export const FilesList = ({ files }: FilesListProps) => {
+export const FilesList = ({ job }: FilesListProps) => {
   const { toast } = useToast();
+  const files = job.files;
 
   const downloadFile = (fileName: string, fileData?: string) => {
     if (fileData) {

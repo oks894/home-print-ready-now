@@ -7,10 +7,10 @@ import { PrintJob } from '@/types/printJob';
 interface JobActionsProps {
   job: PrintJob;
   onStatusUpdate: (jobId: string, status: PrintJob['status']) => void;
-  onDeleteJob: (jobId: string) => void;
+  onDelete: (jobId: string) => void;
 }
 
-export const JobActions = ({ job, onStatusUpdate, onDeleteJob }: JobActionsProps) => {
+export const JobActions = ({ job, onStatusUpdate, onDelete }: JobActionsProps) => {
   return (
     <div className="space-y-4">
       <div>
@@ -25,7 +25,7 @@ export const JobActions = ({ job, onStatusUpdate, onDeleteJob }: JobActionsProps
         <Button
           variant="destructive"
           size="sm"
-          onClick={() => onDeleteJob(job.id)}
+          onClick={() => onDelete(job.id)}
           className="w-full sm:w-auto"
         >
           <Trash2 className="w-4 h-4 mr-2" />

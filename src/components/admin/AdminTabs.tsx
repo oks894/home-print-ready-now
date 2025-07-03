@@ -159,9 +159,9 @@ export const AdminTabs = ({
       <TabsContent value="details" className="space-y-4">
         {selectedJob ? (
           <JobDetails
-            selectedJob={selectedJob}
+            job={selectedJob}
             onStatusUpdate={onStatusUpdate}
-            onDeleteJob={onDeleteJob}
+            onDelete={onDeleteJob}
           />
         ) : (
           <Card>

@@ -13,4 +13,5 @@ export interface PrintJob {
   selected_services?: Array<{ id: string; name: string; quantity: number; price: number }>;
   total_amount?: number;
   delivery_requested?: boolean;
+  estimated_completion?: string;
 }

@@ -2,20 +2,17 @@
 import { Package, Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getBulkDiscountInfo } from '@/utils/pricingUtils';
-
-interface Service {
-  name: string;
-  quantity: number;
-  price: number;
-}
+import { PrintJob } from '@/types/printJob';
 
 interface SelectedServicesProps {
-  services: Service[];
-  totalAmount?: number;
-  deliveryRequested?: boolean;
+  job: PrintJob;
 }
 
-export const SelectedServices = ({ services, totalAmount, deliveryRequested }: SelectedServicesProps) => {
+export const SelectedServices = ({ job }: SelectedServicesProps) => {
+  const services = job.selected_services || [];
+  const totalAmount = job.total_amount;
+  const deliveryRequested = job.delivery_requested;
+
   if (!services || services.length === 0) {
     return null;
   }

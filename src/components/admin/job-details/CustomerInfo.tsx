@@ -1,42 +1,39 @@
 
 import { User, Phone, Building, Clock, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { PrintJob } from '@/types/printJob';
 
 interface CustomerInfoProps {
-  name: string;
-  phone: string;
-  institute?: string;
-  timeSlot: string;
-  trackingId: string;
+  job: PrintJob;
 }
 
-export const CustomerInfo = ({ name, phone, institute, timeSlot, trackingId }: CustomerInfoProps) => {
+export const CustomerInfo = ({ job }: CustomerInfoProps) => {
   return (
     <div className="space-y-2 sm:space-y-3">
       <div className="flex items-center gap-2 text-sm sm:text-base">
         <User className="w-4 h-4 text-gray-500 flex-shrink-0" />
-        <span className="font-medium truncate">{name}</span>
+        <span className="font-medium truncate">{job.name}</span>
       </div>
       <div className="flex items-center gap-2 text-sm sm:text-base">
         <Phone className="w-4 h-4 text-gray-500 flex-shrink-0" />
-        <a href={`tel:${phone}`} className="text-blue-600 hover:underline">
-          {phone}
+        <a href={`tel:${job.phone}`} className="text-blue-600 hover:underline">
+          {job.phone}
         </a>
       </div>
-      {institute && (
+      {job.institute && (
         <div className="flex items-center gap-2 text-sm sm:text-base">
           <Building className="w-4 h-4 text-gray-500 flex-shrink-0" />
-          <span className="truncate">{institute}</span>
+          <span className="truncate">{job.institute}</span>
         </div>
       )}
       <div className="flex items-center gap-2 text-sm sm:text-base">
         <Clock className="w-4 h-4 text-gray-500 flex-shrink-0" />
-        <span>{timeSlot}</span>
+        <span>{job.time_slot}</span>
       </div>
       <div className="flex items-center gap-2 text-sm sm:text-base">
         <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
         <Badge variant="outline" className="font-mono text-xs px-2 py-1">
-          {trackingId}
+          {job.tracking_id}
         </Badge>
       </div>
     </div>
