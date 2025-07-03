@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { PrintJob } from '@/types/printJob';
 import { useIsMobile } from '@/hooks/use-mobile';
