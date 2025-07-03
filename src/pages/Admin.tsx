@@ -3,8 +3,11 @@ import { useState } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminHeader } from '@/components/admin/AdminHeader';
+import { MobileAdminHeader } from '@/components/admin/MobileAdminHeader';
+import { MobileDrawer } from '@/components/admin/MobileDrawer';
 import { AdminTabs } from '@/components/admin/AdminTabs';
 import { NotificationManager } from '@/components/admin/NotificationManager';
+import { OfflineIndicator } from '@/components/admin/OfflineIndicator';
 import { SearchProvider } from '@/components/admin/AdminSearch';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { useAdminData } from '@/hooks/useAdminData';
@@ -12,7 +15,10 @@ import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeTab, setActiveTab] = useState('orders');
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const isMobile = useIsMobile();
+  
   const {
     printJobs,
     feedback,
@@ -28,6 +34,19 @@ const Admin = () => {
 
   console.log('Admin render - Print jobs:', printJobs.length, 'Feedback:', feedback.length);
 
+  // Register service worker for offline capability
+  React.useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('SW registered: ', registration);
+        })
+        .catch((registrationError) => {
+          console.log('SW registration failed: ', registrationError);
+        });
+    }
+  }, []);
+
   if (!isAuthenticated) {
     return (
       <MobileLayout>
@@ -36,15 +55,42 @@ const Admin = () => {
     );
   }
 
+  const pendingJobs = printJobs.filter(job => job.status === 'pending').length;
+
   return (
     <SearchProvider>
       <MobileLayout>
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30">
-          <AdminHeader 
-            onLogout={() => setIsAuthenticated(false)}
-            isRetrying={isRetrying}
-            onRefresh={loadData}
-          />
+          {/* Offline Indicator */}
+          <OfflineIndicator />
+
+          {/* Mobile Navigation Drawer */}
+          {isMobile && (
+            <MobileDrawer
+              isOpen={isDrawerOpen}
+              onClose={() => setIsDrawerOpen(false)}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              pendingCount={pendingJobs}
+              feedbackCount={feedback.length}
+            />
+          )}
+
+          {/* Headers */}
+          {isMobile ? (
+            <MobileAdminHeader
+              onLogout={() => setIsAuthenticated(false)}
+              onRefresh={loadData}
+              isRetrying={isRetrying}
+              onMenuToggle={() => setIsDrawerOpen(true)}
+            />
+          ) : (
+            <AdminHeader 
+              onLogout={() => setIsAuthenticated(false)}
+              isRetrying={isRetrying}
+              onRefresh={loadData}
+            />
+          )}
 
           {/* Admin Live Monitor with Milestones */}
           <OnlineUsersMonitor 
@@ -84,6 +130,8 @@ const Admin = () => {
               onStatusUpdate={updateJobStatus}
               onDeleteJob={deleteJob}
               onDeleteFeedback={deleteFeedback}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
             />
           </div>
         </div>
