@@ -1,70 +1,53 @@
-
-import { Eye } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import React from 'react';
 import { PrintJob } from '@/types/printJob';
-import { JobDetailsHeader } from '@/components/admin/job-details/JobDetailsHeader';
-import { CustomerInfo } from '@/components/admin/job-details/CustomerInfo';
-import { SelectedServices } from '@/components/admin/job-details/SelectedServices';
-import { FilesList } from '@/components/admin/job-details/FilesList';
-import { JobNotes } from '@/components/admin/job-details/JobNotes';
-import { JobActions } from '@/components/admin/job-details/JobActions';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { JobDetailsHeader } from './job-details/JobDetailsHeader';
+import { CustomerInfo } from './job-details/CustomerInfo';
+import { SelectedServices } from './job-details/SelectedServices';
+import { FilesList } from './job-details/FilesList';
+import { JobNotes } from './job-details/JobNotes';
+import { JobActions } from './job-details/JobActions';
+import { AdminStatusManager } from './AdminStatusManager';
+import { StatusHistory } from './StatusHistory';
 
 interface JobDetailsProps {
-  selectedJob: PrintJob | null;
+  job: PrintJob;
   onStatusUpdate: (jobId: string, status: PrintJob['status']) => void;
-  onDeleteJob: (jobId: string) => void;
+  onDelete: (jobId: string) => void;
 }
 
-export const JobDetails = ({ selectedJob, onStatusUpdate, onDeleteJob }: JobDetailsProps) => {
-  const handleBack = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  if (!selectedJob) {
-    return (
-      <Card>
-        <CardContent className="flex items-center justify-center h-40 sm:h-64 text-gray-500">
-          <div className="text-center">
-            <Eye className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 opacity-50" />
-            <p className="text-sm sm:text-base">Select a print job to view details</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+export const JobDetails: React.FC<JobDetailsProps> = ({
+  job,
+  onStatusUpdate,
+  onDelete
+}) => {
+  const isMobile = useIsMobile();
 
   return (
-    <Card className="h-fit">
-      <JobDetailsHeader 
-        timestamp={selectedJob.timestamp}
-        onBack={handleBack}
-      />
+    <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${
+      isMobile ? 'mx-2' : ''
+    }`}>
+      <JobDetailsHeader job={job} />
       
-      <CardContent className="space-y-4 max-h-[70vh] lg:max-h-none overflow-y-auto">
-        <CustomerInfo
-          name={selectedJob.name}
-          phone={selectedJob.phone}
-          institute={selectedJob.institute}
-          timeSlot={selectedJob.time_slot}
-          trackingId={selectedJob.tracking_id}
-        />
+      <div className={`${isMobile ? 'p-4 space-y-4' : 'p-6 space-y-6'}`}>
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-4">
+            <CustomerInfo job={job} />
+            <AdminStatusManager job={job} onStatusUpdate={onStatusUpdate} />
+          </div>
+          
+          <div className="space-y-4">
+            <SelectedServices job={job} />
+            <FilesList job={job} />
+          </div>
+        </div>
 
-        <SelectedServices
-          services={selectedJob.selected_services || []}
-          totalAmount={selectedJob.total_amount}
-          deliveryRequested={selectedJob.delivery_requested}
-        />
+        {/* Add Status History */}
+        <StatusHistory printJobId={job.id} />
 
-        <FilesList files={selectedJob.files} />
-
-        <JobNotes notes={selectedJob.notes} />
-
-        <JobActions
-          job={selectedJob}
-          onStatusUpdate={onStatusUpdate}
-          onDeleteJob={onDeleteJob}
-        />
-      </CardContent>
-    </Card>
+        <JobNotes job={job} />
+        <JobActions job={job} onDelete={onDelete} />
+      </div>
+    </div>
   );
 };

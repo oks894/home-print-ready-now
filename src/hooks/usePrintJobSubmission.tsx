@@ -130,7 +130,9 @@ export const usePrintJobSubmission = () => {
           status: totalAmount > 0 ? 'pending_payment' : 'pending',
           selected_services: selectedServicesData,
           total_amount: totalAmount,
-          delivery_requested: deliveryRequested && canAccessDelivery
+          delivery_requested: deliveryRequested && canAccessDelivery,
+          sms_notifications: true, // Default to enabled
+          email_notifications: true // Default to enabled
         });
 
       if (error) {
@@ -148,7 +150,7 @@ export const usePrintJobSubmission = () => {
       
       toast({
         title: "Order Submitted Successfully!",
-        description: `Your tracking ID is ${newTrackingId}${copySuccess ? ' (Auto-copied!)' : ''}. You will receive a call within 30 minutes to confirm your order. Total: ₹${totalAmount.toFixed(2)}${totalAmount > 0 && selectedServices.some(s => s.quantity >= 50) ? ' (Bulk discount applied!)' : ''}`,
+        description: `Your tracking ID is ${newTrackingId}${copySuccess ? ' (Auto-copied!)' : ''}. You will receive notifications about your order status via SMS. Total: ₹${totalAmount.toFixed(2)}${totalAmount > 0 && selectedServices.some(s => s.quantity >= 50) ? ' (Bulk discount applied!)' : ''}`,
       });
 
       return newTrackingId;

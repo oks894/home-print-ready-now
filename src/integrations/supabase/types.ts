@@ -57,6 +57,8 @@ export type Database = {
       print_jobs: {
         Row: {
           delivery_requested: boolean | null
+          email_notifications: boolean | null
+          estimated_completion: string | null
           files: Json
           id: string
           institute: string | null
@@ -64,6 +66,7 @@ export type Database = {
           notes: string | null
           phone: string
           selected_services: Json | null
+          sms_notifications: boolean | null
           status: string
           time_slot: string
           timestamp: string
@@ -72,6 +75,8 @@ export type Database = {
         }
         Insert: {
           delivery_requested?: boolean | null
+          email_notifications?: boolean | null
+          estimated_completion?: string | null
           files: Json
           id?: string
           institute?: string | null
@@ -79,6 +84,7 @@ export type Database = {
           notes?: string | null
           phone: string
           selected_services?: Json | null
+          sms_notifications?: boolean | null
           status?: string
           time_slot: string
           timestamp?: string
@@ -87,6 +93,8 @@ export type Database = {
         }
         Update: {
           delivery_requested?: boolean | null
+          email_notifications?: boolean | null
+          estimated_completion?: string | null
           files?: Json
           id?: string
           institute?: string | null
@@ -94,6 +102,7 @@ export type Database = {
           notes?: string | null
           phone?: string
           selected_services?: Json | null
+          sms_notifications?: boolean | null
           status?: string
           time_slot?: string
           timestamp?: string
@@ -128,6 +137,41 @@ export type Database = {
           price?: string
         }
         Relationships: []
+      }
+      status_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          id: string
+          notes: string | null
+          print_job_id: string
+          status: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          notes?: string | null
+          print_job_id: string
+          status: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          notes?: string | null
+          print_job_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "status_history_print_job_id_fkey"
+            columns: ["print_job_id"]
+            isOneToOne: false
+            referencedRelation: "print_jobs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

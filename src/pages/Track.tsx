@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -140,15 +139,24 @@ const Track = () => {
     }
   };
 
-  const getStatusMessage = (status: string) => {
-    switch (status) {
-      case 'pending': return 'Your order has been received and is waiting to be processed. We\'ll call you shortly to confirm details.';
-      case 'pending_payment': return 'Please complete payment to process your order. Our team will contact you with payment details.';
-      case 'printing': return 'Great news! Your documents are currently being printed with premium quality materials.';
-      case 'ready': return '🎉 Your order is ready for pickup! Please collect it at your scheduled time or wait for delivery.';
-      case 'completed': return '✅ Your order has been completed and delivered. Thank you for choosing our services!';
-      default: return 'Status information is being updated...';
+  const getStatusMessage = (status: string, estimatedCompletion?: string) => {
+    const baseMessages = {
+      'pending': 'Your order has been received and is waiting to be processed. We\'ll call you shortly to confirm details.',
+      'pending_payment': 'Please complete payment to process your order. Our team will contact you with payment details.',
+      'printing': 'Great news! Your documents are currently being printed with premium quality materials.',
+      'ready': '🎉 Your order is ready for pickup! Please collect it at your scheduled time or wait for delivery.',
+      'completed': '✅ Your order has been completed and delivered. Thank you for choosing our services!',
+      'default': 'Status information is being updated...'
+    };
+
+    let message = baseMessages[status as keyof typeof baseMessages] || baseMessages.default;
+    
+    if (estimatedCompletion && (status === 'printing' || status === 'pending')) {
+      const completionDate = new Date(estimatedCompletion);
+      message += ` Estimated completion: ${completionDate.toLocaleDateString()} at ${completionDate.toLocaleTimeString()}.`;
     }
+    
+    return message;
   };
 
   const getProgressPercentage = (status: string) => {
@@ -293,6 +301,9 @@ const Track = () => {
                         <CardTitle className="text-2xl mb-2">Order Status</CardTitle>
                         <CardDescription className="text-base">
                           Phone: {job.tracking_id} • Submitted: {new Date(job.timestamp).toLocaleDateString()}
+                          {job.estimated_completion && (
+                            <> • Est. Completion: {new Date(job.estimated_completion).toLocaleDateString()}</>
+                          )}
                         </CardDescription>
                       </div>
                       <Badge className={`text-base px-4 py-2 border-2 ${getStatusColor(job.status)}`}>
@@ -324,9 +335,26 @@ const Track = () => {
                       </div>
                       <div>
                         <h4 className="font-semibold text-lg mb-2">Current Status</h4>
-                        <p className="text-gray-700">{getStatusMessage(job.status)}</p>
+                        <p className="text-gray-700">{getStatusMessage(job.status, job.estimated_completion)}</p>
                       </div>
                     </div>
+
+                    {/* Estimated Completion Alert */}
+                    {job.estimated_completion && (
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-green-600" />
+                          <div>
+                            <h5 className="font-semibold text-green-800">Estimated Completion</h5>
+                            <p className="text-sm text-green-700">
+                              Your order is expected to be completed by{' '}
+                              <strong>{new Date(job.estimated_completion).toLocaleDateString()}</strong>{' '}
+                              at <strong>{new Date(job.estimated_completion).toLocaleTimeString()}</strong>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
