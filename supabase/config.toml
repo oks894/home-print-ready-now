@@ -20,3 +20,6 @@ enable_signup = true
 
 [functions.send-notifications]
 verify_jwt = false
+
+[functions.send-whatsapp-notification]
+verify_jwt = false
