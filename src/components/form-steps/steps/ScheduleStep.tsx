@@ -50,6 +50,7 @@ const ScheduleStep = ({
         notes={formData.notes}
         onTimeSlotChange={(slot) => onFormDataChange({...formData, timeSlot: slot})}
         onNotesChange={(notes) => onFormDataChange({...formData, notes})}
+        isAdminView={false}
       />
       
       {canAccessDelivery && (

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Plus, Minus, Info } from 'lucide-react';
+import { Plus, Minus, Info, FileText } from 'lucide-react';
 import { Service, SelectedService } from '@/types/service';
 import { getPrintingPriceBreakdown } from '@/utils/pricingUtils';
 
@@ -79,7 +79,10 @@ const PrintingOptionsCard = ({
       <CardHeader className="pb-4">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="text-lg">{service.name}</CardTitle>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              {service.name}
+            </CardTitle>
             <p className="text-sm text-gray-600 mt-1">{service.description}</p>
           </div>
           {isColor && (
@@ -142,7 +145,10 @@ const PrintingOptionsCard = ({
             checked={doubleSided}
             onCheckedChange={setDoubleSided}
           />
-          <Label htmlFor="double-sided">Double-sided printing</Label>
+          <Label htmlFor="double-sided" className="flex items-center gap-2">
+            Double-sided printing
+            <span className="text-xs text-gray-500">(saves paper & cost)</span>
+          </Label>
         </div>
 
         {/* Price Breakdown */}
@@ -152,14 +158,26 @@ const PrintingOptionsCard = ({
               <span>Total Pages:</span>
               <span className="font-medium">{priceBreakdown.totalPages} pages</span>
             </div>
+            {priceBreakdown.doubleSided && (
+              <div className="flex justify-between text-sm">
+                <span>Actual Sheets:</span>
+                <span className="font-medium">{priceBreakdown.actualUnits} sheets</span>
+              </div>
+            )}
             <div className="flex justify-between text-sm">
-              <span>Price per page:</span>
-              <span className="font-medium">₹{priceBreakdown.pricePerPage}</span>
+              <span>Price per {priceBreakdown.unitType.slice(0, -1)}:</span>
+              <span className="font-medium">₹{priceBreakdown.pricePerUnit}</span>
             </div>
             {priceBreakdown.hasBulkDiscount && (
               <div className="flex items-center gap-2 text-sm text-green-600">
                 <Info className="w-4 h-4" />
                 <span>Bulk discount applied! Saved ₹{priceBreakdown.savings.toFixed(2)}</span>
+              </div>
+            )}
+            {priceBreakdown.doubleSided && (
+              <div className="flex items-center gap-2 text-sm text-blue-600">
+                <Info className="w-4 h-4" />
+                <span>Double-sided saves {priceBreakdown.totalPages - priceBreakdown.actualUnits} sheets!</span>
               </div>
             )}
             <div className="flex justify-between text-lg font-bold border-t pt-2">

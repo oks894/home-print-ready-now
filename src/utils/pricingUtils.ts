@@ -49,8 +49,14 @@ export const getBulkDiscountInfo = (quantity: number): { hasBulkDiscount: boolea
 
 export const calculateTotalPages = (pages: number, copies: number, doubleSided: boolean = false): number => {
   const totalPages = pages * copies;
-  // If double-sided, we print on half the number of sheets but still charge for total pages
   return totalPages;
+};
+
+export const calculateDoubleSidedSheets = (pages: number, copies: number): number => {
+  // For double-sided printing, calculate actual sheets needed
+  // Each sheet can hold 2 pages (front and back)
+  const totalPages = pages * copies;
+  return Math.ceil(totalPages / 2);
 };
 
 export const calculateServicePrice = (service: any, quantity: number, options?: {
@@ -60,11 +66,25 @@ export const calculateServicePrice = (service: any, quantity: number, options?: 
 }): number => {
   const basePrice = parsePriceFromString(service.price);
   
-  // For printing services, calculate based on total pages
+  // For printing services, calculate based on total pages or sheets
   if (service.category === 'Printing' || service.category === 'Color') {
     if (options?.pages && options?.copies) {
-      const totalPages = calculateTotalPages(options.pages, options.copies, options.doubleSided);
-      return calculateBulkPrice(basePrice, totalPages);
+      if (options?.doubleSided) {
+        // For double-sided, we charge per sheet but still apply bulk pricing based on total pages
+        const totalPages = calculateTotalPages(options.pages, options.copies, options.doubleSided);
+        const actualSheets = calculateDoubleSidedSheets(options.pages, options.copies);
+        
+        // Apply bulk pricing if total pages >= 50, but charge for actual sheets
+        if (totalPages >= 50) {
+          return actualSheets * 2.5; // Bulk price per sheet
+        } else {
+          return actualSheets * basePrice; // Regular price per sheet
+        }
+      } else {
+        // Single-sided: charge per page
+        const totalPages = calculateTotalPages(options.pages, options.copies, options.doubleSided);
+        return calculateBulkPrice(basePrice, totalPages);
+      }
     }
     // Fallback to quantity-based pricing
     return calculateBulkPrice(basePrice, quantity);
@@ -78,20 +98,44 @@ export const getPrintingPriceBreakdown = (pages: number, copies: number, isColor
   const totalPages = calculateTotalPages(pages, copies, doubleSided);
   const basePrice = isColor ? 5 : 3.5; // Color: ₹5, B&W: ₹3.5
   
-  const finalPrice = calculateBulkPrice(basePrice, totalPages);
-  const pricePerPage = totalPages >= 50 ? 2.5 : basePrice;
+  let finalPrice: number;
+  let pricePerUnit: number;
+  let actualUnits: number;
+  
+  if (doubleSided) {
+    // Double-sided: calculate sheets needed
+    actualUnits = calculateDoubleSidedSheets(pages, copies);
+    if (totalPages >= 50) {
+      pricePerUnit = 2.5; // Bulk price per sheet
+      finalPrice = actualUnits * pricePerUnit;
+    } else {
+      pricePerUnit = basePrice; // Regular price per sheet
+      finalPrice = actualUnits * pricePerUnit;
+    }
+  } else {
+    // Single-sided: calculate pages
+    actualUnits = totalPages;
+    finalPrice = calculateBulkPrice(basePrice, totalPages);
+    pricePerUnit = totalPages >= 50 ? 2.5 : basePrice;
+  }
+  
   const hasBulkDiscount = totalPages >= 50;
+  const originalPrice = doubleSided ? 
+    calculateDoubleSidedSheets(pages, copies) * basePrice : 
+    totalPages * basePrice;
   
   return {
     pages,
     copies,
     totalPages,
+    actualUnits,
     doubleSided,
     isColor,
     basePrice,
-    pricePerPage,
+    pricePerUnit,
     finalPrice,
     hasBulkDiscount,
-    savings: hasBulkDiscount ? (totalPages * basePrice) - finalPrice : 0
+    savings: hasBulkDiscount ? originalPrice - finalPrice : 0,
+    unitType: doubleSided ? 'sheets' : 'pages'
   };
 };

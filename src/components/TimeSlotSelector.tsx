@@ -11,27 +11,32 @@ interface TimeSlotSelectorProps {
   notes: string;
   onTimeSlotChange: (timeSlot: string) => void;
   onNotesChange: (notes: string) => void;
+  isAdminView?: boolean;
 }
 
-const TimeSlotSelector = ({ timeSlot, notes, onTimeSlotChange, onNotesChange }: TimeSlotSelectorProps) => {
+const TimeSlotSelector = ({ timeSlot, notes, onTimeSlotChange, onNotesChange, isAdminView = false }: TimeSlotSelectorProps) => {
   const timeSlots = [
     '9:00 AM - 10:00 AM',
     '10:00 AM - 11:00 AM',
     '11:00 AM - 12:00 PM',
     '12:00 PM - 1:00 PM',
+    '1:00 PM - 2:00 PM',
     '2:00 PM - 3:00 PM',
-    '3:00 PM - 4:00 PM',
-    '4:00 PM - 5:00 PM',
-    '5:00 PM - 6:00 PM'
+    '3:00 PM - 4:00 PM'
   ];
 
   const getDayOptions = () => {
     const days = [];
     const today = new Date();
     
-    for (let i = 0; i < 7; i++) {
+    // Generate next 14 days but filter for Mon-Sat only
+    for (let i = 0; i < 14; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
+      
+      const dayOfWeek = date.getDay();
+      // Skip Sunday (0)
+      if (dayOfWeek === 0) continue;
       
       const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
       const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -72,7 +77,7 @@ const TimeSlotSelector = ({ timeSlot, notes, onTimeSlotChange, onNotesChange }: 
           <span className="sm:hidden">Schedule</span>
         </CardTitle>
         <CardDescription className="text-sm sm:text-base">
-          Choose when you'd like to collect your printed documents
+          Choose when you'd like to collect your printed documents (Mon-Sat: 9AM-4PM)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 sm:space-y-6">
@@ -92,17 +97,19 @@ const TimeSlotSelector = ({ timeSlot, notes, onTimeSlotChange, onNotesChange }: 
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="notes" className="text-sm font-medium">Special Instructions (Optional)</Label>
-          <Textarea
-            id="notes"
-            value={notes}
-            onChange={(e) => onNotesChange(e.target.value)}
-            placeholder="Color printing, double-sided, binding, passport photos, etc."
-            rows={3}
-            className="text-base resize-none"
-          />
-        </div>
+        {!isAdminView && (
+          <div className="space-y-2">
+            <Label htmlFor="notes" className="text-sm font-medium">Special Instructions (Optional)</Label>
+            <Textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => onNotesChange(e.target.value)}
+              placeholder="Color printing, double-sided, binding, passport photos, etc."
+              rows={3}
+              className="text-base resize-none"
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );
