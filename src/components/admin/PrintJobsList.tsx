@@ -64,7 +64,7 @@ export const PrintJobsList: React.FC<PrintJobsListProps> = ({
           <MobileJobCard
             key={job.id}
             job={job}
-            onClick={() => onJobSelect(job)}
+            onSelect={onJobSelect}
             isSelected={selectedJob?.id === job.id}
             index={index}
           />

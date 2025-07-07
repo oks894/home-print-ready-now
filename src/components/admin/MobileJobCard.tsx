@@ -10,6 +10,7 @@ interface MobileJobCardProps {
   job: PrintJob;
   onSelect: (job: PrintJob) => void;
   isSelected: boolean;
+  index?: number;
 }
 
 export const MobileJobCard = ({ job, onSelect, isSelected }: MobileJobCardProps) => {

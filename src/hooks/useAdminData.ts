@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { PrintJob } from '@/types/printJob';
@@ -20,6 +21,26 @@ interface UseAdminDataReturn {
 }
 
 const ITEMS_PER_PAGE = 20;
+
+// Helper function to transform database data to PrintJob type
+const transformToPrintJob = (data: any): PrintJob => {
+  return {
+    id: data.id,
+    tracking_id: data.tracking_id || '',
+    name: data.name || '',
+    phone: data.phone || '',
+    institute: data.institute || '',
+    time_slot: data.time_slot || '',
+    notes: data.notes || '',
+    files: Array.isArray(data.files) ? data.files as Array<{ name: string; size: number; type: string; data?: string }> : [],
+    timestamp: data.timestamp,
+    status: data.status as PrintJob['status'] || 'pending',
+    selected_services: data.selected_services as Array<{ id: string; name: string; quantity: number; price: number }> || [],
+    total_amount: data.total_amount || 0,
+    delivery_requested: data.delivery_requested || false,
+    estimated_completion: data.estimated_completion
+  };
+};
 
 export const useAdminData = (): UseAdminDataReturn => {
   const [printJobs, setPrintJobs] = useState<PrintJob[]>([]);
@@ -46,7 +67,8 @@ export const useAdminData = (): UseAdminDataReturn => {
 
       if (jobsError) throw jobsError;
 
-      setPrintJobs(jobs || []);
+      const transformedJobs = (jobs || []).map(transformToPrintJob);
+      setPrintJobs(transformedJobs);
       setTotalCount(count || 0);
       setHasMore((count || 0) > ITEMS_PER_PAGE);
 
@@ -88,7 +110,8 @@ export const useAdminData = (): UseAdminDataReturn => {
       if (error) throw error;
 
       if (moreJobs && moreJobs.length > 0) {
-        setPrintJobs(prev => [...prev, ...moreJobs]);
+        const transformedMoreJobs = moreJobs.map(transformToPrintJob);
+        setPrintJobs(prev => [...prev, ...transformedMoreJobs]);
         setCurrentPage(nextPage);
         setHasMore(moreJobs.length === ITEMS_PER_PAGE);
       } else {
@@ -114,11 +137,11 @@ export const useAdminData = (): UseAdminDataReturn => {
       if (error) throw error;
 
       setPrintJobs(prev => prev.map(job => 
-        job.id === id ? { ...job, status } : job
+        job.id === id ? { ...job, status: status as PrintJob['status'] } : job
       ));
 
       if (selectedJob?.id === id) {
-        setSelectedJob(prev => prev ? { ...prev, status } : null);
+        setSelectedJob(prev => prev ? { ...prev, status: status as PrintJob['status'] } : null);
       }
 
       toast({

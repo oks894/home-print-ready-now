@@ -94,7 +94,7 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
             <JobDetails
               job={selectedJob}
               onStatusUpdate={onStatusUpdate}
-              onDeleteJob={onDeleteJob}
+              onDelete={onDeleteJob}
             />
           )}
         </div>
