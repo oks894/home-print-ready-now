@@ -25,14 +25,15 @@ const Admin = () => {
     selectedJob,
     isLoading,
     isRetrying,
+    hasMore,
+    totalCount,
     loadData,
+    loadMore,
     updateJobStatus,
     deleteJob,
     deleteFeedback,
     setSelectedJob
   } = useAdminData();
-
-  console.log('Admin render - Print jobs:', printJobs.length, 'Feedback:', feedback.length);
 
   // Register service worker for offline capability
   React.useEffect(() => {
@@ -109,6 +110,7 @@ const Admin = () => {
               </h1>
               <p className={`text-gray-600 mt-2 ${isMobile ? 'text-sm' : ''}`}>
                 Manage your print services and track customer orders
+                {totalCount > 0 && ` • ${totalCount} total jobs`}
               </p>
               {isLoading && (
                 <div className="mt-2 text-sm text-blue-600">Loading data...</div>
@@ -126,6 +128,8 @@ const Admin = () => {
               selectedJob={selectedJob}
               isLoading={isLoading}
               isRetrying={isRetrying}
+              hasMore={hasMore}
+              onLoadMore={loadMore}
               onJobSelect={setSelectedJob}
               onStatusUpdate={updateJobStatus}
               onDeleteJob={deleteJob}

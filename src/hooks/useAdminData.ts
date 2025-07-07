@@ -1,101 +1,197 @@
-
 import { useState, useEffect, useCallback } from 'react';
-import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { PrintJob } from '@/types/printJob';
-import { useRetry } from '@/hooks/useRetry';
-import { usePrintJobs } from '@/hooks/usePrintJobs';
-import { useFeedback } from '@/hooks/useFeedback';
+import { useToast } from '@/hooks/use-toast';
 
-export const useAdminData = () => {
+interface UseAdminDataReturn {
+  printJobs: PrintJob[];
+  feedback: any[];
+  selectedJob: PrintJob | null;
+  isLoading: boolean;
+  isRetrying: boolean;
+  hasMore: boolean;
+  totalCount: number;
+  loadData: () => Promise<void>;
+  loadMore: () => Promise<void>;
+  updateJobStatus: (id: string, status: string, notes?: string) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
+  deleteFeedback: (id: string) => Promise<void>;
+  setSelectedJob: (job: PrintJob | null) => void;
+}
+
+const ITEMS_PER_PAGE = 20;
+
+export const useAdminData = (): UseAdminDataReturn => {
+  const [printJobs, setPrintJobs] = useState<PrintJob[]>([]);
+  const [feedback, setFeedback] = useState<any[]>([]);
   const [selectedJob, setSelectedJob] = useState<PrintJob | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [lastFetchTime, setLastFetchTime] = useState(0);
-  
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
   const { toast } = useToast();
-  const { isRetrying, retryWithBackoff, setIsRetrying } = useRetry();
-  const { 
-    printJobs, 
-    loadPrintJobs, 
-    updateJobStatus: updateJobStatusInternal,
-    deleteJob: deleteJobInternal 
-  } = usePrintJobs();
-  const { 
-    feedback, 
-    loadFeedback, 
-    deleteFeedback: deleteFeedbackInternal 
-  } = useFeedback();
 
-  const CACHE_DURATION = 30000;
-
-  const shouldRefetchData = useCallback(() => {
-    return Date.now() - lastFetchTime > CACHE_DURATION;
-  }, [lastFetchTime]);
-
-  const loadData = async () => {
-    console.log('useAdminData: Loading admin data...');
-    setIsLoading(true);
+  const loadData = useCallback(async () => {
     try {
-      await retryWithBackoff(async () => {
-        console.log('useAdminData: Attempting to load print jobs and feedback...');
-        await Promise.all([loadPrintJobs(), loadFeedback()]);
-        setLastFetchTime(Date.now());
-        console.log('useAdminData: Admin data loaded successfully');
-      });
+      setIsLoading(true);
+      setCurrentPage(0);
+      
+      // Load first page of print jobs with count
+      const { data: jobs, error: jobsError, count } = await supabase
+        .from('print_jobs')
+        .select('*', { count: 'exact' })
+        .order('timestamp', { ascending: false })
+        .range(0, ITEMS_PER_PAGE - 1);
+
+      if (jobsError) throw jobsError;
+
+      setPrintJobs(jobs || []);
+      setTotalCount(count || 0);
+      setHasMore((count || 0) > ITEMS_PER_PAGE);
+
+      // Load feedback (keep all for now as it's typically smaller)
+      const { data: feedbackData, error: feedbackError } = await supabase
+        .from('feedback')
+        .select('*')
+        .order('timestamp', { ascending: false });
+
+      if (feedbackError) throw feedbackError;
+
+      setFeedback(feedbackData || []);
     } catch (error) {
-      console.error('useAdminData: Failed to load data after retries:', error);
+      console.error('Error loading admin data:', error);
       toast({
-        title: "Connection issues",
-        description: "Having trouble loading data. Please check your internet connection and try again.",
-        variant: "destructive"
+        title: "Error loading data",
+        description: "Failed to load admin data. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
-      setIsRetrying(false);
     }
-  };
+  }, [toast]);
 
-  const updateJobStatus = async (jobId: string, status: PrintJob['status']) => {
-    console.log('useAdminData: Updating job status:', jobId, status);
-    const success = await updateJobStatusInternal(jobId, status, retryWithBackoff);
-    if (success && selectedJob?.id === jobId) {
-      setSelectedJob(prev => prev ? { ...prev, status } : null);
-    }
-    return success;
-  };
+  const loadMore = useCallback(async () => {
+    if (!hasMore || isLoading) return;
 
-  const deleteJob = async (jobId: string) => {
-    console.log('useAdminData: Deleting job:', jobId);
-    const success = await deleteJobInternal(jobId, retryWithBackoff);
-    if (success && selectedJob?.id === jobId) {
-      setSelectedJob(null);
-    }
-    return success;
-  };
+    try {
+      const nextPage = currentPage + 1;
+      const start = nextPage * ITEMS_PER_PAGE;
+      const end = start + ITEMS_PER_PAGE - 1;
 
-  const deleteFeedback = async (feedbackId: string) => {
-    console.log('useAdminData: Deleting feedback:', feedbackId);
-    await deleteFeedbackInternal(feedbackId, retryWithBackoff);
-  };
+      const { data: moreJobs, error } = await supabase
+        .from('print_jobs')
+        .select('*')
+        .order('timestamp', { ascending: false })
+        .range(start, end);
 
-  // Load data on component mount
-  useEffect(() => {
-    console.log('useAdminData: Component mounted, loading data...');
-    loadData();
-  }, []);
+      if (error) throw error;
 
-  // Auto-refresh data periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!isLoading && !isRetrying) {
-        console.log('useAdminData: Auto-refresh triggered');
-        loadData();
+      if (moreJobs && moreJobs.length > 0) {
+        setPrintJobs(prev => [...prev, ...moreJobs]);
+        setCurrentPage(nextPage);
+        setHasMore(moreJobs.length === ITEMS_PER_PAGE);
+      } else {
+        setHasMore(false);
       }
-    }, 60000); // Refresh every minute
+    } catch (error) {
+      console.error('Error loading more data:', error);
+      toast({
+        title: "Error loading more data",
+        description: "Failed to load additional data.",
+        variant: "destructive",
+      });
+    }
+  }, [currentPage, hasMore, isLoading, toast]);
 
-    return () => clearInterval(interval);
-  }, [isLoading, isRetrying]);
+  const updateJobStatus = async (id: string, status: string, notes?: string) => {
+    try {
+      const { error } = await supabase
+        .from('print_jobs')
+        .update({ status })
+        .eq('id', id);
 
-  console.log('useAdminData: Current state - printJobs:', printJobs.length, 'feedback:', feedback.length, 'isLoading:', isLoading);
+      if (error) throw error;
+
+      setPrintJobs(prev => prev.map(job => 
+        job.id === id ? { ...job, status } : job
+      ));
+
+      if (selectedJob?.id === id) {
+        setSelectedJob(prev => prev ? { ...prev, status } : null);
+      }
+
+      toast({
+        title: "Status updated",
+        description: `Job status changed to ${status}`,
+      });
+    } catch (error) {
+      console.error('Error updating job status:', error);
+      toast({
+        title: "Error updating status",
+        description: "Failed to update job status.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteJob = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('print_jobs')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setPrintJobs(prev => prev.filter(job => job.id !== id));
+      
+      if (selectedJob?.id === id) {
+        setSelectedJob(null);
+      }
+
+      toast({
+        title: "Job deleted",
+        description: "Print job has been deleted successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      toast({
+        title: "Error deleting job",
+        description: "Failed to delete the job.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const deleteFeedback = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('feedback')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setFeedback(prev => prev.filter(item => item.id !== id));
+
+      toast({
+        title: "Feedback deleted",
+        description: "Feedback has been deleted successfully.",
+      });
+    } catch (error) {
+      console.error('Error deleting feedback:', error);
+      toast({
+        title: "Error deleting feedback",
+        description: "Failed to delete the feedback.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   return {
     printJobs,
@@ -103,11 +199,13 @@ export const useAdminData = () => {
     selectedJob,
     isLoading,
     isRetrying,
+    hasMore,
+    totalCount,
     loadData,
+    loadMore,
     updateJobStatus,
     deleteJob,
     deleteFeedback,
     setSelectedJob,
-    shouldRefetchData
   };
 };

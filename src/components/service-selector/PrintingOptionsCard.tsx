@@ -25,7 +25,7 @@ const PrintingOptionsCard = ({
   onUpdateQuantity, 
   onRemoveService 
 }: PrintingOptionsCardProps) => {
-  const [pages, setPages] = useState(1);
+  const [pages, setPages] = useState<string>('');
   const [copies, setCopies] = useState(1);
   const [doubleSided, setDoubleSided] = useState(false);
   const [priceBreakdown, setPriceBreakdown] = useState<any>(null);
@@ -34,18 +34,34 @@ const PrintingOptionsCard = ({
   const isSelected = !!selectedService;
 
   useEffect(() => {
-    const breakdown = getPrintingPriceBreakdown(pages, copies, isColor, doubleSided);
-    setPriceBreakdown(breakdown);
+    const pagesNum = parseInt(pages) || 0;
+    if (pagesNum > 0) {
+      const breakdown = getPrintingPriceBreakdown(pagesNum, copies, isColor, doubleSided);
+      setPriceBreakdown(breakdown);
+    } else {
+      setPriceBreakdown(null);
+    }
   }, [pages, copies, doubleSided, isColor]);
 
+  const handlePagesChange = (value: string) => {
+    // Only allow numbers
+    if (value === '' || /^\d+$/.test(value)) {
+      setPages(value);
+    }
+  };
+
   const handleAddService = () => {
-    const options = { pages, copies, doubleSided };
-    onAddService(service, priceBreakdown.finalPrice, options);
+    const pagesNum = parseInt(pages) || 0;
+    if (pagesNum > 0 && priceBreakdown) {
+      const options = { pages: pagesNum, copies, doubleSided };
+      onAddService(service, priceBreakdown.finalPrice, options);
+    }
   };
 
   const handleUpdateService = () => {
-    if (onUpdateQuantity && selectedService) {
-      const options = { pages, copies, doubleSided };
+    const pagesNum = parseInt(pages) || 0;
+    if (onUpdateQuantity && selectedService && pagesNum > 0 && priceBreakdown) {
+      const options = { pages: pagesNum, copies, doubleSided };
       onUpdateQuantity(selectedService.id, priceBreakdown.finalPrice, options);
     }
   };
@@ -55,6 +71,8 @@ const PrintingOptionsCard = ({
       onRemoveService(selectedService.id);
     }
   };
+
+  const canAddService = pages !== '' && parseInt(pages) > 0 && priceBreakdown;
 
   return (
     <Card className={`transition-all duration-200 ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:shadow-md'}`}>
@@ -73,15 +91,18 @@ const PrintingOptionsCard = ({
       <CardContent className="space-y-4">
         {/* Pages Input */}
         <div className="space-y-2">
-          <Label htmlFor="pages">Number of Pages</Label>
+          <Label htmlFor="pages">Number of Pages *</Label>
           <Input
             id="pages"
-            type="number"
-            min="1"
+            type="text"
             value={pages}
-            onChange={(e) => setPages(Math.max(1, parseInt(e.target.value) || 1))}
+            onChange={(e) => handlePagesChange(e.target.value)}
+            placeholder="Enter number of pages"
             className="w-full"
           />
+          {pages === '' && (
+            <p className="text-xs text-gray-500">Please enter the number of pages to see pricing</p>
+          )}
         </div>
 
         {/* Copies Input */}
@@ -152,7 +173,11 @@ const PrintingOptionsCard = ({
         <div className="flex gap-2">
           {isSelected ? (
             <>
-              <Button onClick={handleUpdateService} className="flex-1">
+              <Button 
+                onClick={handleUpdateService} 
+                className="flex-1"
+                disabled={!canAddService}
+              >
                 Update Service
               </Button>
               <Button variant="outline" onClick={handleRemoveService}>
@@ -160,7 +185,11 @@ const PrintingOptionsCard = ({
               </Button>
             </>
           ) : (
-            <Button onClick={handleAddService} className="w-full">
+            <Button 
+              onClick={handleAddService} 
+              className="w-full"
+              disabled={!canAddService}
+            >
               Add to Order
             </Button>
           )}
