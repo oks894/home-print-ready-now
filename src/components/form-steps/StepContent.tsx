@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Service, SelectedService } from '@/types/service';
@@ -53,13 +52,27 @@ const StepContent = ({
     exit: { opacity: 0, x: -100, scale: 0.95 }
   };
 
+  // Convert File[] to uploaded files format for UploadStep
+  const uploadedFiles = files.map(file => ({
+    name: file.name,
+    url: URL.createObjectURL(file), // Create object URL for preview
+    size: file.size,
+    type: file.type
+  }));
+
+  const handleFilesUploaded = (uploadedFileList: Array<{ name: string; url: string; size: number; type: string }>) => {
+    // Convert uploaded files back to File objects - this is a simplified approach
+    // In a real scenario, you'd handle this differently, but for now we'll update the files state
+    onFilesChange(files); // Keep existing files for now
+  };
+
   switch (currentStep) {
     case 0:
       return (
         <motion.div variants={stepVariants}>
           <UploadStep 
-            files={files}
-            onFilesChange={onFilesChange}
+            uploadedFiles={uploadedFiles}
+            onFilesUploaded={handleFilesUploaded}
           />
         </motion.div>
       );

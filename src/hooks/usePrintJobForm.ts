@@ -13,6 +13,7 @@ interface FormData {
 export const usePrintJobForm = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [files, setFiles] = useState<File[]>([]);
+  const [uploadedFiles, setUploadedFiles] = useState<Array<{ name: string; url: string; size: number; type: string }>>([]);
   const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
   const [canAccessDelivery, setCanAccessDelivery] = useState(false);
@@ -40,12 +41,13 @@ export const usePrintJobForm = () => {
   const canProceed = (): boolean | string => {
     console.log('Checking canProceed for step:', currentStep);
     console.log('Files:', files.length);
+    console.log('Uploaded files:', uploadedFiles.length);
     console.log('Selected services:', selectedServices.length);
     console.log('Form data:', formData);
     
     switch (currentStep) {
       case 0: 
-        if (files.length === 0) {
+        if (files.length === 0 && uploadedFiles.length === 0) {
           return 'Please upload at least one file to continue';
         }
         return true;
@@ -77,6 +79,7 @@ export const usePrintJobForm = () => {
   const resetForm = () => {
     setCurrentStep(0);
     setFiles([]);
+    setUploadedFiles([]);
     setSelectedServices([]);
     setFormData({
       name: '',
@@ -106,12 +109,14 @@ export const usePrintJobForm = () => {
   return {
     currentStep,
     files,
+    uploadedFiles,
     selectedServices,
     totalAmount,
     canAccessDelivery,
     deliveryRequested,
     formData,
     setFiles,
+    setUploadedFiles,
     setSelectedServices,
     setFormData,
     handleNext,

@@ -6,6 +6,7 @@ interface UseFormSubmissionProps {
   canProceed: () => boolean | string;
   formData: any;
   files: File[];
+  uploadedFiles: Array<{ name: string; url: string; size: number; type: string }>;
   selectedServices: any[];
   totalAmount: number;
   deliveryRequested: boolean;
@@ -18,6 +19,7 @@ export const useFormSubmission = ({
   canProceed,
   formData,
   files,
+  uploadedFiles,
   selectedServices,
   totalAmount,
   deliveryRequested,
@@ -49,6 +51,7 @@ export const useFormSubmission = ({
       console.log('Submitting form with data:', {
         formData,
         files: files.length,
+        uploadedFiles: uploadedFiles.length,
         selectedServices: selectedServices.length,
         totalAmount,
         deliveryRequested
@@ -59,9 +62,13 @@ export const useFormSubmission = ({
         description: "Please wait while we process your print job...",
       });
 
+      // Use uploadedFiles if available, otherwise fall back to files
+      const filesToSubmit = uploadedFiles.length > 0 ? uploadedFiles : files;
+      console.log('Files to submit:', filesToSubmit);
+
       const trackingId = await submitPrintJob(
         formData,
-        files,
+        filesToSubmit,
         selectedServices,
         totalAmount,
         deliveryRequested,

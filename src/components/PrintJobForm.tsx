@@ -16,12 +16,14 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   const {
     currentStep,
     files,
+    uploadedFiles,
     selectedServices,
     totalAmount,
     canAccessDelivery,
     deliveryRequested,
     formData,
     setFiles,
+    setUploadedFiles,
     setSelectedServices,
     setFormData,
     handleNext,
@@ -46,6 +48,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     canProceed,
     formData,
     files,
+    uploadedFiles,
     selectedServices,
     totalAmount,
     deliveryRequested: deliveryRequestedBoolean,
@@ -58,6 +61,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
   console.log('PrintJobForm - currentStep:', currentStep);
   console.log('PrintJobForm - files count:', files.length);
+  console.log('PrintJobForm - uploaded files count:', uploadedFiles.length);
   console.log('PrintJobForm - selected services count:', selectedServices.length);
   console.log('PrintJobForm - validation result:', validationResult);
   console.log('PrintJobForm - can proceed:', canProceedBoolean);
