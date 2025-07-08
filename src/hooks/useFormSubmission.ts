@@ -62,8 +62,17 @@ export const useFormSubmission = ({
         description: "Please wait while we process your print job...",
       });
 
-      // Use uploadedFiles if available, otherwise fall back to files
-      const filesToSubmit = uploadedFiles.length > 0 ? uploadedFiles : files;
+      // Convert File[] to uploaded files format if uploadedFiles is empty
+      let filesToSubmit = uploadedFiles;
+      if (uploadedFiles.length === 0 && files.length > 0) {
+        filesToSubmit = files.map(file => ({
+          name: file.name,
+          url: URL.createObjectURL(file),
+          size: file.size,
+          type: file.type
+        }));
+      }
+
       console.log('Files to submit:', filesToSubmit);
 
       const trackingId = await submitPrintJob(

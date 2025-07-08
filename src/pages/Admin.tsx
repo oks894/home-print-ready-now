@@ -6,7 +6,6 @@ import { AdminHeader } from '@/components/admin/AdminHeader';
 import { MobileAdminHeader } from '@/components/admin/MobileAdminHeader';
 import { MobileDrawer } from '@/components/admin/MobileDrawer';
 import { AdminTabs } from '@/components/admin/AdminTabs';
-import { NotificationManager } from '@/components/admin/NotificationManager';
 import { OfflineIndicator } from '@/components/admin/OfflineIndicator';
 import { SearchProvider } from '@/components/admin/AdminSearch';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
@@ -65,7 +64,7 @@ const Admin = () => {
 
   const AdminContent = () => (
     <SearchProvider>
-      <div className={`min-h-screen ${isMobile ? '' : 'bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30'}`}>
+      <div className={`min-h-screen ${isMobile ? 'bg-gray-50' : 'bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30'}`}>
         {/* Offline Indicator */}
         <OfflineIndicator />
 
@@ -104,11 +103,11 @@ const Admin = () => {
         />
 
         <div className={`max-w-7xl mx-auto safe-area-inset ${
-          isMobile ? 'px-2 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
+          isMobile ? 'px-3 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
         }`}>
-          <div className={isMobile ? 'mb-6' : 'mb-8'}>
+          <div className={isMobile ? 'mb-4' : 'mb-8'}>
             <h1 className={`font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent ${
-              isMobile ? 'text-2xl' : 'text-3xl'
+              isMobile ? 'text-xl' : 'text-3xl'
             }`}>
               Dashboard Overview
             </h1>
@@ -119,11 +118,6 @@ const Admin = () => {
             {isLoading && (
               <div className="mt-2 text-sm text-blue-600">Loading data...</div>
             )}
-          </div>
-
-          {/* Add Notification Manager */}
-          <div className={isMobile ? 'mb-4' : 'mb-6'}>
-            <NotificationManager />
           </div>
 
           <AdminTabs

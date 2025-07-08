@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { RefreshCw, LogOut, Menu, Bell } from 'lucide-react';
+import { RefreshCw, LogOut, Menu } from 'lucide-react';
 import { TouchButton } from '@/components/mobile/TouchButton';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -29,13 +29,13 @@ export const MobileAdminHeader = ({
       animate={{ y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-4 py-4">
+        <div className="flex items-center gap-4">
           <TouchButton
             variant="ghost"
             size="sm"
             onClick={onMenuToggle}
-            className="p-2"
+            className="p-3 hover:bg-gray-100 rounded-full"
           >
             <Menu className="w-5 h-5" />
           </TouchButton>
@@ -46,13 +46,13 @@ export const MobileAdminHeader = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <TouchButton
             variant="ghost"
             size="sm"
             onClick={onRefresh}
             disabled={isRetrying}
-            className="p-2"
+            className="p-3 hover:bg-gray-100 rounded-full"
           >
             <motion.div
               animate={isRetrying ? { rotate: 360 } : {}}
@@ -65,16 +65,8 @@ export const MobileAdminHeader = ({
           <TouchButton
             variant="ghost"
             size="sm"
-            className="p-2"
-          >
-            <Bell className="w-5 h-5" />
-          </TouchButton>
-
-          <TouchButton
-            variant="ghost"
-            size="sm"
             onClick={onLogout}
-            className="p-2 text-red-600"
+            className="p-3 hover:bg-red-50 text-red-600 rounded-full"
           >
             <LogOut className="w-5 h-5" />
           </TouchButton>
