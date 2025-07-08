@@ -32,7 +32,7 @@ const transformToPrintJob = (data: any): PrintJob => {
     institute: data.institute || '',
     time_slot: data.time_slot || '',
     notes: data.notes || '',
-    files: Array.isArray(data.files) ? data.files as Array<{ name: string; size: number; type: string; data?: string }> : [],
+    files: Array.isArray(data.files) ? data.files as Array<{ name: string; size: number; type: string; url?: string; data?: string }> : [],
     timestamp: data.timestamp,
     status: data.status as PrintJob['status'] || 'pending',
     selected_services: data.selected_services as Array<{ id: string; name: string; quantity: number; price: number }> || [],

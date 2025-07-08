@@ -7,7 +7,7 @@ export interface PrintJob {
   institute: string;
   time_slot: string;
   notes: string;
-  files: Array<{ name: string; size: number; type: string; data?: string }>;
+  files: Array<{ name: string; size: number; type: string; url?: string; data?: string }>;
   timestamp: string;
   status: 'pending' | 'pending_payment' | 'printing' | 'ready' | 'completed';
   selected_services?: Array<{ id: string; name: string; quantity: number; price: number }>;
