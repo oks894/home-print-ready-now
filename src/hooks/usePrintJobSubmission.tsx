@@ -17,53 +17,27 @@ export const usePrintJobSubmission = () => {
   const { toast } = useToast();
 
   const generateUniqueTrackingId = async (phone: string): Promise<string> => {
-    // Start with the clean phone number
     const cleanPhone = phone.replace(/\D/g, '');
-    
-    // Generate a random alphabet character (A-Z)
     const alphabetChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     
-    // Try different alphabet combinations until we find a unique one
     for (let i = 0; i < 26; i++) {
       const randomChar = alphabetChars[Math.floor(Math.random() * alphabetChars.length)];
       const trackingId = `${cleanPhone}${randomChar}`;
       
-      // Check if this tracking ID already exists
       const { data: existingJob } = await supabase
         .from('print_jobs')
         .select('tracking_id')
         .eq('tracking_id', trackingId)
         .maybeSingle();
       
-      // If no conflict, use this tracking ID
       if (!existingJob) {
         return trackingId;
       }
     }
     
-    // If all single letters are taken, add a number
     const timestamp = Date.now().toString().slice(-2);
     const randomChar = alphabetChars[Math.floor(Math.random() * alphabetChars.length)];
     return `${cleanPhone}${randomChar}${timestamp}`;
-  };
-
-  const convertFilesToBase64 = async (files: File[]): Promise<Array<{ name: string; size: number; type: string; data: string }>> => {
-    const filePromises = files.map(file => {
-      return new Promise<{ name: string; size: number; type: string; data: string }>((resolve) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          resolve({
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            data: reader.result as string
-          });
-        };
-        reader.readAsDataURL(file);
-      });
-    });
-    
-    return Promise.all(filePromises);
   };
 
   const copyToClipboard = async (text: string): Promise<boolean> => {
@@ -78,13 +52,13 @@ export const usePrintJobSubmission = () => {
 
   const submitPrintJob = async (
     formData: FormData,
-    files: File[],
+    uploadedFiles: Array<{ name: string; url: string; size: number; type: string }>,
     selectedServices: SelectedService[],
     totalAmount: number,
     deliveryRequested: boolean,
     canAccessDelivery: boolean
   ) => {
-    if (!formData.name || !formData.phone || !formData.timeSlot || files.length === 0) {
+    if (!formData.name || !formData.phone || !formData.timeSlot || uploadedFiles.length === 0) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields and upload at least one file",
@@ -106,7 +80,6 @@ export const usePrintJobSubmission = () => {
 
     try {
       const newTrackingId = await generateUniqueTrackingId(formData.phone);
-      const filesWithData = await convertFilesToBase64(files);
 
       const selectedServicesData = selectedServices.map(service => ({
         id: service.id,
@@ -126,13 +99,13 @@ export const usePrintJobSubmission = () => {
           institute: formData.institute || null,
           time_slot: formData.timeSlot,
           notes: formData.notes || null,
-          files: filesWithData,
+          files: uploadedFiles, // Now using uploaded file URLs instead of Base64
           status: totalAmount > 0 ? 'pending_payment' : 'pending',
           selected_services: selectedServicesData,
           total_amount: totalAmount,
           delivery_requested: deliveryRequested && canAccessDelivery,
-          sms_notifications: true, // Default to enabled
-          email_notifications: true // Default to enabled
+          sms_notifications: true,
+          email_notifications: true
         });
 
       if (error) {
@@ -145,7 +118,6 @@ export const usePrintJobSubmission = () => {
         return null;
       }
 
-      // Auto-copy tracking ID to clipboard
       const copySuccess = await copyToClipboard(newTrackingId);
       
       toast({

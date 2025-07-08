@@ -1,13 +1,13 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, User, Package, ChevronDown } from 'lucide-react';
+import { Clock, User, Package, ChevronDown, Search, Filter } from 'lucide-react';
 import { PrintJob } from '@/types/printJob';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { MobileJobCard } from './MobileJobCard';
+import { MobileAdminCard } from '@/components/mobile/MobileAdminCard';
 import { useInView } from 'react-intersection-observer';
+import { Input } from '@/components/ui/input';
 
 interface PrintJobsListProps {
   jobs: PrintJob[];
@@ -39,6 +39,8 @@ export const PrintJobsList: React.FC<PrintJobsListProps> = ({
   totalCount
 }) => {
   const isMobile = useIsMobile();
+  const [searchTerm, setSearchTerm] = React.useState('');
+  const [statusFilter, setStatusFilter] = React.useState('all');
   const { ref, inView } = useInView({
     threshold: 0,
     triggerOnce: false,
@@ -50,35 +52,80 @@ export const PrintJobsList: React.FC<PrintJobsListProps> = ({
     }
   }, [inView, hasMore, isLoading, onLoadMore]);
 
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         job.phone.includes(searchTerm) ||
+                         job.tracking_id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = statusFilter === 'all' || job.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   if (isMobile) {
     return (
-      <div className="space-y-3">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">Print Jobs</h3>
-          {totalCount !== undefined && (
-            <Badge variant="outline">{totalCount} total</Badge>
-          )}
+      <div className="space-y-4">
+        <div className="sticky top-0 bg-white/95 backdrop-blur-md z-10 p-4 -mx-4 border-b border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold text-gray-900">Print Jobs</h3>
+            {totalCount !== undefined && (
+              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                {totalCount} total
+              </Badge>
+            )}
+          </div>
+          
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search by name, phone, or tracking ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-white border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+              />
+            </div>
+            
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              {['all', 'pending', 'printing', 'ready', 'completed'].map(status => (
+                <Button
+                  key={status}
+                  variant={statusFilter === status ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setStatusFilter(status)}
+                  className="whitespace-nowrap"
+                >
+                  {status === 'all' ? 'All' : status.charAt(0).toUpperCase() + status.slice(1)}
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
         
-        {jobs.map((job, index) => (
-          <MobileJobCard
-            key={job.id}
-            job={job}
-            onSelect={onJobSelect}
-            isSelected={selectedJob?.id === job.id}
-            index={index}
-          />
-        ))}
+        <div className="space-y-4">
+          {filteredJobs.map((job, index) => (
+            <MobileAdminCard
+              key={job.id}
+              job={job}
+              onSelect={onJobSelect}
+              isSelected={selectedJob?.id === job.id}
+              index={index}
+            />
+          ))}
+        </div>
         
         {hasMore && (
-          <div ref={ref} className="py-4">
+          <div ref={ref} className="py-6">
             {isLoading ? (
-              <div className="text-center text-sm text-gray-500">Loading more...</div>
+              <div className="text-center">
+                <div className="inline-flex items-center gap-2 text-blue-600">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                  <span className="text-sm">Loading more jobs...</span>
+                </div>
+              </div>
             ) : (
               <Button
                 variant="outline"
                 onClick={onLoadMore}
-                className="w-full"
+                className="w-full py-3 bg-white border-gray-200 hover:bg-gray-50 transition-colors"
               >
                 <ChevronDown className="w-4 h-4 mr-2" />
                 Load More Jobs

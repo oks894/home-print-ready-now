@@ -2,14 +2,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileText, CheckCircle } from 'lucide-react';
-import FileUpload from '../../FileUpload';
+import FileUploadOptimized from '../../FileUploadOptimized';
 
 interface UploadStepProps {
-  files: File[];
-  onFilesChange: (files: File[]) => void;
+  uploadedFiles: Array<{ name: string; url: string; size: number; type: string }>;
+  onFilesUploaded: (files: Array<{ name: string; url: string; size: number; type: string }>) => void;
 }
 
-const UploadStep = ({ files, onFilesChange }: UploadStepProps) => {
+const UploadStep = ({ uploadedFiles, onFilesUploaded }: UploadStepProps) => {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-4">
@@ -25,29 +25,26 @@ const UploadStep = ({ files, onFilesChange }: UploadStepProps) => {
           Upload Your Documents
         </h3>
         <p className="text-gray-600 max-w-md mx-auto">
-          Drag and drop your files or click to browse. We support PDF, DOC, DOCX, and image formats.
+          Upload your files quickly and securely. Large files are now processed much faster with real-time progress tracking.
         </p>
       </div>
       
-      <FileUpload 
-        files={files} 
-        onFilesChange={onFilesChange}
-      />
+      <FileUploadOptimized onFilesUploaded={onFilesUploaded} />
       
-      {files.length > 0 && (
+      {uploadedFiles.length > 0 && (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-blue-50 p-4 rounded-lg"
+          className="bg-green-50 p-4 rounded-lg border border-green-200"
         >
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle className="w-5 h-5 text-green-500" />
-            <span className="font-medium text-blue-900">
-              {files.length} file{files.length > 1 ? 's' : ''} ready for printing
+            <span className="font-medium text-green-900">
+              {uploadedFiles.length} file{uploadedFiles.length > 1 ? 's' : ''} uploaded successfully
             </span>
           </div>
-          <p className="text-sm text-blue-700">
-            Total size: {(files.reduce((sum, file) => sum + file.size, 0) / 1024 / 1024).toFixed(2)} MB
+          <p className="text-sm text-green-700">
+            Total size: {(uploadedFiles.reduce((sum, file) => sum + file.size, 0) / 1024 / 1024).toFixed(2)} MB
           </p>
         </motion.div>
       )}
