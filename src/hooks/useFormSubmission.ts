@@ -5,7 +5,6 @@ import { usePrintJobSubmission } from '@/hooks/usePrintJobSubmission';
 interface UseFormSubmissionProps {
   canProceed: () => boolean | string;
   formData: any;
-  files: File[];
   uploadedFiles: Array<{ name: string; url: string; size: number; type: string }>;
   selectedServices: any[];
   totalAmount: number;
@@ -18,7 +17,6 @@ interface UseFormSubmissionProps {
 export const useFormSubmission = ({
   canProceed,
   formData,
-  files,
   uploadedFiles,
   selectedServices,
   totalAmount,
@@ -47,10 +45,18 @@ export const useFormSubmission = ({
       return;
     }
 
+    if (uploadedFiles.length === 0) {
+      toast({
+        title: "No Files Uploaded",
+        description: "Please upload at least one file before submitting.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       console.log('Submitting form with data:', {
         formData,
-        files: files.length,
         uploadedFiles: uploadedFiles.length,
         selectedServices: selectedServices.length,
         totalAmount,
@@ -62,22 +68,9 @@ export const useFormSubmission = ({
         description: "Please wait while we process your print job...",
       });
 
-      // Convert File[] to uploaded files format if uploadedFiles is empty
-      let filesToSubmit = uploadedFiles;
-      if (uploadedFiles.length === 0 && files.length > 0) {
-        filesToSubmit = files.map(file => ({
-          name: file.name,
-          url: URL.createObjectURL(file),
-          size: file.size,
-          type: file.type
-        }));
-      }
-
-      console.log('Files to submit:', filesToSubmit);
-
       const trackingId = await submitPrintJob(
         formData,
-        filesToSubmit,
+        uploadedFiles,
         selectedServices,
         totalAmount,
         deliveryRequested,

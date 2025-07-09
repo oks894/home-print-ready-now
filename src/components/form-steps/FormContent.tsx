@@ -16,8 +16,8 @@ interface FormData {
 
 interface FormContentProps {
   currentStep: number;
-  files: File[];
-  onFilesChange: (files: File[]) => void;
+  uploadedFiles: Array<{ name: string; url: string; size: number; type: string }>;
+  onUploadedFilesChange: (files: Array<{ name: string; url: string; size: number; type: string }>) => void;
   services: Service[];
   selectedServices: SelectedService[];
   onAddService: (service: any, quantity?: number) => void;
@@ -33,8 +33,8 @@ interface FormContentProps {
 
 export const FormContent = ({
   currentStep,
-  files,
-  onFilesChange,
+  uploadedFiles,
+  onUploadedFilesChange,
   services,
   selectedServices,
   onAddService,
@@ -71,8 +71,8 @@ export const FormContent = ({
           >
             <StepContent
               currentStep={currentStep}
-              files={files}
-              onFilesChange={onFilesChange}
+              uploadedFiles={uploadedFiles}
+              onUploadedFilesChange={onUploadedFilesChange}
               services={services}
               selectedServices={selectedServices}
               onAddService={onAddService}

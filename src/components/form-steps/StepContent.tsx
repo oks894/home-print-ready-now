@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Service, SelectedService } from '@/types/service';
@@ -9,8 +10,8 @@ import ReviewStep from './steps/ReviewStep';
 
 interface StepContentProps {
   currentStep: number;
-  files: File[];
-  onFilesChange: (files: File[]) => void;
+  uploadedFiles: Array<{ name: string; url: string; size: number; type: string }>;
+  onUploadedFilesChange: (files: Array<{ name: string; url: string; size: number; type: string }>) => void;
   services: Service[];
   selectedServices: SelectedService[];
   onAddService: (service: any, quantity?: number) => void;
@@ -32,8 +33,8 @@ interface StepContentProps {
 
 const StepContent = ({
   currentStep,
-  files,
-  onFilesChange,
+  uploadedFiles,
+  onUploadedFilesChange,
   services,
   selectedServices,
   onAddService,
@@ -52,27 +53,13 @@ const StepContent = ({
     exit: { opacity: 0, x: -100, scale: 0.95 }
   };
 
-  // Convert File[] to uploaded files format for UploadStep
-  const uploadedFiles = files.map(file => ({
-    name: file.name,
-    url: URL.createObjectURL(file), // Create object URL for preview
-    size: file.size,
-    type: file.type
-  }));
-
-  const handleFilesUploaded = (uploadedFileList: Array<{ name: string; url: string; size: number; type: string }>) => {
-    // Convert uploaded files back to File objects - this is a simplified approach
-    // In a real scenario, you'd handle this differently, but for now we'll update the files state
-    onFilesChange(files); // Keep existing files for now
-  };
-
   switch (currentStep) {
     case 0:
       return (
         <motion.div variants={stepVariants}>
           <UploadStep 
             uploadedFiles={uploadedFiles}
-            onFilesUploaded={handleFilesUploaded}
+            onFilesUploaded={onUploadedFilesChange}
           />
         </motion.div>
       );
@@ -119,7 +106,7 @@ const StepContent = ({
       return (
         <motion.div variants={stepVariants}>
           <ReviewStep
-            files={files}
+            uploadedFiles={uploadedFiles}
             selectedServices={selectedServices}
             totalAmount={totalAmount}
             formData={formData}

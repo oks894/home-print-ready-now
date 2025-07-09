@@ -24,18 +24,18 @@ export const MobileAdminHeader = ({
 
   return (
     <motion.header 
-      className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 safe-area-top"
+      className="sticky top-0 z-50 bg-white border-b border-gray-200"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-between px-4 py-4">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between px-4 py-3">
+        <div className="flex items-center gap-3">
           <TouchButton
             variant="ghost"
             size="sm"
             onClick={onMenuToggle}
-            className="p-3 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-lg"
           >
             <Menu className="w-5 h-5" />
           </TouchButton>
@@ -46,13 +46,13 @@ export const MobileAdminHeader = ({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <TouchButton
             variant="ghost"
             size="sm"
             onClick={onRefresh}
             disabled={isRetrying}
-            className="p-3 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-gray-100 rounded-lg"
           >
             <motion.div
               animate={isRetrying ? { rotate: 360 } : {}}
@@ -66,7 +66,7 @@ export const MobileAdminHeader = ({
             variant="ghost"
             size="sm"
             onClick={onLogout}
-            className="p-3 hover:bg-red-50 text-red-600 rounded-full"
+            className="p-2 hover:bg-red-50 text-red-600 rounded-lg"
           >
             <LogOut className="w-5 h-5" />
           </TouchButton>

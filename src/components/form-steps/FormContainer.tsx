@@ -21,7 +21,7 @@ interface FormData {
 
 interface FormContainerProps {
   currentStep: number;
-  files: File[];
+  uploadedFiles: Array<{ name: string; url: string; size: number; type: string }>;
   selectedServices: SelectedService[];
   totalAmount: number;
   canAccessDelivery: boolean;
@@ -32,7 +32,7 @@ interface FormContainerProps {
   validationMessage: string | null;
   canProceedBoolean: boolean;
   isSubmitting: boolean;
-  onFilesChange: (files: File[]) => void;
+  onUploadedFilesChange: (files: Array<{ name: string; url: string; size: number; type: string }>) => void;
   onAddService: (service: any, quantity?: number) => void;
   onUpdateQuantity: (serviceId: string, quantity: number) => void;
   onRemoveService: (serviceId: string) => void;
@@ -45,7 +45,7 @@ interface FormContainerProps {
 
 export const FormContainer = ({
   currentStep,
-  files,
+  uploadedFiles,
   selectedServices,
   totalAmount,
   canAccessDelivery,
@@ -56,7 +56,7 @@ export const FormContainer = ({
   validationMessage,
   canProceedBoolean,
   isSubmitting,
-  onFilesChange,
+  onUploadedFilesChange,
   onAddService,
   onUpdateQuantity,
   onRemoveService,
@@ -98,8 +98,8 @@ export const FormContainer = ({
         <div className={isMobile ? 'my-4' : 'my-8'}>
           <FormContent
             currentStep={currentStep}
-            files={files}
-            onFilesChange={onFilesChange}
+            uploadedFiles={uploadedFiles}
+            onUploadedFilesChange={onUploadedFilesChange}
             services={services}
             selectedServices={selectedServices}
             onAddService={onAddService}

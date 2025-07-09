@@ -15,14 +15,12 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   const isMobile = useIsMobile();
   const {
     currentStep,
-    files,
     uploadedFiles,
     selectedServices,
     totalAmount,
     canAccessDelivery,
     deliveryRequested,
     formData,
-    setFiles,
     setUploadedFiles,
     setSelectedServices,
     setFormData,
@@ -36,10 +34,8 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   const { services, isLoading: servicesLoading } = useServices();
   const serviceHandlers = createServiceHandlers(setSelectedServices);
 
-  // Convert deliveryRequested to boolean to fix TypeScript error
   const deliveryRequestedBoolean = typeof deliveryRequested === 'string' ? deliveryRequested === 'true' : Boolean(deliveryRequested);
 
-  // Get validation result
   const validationResult = canProceed();
   const canProceedBoolean = validationResult === true;
   const validationMessage = typeof validationResult === 'string' ? validationResult : null;
@@ -47,7 +43,6 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   const { handleSubmit, isSubmitting } = useFormSubmission({
     canProceed,
     formData,
-    files,
     uploadedFiles,
     selectedServices,
     totalAmount,
@@ -60,7 +55,6 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
   console.log('PrintJobForm - services:', services);
   console.log('PrintJobForm - servicesLoading:', servicesLoading);
   console.log('PrintJobForm - currentStep:', currentStep);
-  console.log('PrintJobForm - files count:', files.length);
   console.log('PrintJobForm - uploaded files count:', uploadedFiles.length);
   console.log('PrintJobForm - selected services count:', selectedServices.length);
   console.log('PrintJobForm - validation result:', validationResult);
@@ -70,7 +64,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
     <section className={`${isMobile ? 'py-6 px-0' : 'py-16 px-4'} bg-gradient-to-br from-white via-blue-50 to-purple-50 min-h-screen`}>
       <FormContainer
         currentStep={currentStep}
-        files={files}
+        uploadedFiles={uploadedFiles}
         selectedServices={selectedServices}
         totalAmount={totalAmount}
         canAccessDelivery={canAccessDelivery}
@@ -81,7 +75,7 @@ const PrintJobForm = ({ onOrderSubmitted }: PrintJobFormProps) => {
         validationMessage={validationMessage}
         canProceedBoolean={canProceedBoolean}
         isSubmitting={isSubmitting}
-        onFilesChange={setFiles}
+        onUploadedFilesChange={setUploadedFiles}
         onAddService={serviceHandlers.handleServiceAdd}
         onUpdateQuantity={serviceHandlers.handleServiceUpdate}
         onRemoveService={serviceHandlers.handleServiceRemove}

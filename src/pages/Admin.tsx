@@ -8,7 +8,6 @@ import { MobileDrawer } from '@/components/admin/MobileDrawer';
 import { AdminTabs } from '@/components/admin/AdminTabs';
 import { OfflineIndicator } from '@/components/admin/OfflineIndicator';
 import { SearchProvider } from '@/components/admin/AdminSearch';
-import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { MobileAdminLayout } from '@/components/mobile/MobileAdminLayout';
 import { useAdminData } from '@/hooks/useAdminData';
 import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
@@ -35,7 +34,6 @@ const Admin = () => {
     setSelectedJob
   } = useAdminData();
 
-  // Register service worker for offline capability
   React.useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
@@ -49,26 +47,20 @@ const Admin = () => {
   }, []);
 
   if (!isAuthenticated) {
-    return isMobile ? (
+    return (
       <MobileAdminLayout>
         <AdminLogin onLogin={() => setIsAuthenticated(true)} />
       </MobileAdminLayout>
-    ) : (
-      <MobileLayout>
-        <AdminLogin onLogin={() => setIsAuthenticated(true)} />
-      </MobileLayout>
     );
   }
 
   const pendingJobs = printJobs.filter(job => job.status === 'pending').length;
 
-  const AdminContent = () => (
-    <SearchProvider>
-      <div className={`min-h-screen ${isMobile ? 'bg-gray-50' : 'bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30'}`}>
-        {/* Offline Indicator */}
+  return (
+    <MobileAdminLayout>
+      <SearchProvider>
         <OfflineIndicator />
 
-        {/* Mobile Navigation Drawer */}
         {isMobile && (
           <MobileDrawer
             isOpen={isDrawerOpen}
@@ -80,7 +72,6 @@ const Admin = () => {
           />
         )}
 
-        {/* Headers */}
         {isMobile ? (
           <MobileAdminHeader
             onLogout={() => setIsAuthenticated(false)}
@@ -96,14 +87,13 @@ const Admin = () => {
           />
         )}
 
-        {/* Admin Live Monitor with Milestones */}
         <OnlineUsersMonitor 
           showMilestones={true}
           className="admin-monitor"
         />
 
-        <div className={`max-w-7xl mx-auto safe-area-inset ${
-          isMobile ? 'px-3 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
+        <div className={`max-w-7xl mx-auto ${
+          isMobile ? 'px-4 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
         }`}>
           <div className={isMobile ? 'mb-4' : 'mb-8'}>
             <h1 className={`font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent ${
@@ -136,18 +126,8 @@ const Admin = () => {
             onTabChange={setActiveTab}
           />
         </div>
-      </div>
-    </SearchProvider>
-  );
-
-  return isMobile ? (
-    <MobileAdminLayout>
-      <AdminContent />
+      </SearchProvider>
     </MobileAdminLayout>
-  ) : (
-    <MobileLayout>
-      <AdminContent />
-    </MobileLayout>
   );
 };
 

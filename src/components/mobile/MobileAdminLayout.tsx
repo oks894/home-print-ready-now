@@ -12,12 +12,12 @@ export const MobileAdminLayout = ({ children, className = '' }: MobileAdminLayou
   const isMobile = useIsMobile();
   
   if (!isMobile) {
-    return <div className={className}>{children}</div>;
+    return <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 ${className}`}>{children}</div>;
   }
 
   return (
     <motion.div 
-      className={`min-h-screen bg-gray-50 safe-area-inset ${className}`}
+      className={`min-h-screen bg-gray-50 ${className}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
