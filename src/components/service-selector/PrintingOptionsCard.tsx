@@ -53,16 +53,26 @@ const PrintingOptionsCard = ({
   const handleAddService = () => {
     const pagesNum = parseInt(pages) || 0;
     if (pagesNum > 0 && priceBreakdown) {
-      const options = { pages: pagesNum, copies, doubleSided };
-      onAddService(service, priceBreakdown.finalPrice, options);
+      const printingOptions = {
+        pages: pagesNum,
+        copies,
+        doubleSided,
+        calculatedPrice: priceBreakdown.finalPrice
+      };
+      onAddService(service, 1, printingOptions);
     }
   };
 
   const handleUpdateService = () => {
     const pagesNum = parseInt(pages) || 0;
     if (onUpdateQuantity && selectedService && pagesNum > 0 && priceBreakdown) {
-      const options = { pages: pagesNum, copies, doubleSided };
-      onUpdateQuantity(selectedService.id, priceBreakdown.finalPrice, options);
+      const printingOptions = {
+        pages: pagesNum,
+        copies,
+        doubleSided,
+        calculatedPrice: priceBreakdown.finalPrice
+      };
+      onUpdateQuantity(selectedService.id, 1, printingOptions);
     }
   };
 

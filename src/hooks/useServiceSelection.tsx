@@ -6,10 +6,15 @@ import { calculateBulkPrice, parsePriceFromString } from '@/utils/pricingUtils';
 export const useServiceSelection = (services: Service[]) => {
   const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
 
-  const calculateServicePrice = (service: Service, quantity: number): number => {
+  const calculateServicePrice = (service: Service, quantity: number, options?: { pages?: number; copies?: number; doubleSided?: boolean; }): number => {
     const basePrice = parsePriceFromString(service.price);
     
-    // Apply bulk pricing for printing services
+    // For printing services, use the advanced pricing calculation if options are provided
+    if ((service.category === 'Printing' || service.category === 'Color') && options?.pages && options?.copies) {
+      return calculateServicePrice(service, quantity, options);
+    }
+    
+    // Apply bulk pricing for printing services (fallback)
     if (service.category === 'Printing' || service.category === 'Color') {
       return calculateBulkPrice(basePrice, quantity);
     }
@@ -18,22 +23,24 @@ export const useServiceSelection = (services: Service[]) => {
     return basePrice * quantity;
   };
 
-  const addService = (service: Service, quantity: number = 1) => {
+  const addService = (service: Service, quantity: number = 1, options?: { pages?: number; copies?: number; doubleSided?: boolean; calculatedPrice?: number; }) => {
     const existingService = selectedServices.find(s => s.id === service.id);
     
     if (existingService) {
-      updateQuantity(service.id, existingService.quantity + quantity);
+      updateQuantity(service.id, existingService.quantity + quantity, options);
     } else {
-      const calculatedPrice = calculateServicePrice(service, quantity);
+      // Use pre-calculated price if provided, otherwise calculate
+      const calculatedPrice = options?.calculatedPrice ?? calculateServicePrice(service, quantity, options);
       setSelectedServices(prev => [...prev, {
         ...service, // This spreads all properties from Service including id, name, description, price, category, created_at
         quantity,
-        calculatedPrice
+        calculatedPrice,
+        ...(options && { printingOptions: { pages: options.pages, copies: options.copies, doubleSided: options.doubleSided } })
       }]);
     }
   };
 
-  const updateQuantity = (serviceId: string, quantity: number) => {
+  const updateQuantity = (serviceId: string, quantity: number, options?: { pages?: number; copies?: number; doubleSided?: boolean; calculatedPrice?: number; }) => {
     if (quantity <= 0) {
       removeService(serviceId);
       return;
@@ -42,11 +49,17 @@ export const useServiceSelection = (services: Service[]) => {
     const service = services.find(s => s.id === serviceId);
     if (!service) return;
 
-    const calculatedPrice = calculateServicePrice(service, quantity);
+    // Use pre-calculated price if provided, otherwise calculate
+    const calculatedPrice = options?.calculatedPrice ?? calculateServicePrice(service, quantity, options);
     
     setSelectedServices(prev => prev.map(s => 
       s.id === serviceId 
-        ? { ...s, quantity, calculatedPrice }
+        ? { 
+            ...s, 
+            quantity, 
+            calculatedPrice,
+            ...(options && { printingOptions: { pages: options.pages, copies: options.copies, doubleSided: options.doubleSided } })
+          }
         : s
     ));
   };

@@ -31,11 +31,21 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
               ? getBulkDiscountInfo(service.quantity) 
               : null;
             
+            const getServiceDisplayText = () => {
+              if (service.printingOptions?.pages && service.printingOptions?.copies) {
+                const { pages, copies, doubleSided } = service.printingOptions;
+                const totalPages = pages * copies;
+                const sheets = doubleSided ? Math.ceil(totalPages / 2) : totalPages;
+                return `${service.name} (${sheets} ${doubleSided ? 'sheets' : 'pages'} - ${pages}p × ${copies}c${doubleSided ? ', double-sided' : ''})`;
+              }
+              return `${service.name} (x${service.quantity})`;
+            };
+
             return (
               <div key={service.id} className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span>
-                    {service.name} (x{service.quantity})
+                    {getServiceDisplayText()}
                     {bulkInfo?.hasBulkDiscount && (
                       <Badge className="ml-2 bg-green-100 text-green-800 text-xs">
                         Bulk Price

@@ -11,4 +11,9 @@ export interface Service {
 export interface SelectedService extends Service {
   quantity: number;
   calculatedPrice: number;
+  printingOptions?: {
+    pages?: number;
+    copies?: number;
+    doubleSided?: boolean;
+  };
 }
