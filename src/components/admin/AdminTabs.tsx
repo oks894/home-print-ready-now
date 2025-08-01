@@ -7,6 +7,7 @@ import { PrintJobsList } from './PrintJobsList';
 import { JobDetails } from './JobDetails';
 import { FeedbackList } from './FeedbackList';
 import { ServicesManager } from './ServicesManager';
+import { MobileJobsList } from './mobile/MobileJobsList';
 import { PrintJob } from '@/types/printJob';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -80,24 +81,39 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
       </TabsList>
 
       <TabsContent value="orders" className="space-y-6">
-        <div className={`${isMobile ? 'space-y-4' : 'grid grid-cols-1 lg:grid-cols-2 gap-8'}`}>
-          <PrintJobsList
-            jobs={printJobs}
-            selectedJob={selectedJob}
-            onJobSelect={onJobSelect}
-            isLoading={isLoading}
-            hasMore={hasMore}
-            onLoadMore={onLoadMore}
-            totalCount={printJobs.length}
-          />
-          {selectedJob && !isMobile && (
-            <JobDetails
-              job={selectedJob}
+        {isMobile ? (
+          <div className="h-full">
+            <MobileJobsList
+              jobs={printJobs}
+              selectedJob={selectedJob}
+              onJobSelect={onJobSelect}
               onStatusUpdate={onStatusUpdate}
-              onDelete={onDeleteJob}
+              isLoading={isLoading}
+              hasMore={hasMore}
+              onLoadMore={onLoadMore}
+              totalCount={printJobs.length}
             />
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <PrintJobsList
+              jobs={printJobs}
+              selectedJob={selectedJob}
+              onJobSelect={onJobSelect}
+              isLoading={isLoading}
+              hasMore={hasMore}
+              onLoadMore={onLoadMore}
+              totalCount={printJobs.length}
+            />
+            {selectedJob && (
+              <JobDetails
+                job={selectedJob}
+                onStatusUpdate={onStatusUpdate}
+                onDelete={onDeleteJob}
+              />
+            )}
+          </div>
+        )}
       </TabsContent>
 
       <TabsContent value="feedback">
