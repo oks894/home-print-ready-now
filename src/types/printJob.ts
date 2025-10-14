@@ -14,4 +14,5 @@ export interface PrintJob {
   total_amount?: number;
   delivery_requested?: boolean;
   estimated_completion?: string;
+  admin_notes?: string;
 }

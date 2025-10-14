@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Search, Package, Clock, CheckCircle, Truck, CreditCard, Phone, User, MapPin, Calendar, FileText, Star, Sparkles } from 'lucide-react';
+import { ArrowLeft, Search, Package, Clock, CheckCircle, Truck, CreditCard, Phone, User, MapPin, Calendar, FileText, Star, Sparkles, Download, Eye, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { PrintJob } from '@/types/printJob';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { StatusHistory } from '@/components/admin/StatusHistory';
 
 const Track = () => {
   const [trackingId, setTrackingId] = useState('');
@@ -56,12 +57,13 @@ const Track = () => {
         console.log('Job found:', data);
         
         // Handle files - ensure it's properly typed and handle Json type
-        let files: Array<{ name: string; size: number; type: string }> = [];
+        let files: Array<{ name: string; size: number; type: string; url?: string }> = [];
         if (data.files && Array.isArray(data.files)) {
           files = (data.files as any[]).map((file: any) => ({
             name: file.name || 'Unknown file',
             size: file.size || 0,
-            type: file.type || 'unknown'
+            type: file.type || 'unknown',
+            url: file.url || undefined
           }));
         }
 
@@ -431,18 +433,65 @@ const Track = () => {
                           Files ({job.files.length})
                           <Badge variant="secondary">{job.files.length}</Badge>
                         </h5>
-                        <div className="space-y-2 max-h-40 overflow-y-auto">
-                          {job.files.map((file, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm">
-                              <div className="flex items-center gap-2">
-                                <FileText className="w-4 h-4 text-gray-500" />
-                                <span className="truncate font-medium">{file.name}</span>
+                        <div className="space-y-3">
+                          {job.files.map((file, index) => {
+                            const isImage = file.type?.startsWith('image/');
+                            return (
+                              <div key={index} className="space-y-2">
+                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg text-sm">
+                                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                                    {isImage ? (
+                                      <ImageIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                    ) : (
+                                      <FileText className="w-4 h-4 text-gray-500 flex-shrink-0" />
+                                    )}
+                                    <span className="truncate font-medium">{file.name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 flex-shrink-0">
+                                    <span className="text-gray-500 text-xs">
+                                      {(file.size / 1024 / 1024).toFixed(2)} MB
+                                    </span>
+                                    {file.url && (
+                                      <div className="flex gap-1">
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-7 px-2"
+                                          onClick={() => window.open(file.url, '_blank')}
+                                        >
+                                          <Eye className="w-3 h-3" />
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-7 px-2"
+                                          onClick={() => {
+                                            const link = document.createElement('a');
+                                            link.href = file.url!;
+                                            link.download = file.name;
+                                            link.click();
+                                          }}
+                                        >
+                                          <Download className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                                {/* Image Preview */}
+                                {isImage && file.url && (
+                                  <div className="relative rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                                    <img 
+                                      src={file.url} 
+                                      alt={file.name}
+                                      className="w-full h-auto max-h-64 object-contain"
+                                      loading="lazy"
+                                    />
+                                  </div>
+                                )}
                               </div>
-                              <span className="text-gray-500 text-xs">
-                                {(file.size / 1024 / 1024).toFixed(2)} MB
-                              </span>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       </div>
                       
@@ -479,12 +528,36 @@ const Track = () => {
                   </Card>
                 </div>
 
+                {/* Status History - Admin Updates & Messages */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-3">
+                        <div className="p-2 bg-indigo-100 rounded-lg">
+                          <Clock className="w-5 h-5 text-indigo-600" />
+                        </div>
+                        Status Updates & Messages
+                      </CardTitle>
+                      <CardDescription>
+                        Track all status changes and admin messages for your order
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <StatusHistory printJobId={job.id} />
+                    </CardContent>
+                  </Card>
+                </motion.div>
+
                 {/* Special Instructions */}
                 {job.notes && (
                   <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
+                    transition={{ delay: 0.4 }}
                   >
                     <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm">
                       <CardHeader>
@@ -492,7 +565,7 @@ const Track = () => {
                           <div className="p-2 bg-purple-100 rounded-lg">
                             <Star className="w-5 h-5 text-purple-600" />
                           </div>
-                          Special Instructions
+                          Your Special Instructions
                         </CardTitle>
                       </CardHeader>
                       <CardContent>

@@ -32,50 +32,40 @@ export const StatusHistory = ({ printJobId }: StatusHistoryProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="w-5 h-5" />
-          Status History
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {statusHistory.length === 0 ? (
-            <p className="text-gray-500 text-center py-4">No status history available</p>
-          ) : (
-            statusHistory.map((entry, index) => (
-              <div key={entry.id} className="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-b-0">
-                <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge className={getStatusColor(entry.status)}>
-                      {formatStatus(entry.status)}
-                    </Badge>
-                    <span className="text-sm text-gray-500">
-                      {new Date(entry.changed_at).toLocaleString()}
-                    </span>
-                  </div>
-                  
-                  {entry.notes && (
-                    <div className="flex items-start gap-2 mt-2">
-                      <FileText className="w-4 h-4 text-gray-400 mt-0.5" />
-                      <p className="text-sm text-gray-600">{entry.notes}</p>
-                    </div>
-                  )}
-                  
-                  {entry.changed_by && (
-                    <div className="flex items-center gap-2 mt-1">
-                      <User className="w-4 h-4 text-gray-400" />
-                      <span className="text-xs text-gray-500">Changed by: {entry.changed_by}</span>
-                    </div>
-                  )}
-                </div>
+    <div className="space-y-4">
+      {statusHistory.length === 0 ? (
+        <p className="text-gray-500 text-center py-4">No status updates yet</p>
+      ) : (
+        statusHistory.map((entry, index) => (
+          <div key={entry.id} className="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-b-0 last:pb-0">
+            <div className="flex-shrink-0 w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1 flex-wrap">
+                <Badge className={getStatusColor(entry.status)}>
+                  {formatStatus(entry.status)}
+                </Badge>
+                <span className="text-sm text-gray-500">
+                  {new Date(entry.changed_at).toLocaleString()}
+                </span>
               </div>
-            ))
-          )}
-        </div>
-      </CardContent>
-    </Card>
+              
+              {entry.notes && (
+                <div className="flex items-start gap-2 mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <FileText className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-sm text-gray-700 font-medium">{entry.notes}</p>
+                </div>
+              )}
+              
+              {entry.changed_by && (
+                <div className="flex items-center gap-2 mt-2">
+                  <User className="w-3 h-3 text-gray-400" />
+                  <span className="text-xs text-gray-500">Updated by: {entry.changed_by}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        ))
+      )}
+    </div>
   );
 };

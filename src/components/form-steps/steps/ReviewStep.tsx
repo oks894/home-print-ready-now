@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle, FileText, User, Clock, Package, Truck } from 'lucide-react';
+import { CheckCircle, FileText, User, Clock, Package, Truck, Eye, Download, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { SelectedService } from '@/types/service';
 
 interface ReviewStepProps {
@@ -21,6 +22,8 @@ interface ReviewStepProps {
 }
 
 const ReviewStep = ({ uploadedFiles, selectedServices, totalAmount, formData, deliveryRequested }: ReviewStepProps) => {
+  const [expandedImage, setExpandedImage] = useState<string | null>(null);
+
   return (
     <div className="space-y-6">
       <div className="text-center space-y-4">
@@ -50,20 +53,66 @@ const ReviewStep = ({ uploadedFiles, selectedServices, totalAmount, formData, de
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {uploadedFiles.map((file, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <FileText className="w-4 h-4 text-blue-600" />
-                    <div>
-                      <p className="font-medium text-sm">{file.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
+            <div className="space-y-3">
+              {uploadedFiles.map((file, index) => {
+                const isImage = file.type?.startsWith('image/');
+                return (
+                  <div key={index} className="space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {isImage ? (
+                          <ImageIcon className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        ) : (
+                          <FileText className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-sm truncate">{file.name}</p>
+                          <p className="text-xs text-gray-500">
+                            {(file.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      {file.url && (
+                        <div className="flex gap-1 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2"
+                            onClick={() => window.open(file.url, '_blank')}
+                          >
+                            <Eye className="w-3 h-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-7 px-2"
+                            onClick={() => {
+                              const link = document.createElement('a');
+                              link.href = file.url!;
+                              link.download = file.name;
+                              link.click();
+                            }}
+                          >
+                            <Download className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
+                    {/* Image Preview */}
+                    {isImage && file.url && (
+                      <div className="relative rounded-lg overflow-hidden border border-blue-200 bg-gray-50">
+                        <img 
+                          src={file.url} 
+                          alt={file.name}
+                          className="w-full h-auto max-h-48 object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                          loading="lazy"
+                          onClick={() => window.open(file.url, '_blank')}
+                        />
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
