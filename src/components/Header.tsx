@@ -37,7 +37,7 @@ const Header = () => {
                 <Printer className={`${isMobile ? 'w-5 h-5' : 'w-5 h-5 sm:w-6 sm:h-6'}`} />
               </motion.div>
               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                PrintReady
+                ellio
               </span>
             </Link>
           </motion.div>

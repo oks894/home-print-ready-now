@@ -57,7 +57,7 @@ const HeroContent = ({
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
           style={{ backgroundSize: "200% 200%" }}
         >
-          Future of
+          Your Ideas,
         </motion.span>
         <br />
         <motion.span 
@@ -68,7 +68,7 @@ const HeroContent = ({
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
           style={{ backgroundSize: "200% 200%" }}
         >
-          Printing
+          Perfectly Printed
         </motion.span>
       </motion.h1>
 
@@ -76,9 +76,9 @@ const HeroContent = ({
         variants={itemVariants}
         className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-gray-700 mb-8 sm:mb-12 md:mb-16 max-w-4xl mx-auto leading-relaxed font-medium px-2"
       >
-        Experience revolutionary 3D printing with AI-powered optimization, 
-        <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold"> real-time tracking</span>, 
-        and premium quality delivery.
+        Transform your vision into reality with cutting-edge 3D printing technology, 
+        <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold"> intelligent design optimization</span>, 
+        and precision craftsmanship delivered at the speed of innovation.
       </motion.p>
 
       {/* Call to Action Buttons */}

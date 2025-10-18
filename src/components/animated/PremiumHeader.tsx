@@ -69,9 +69,9 @@ const PremiumHeader = () => {
         whileInView={{ opacity: 1 }}
         transition={{ duration: 1, delay: 0.5 }}
       >
-        Experience the future of printing with our 
-        <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold"> cutting-edge technology </span>
-        and unmatched quality standards.
+        Where precision meets creativity. Discover our 
+        <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold"> revolutionary printing solutions </span>
+        that bring your boldest ideas to life with exceptional quality.
       </motion.p>
     </motion.div>
   );

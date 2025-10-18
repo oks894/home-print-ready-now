@@ -56,11 +56,11 @@ const Footer = () => {
                   <Printer className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" />
                 </motion.div>
                 <span className="bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                  PrintReady
+                  ellio
                 </span>
               </div>
               <p className="text-gray-300 mb-3 sm:mb-4 text-sm sm:text-base leading-relaxed">
-                Professional printing services delivered to your doorstep. Quality prints, convenient pickup.
+                Your ideas, perfectly printed. Premium quality printing with smart technology and seamless delivery.
               </p>
               <motion.p 
                 className="text-xs sm:text-sm text-gray-400"
@@ -177,7 +177,7 @@ const Footer = () => {
             viewport={{ once: true }}
           >
             <p className="text-xs sm:text-sm">
-              &copy; 2024 PrintReady by DYNAMIC EDU. All rights reserved. 
+              &copy; 2024 ellio by DYNAMIC EDU. All rights reserved.
               <motion.span
                 className="inline-block ml-2 text-blue-400"
                 animate={{ scale: [1, 1.05, 1] }}

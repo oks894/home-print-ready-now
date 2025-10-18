@@ -31,14 +31,14 @@ const SimpleHeroSection = () => {
 
         {/* Main Heading */}
         <h1 className="text-3xl sm:text-5xl font-bold text-gray-900 mb-6 leading-tight">
-          <span className="text-blue-600">Future of</span>
+          <span className="text-blue-600">Your Ideas,</span>
           <br />
-          <span className="text-purple-600">Printing</span>
+          <span className="text-purple-600">Perfectly Printed</span>
         </h1>
 
         <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed">
-          Experience revolutionary 3D printing with AI-powered optimization, 
-          real-time tracking, and premium quality delivery.
+          Transform your vision into reality with cutting-edge 3D printing technology, 
+          intelligent design optimization, and precision craftsmanship delivered at the speed of innovation.
         </p>
 
         {/* Simple Call to Action Buttons */}

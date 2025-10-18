@@ -36,7 +36,7 @@ export const AdminHeader = ({ onLogout, isRetrying = false, onRefresh }: AdminHe
                 <Package className="w-5 h-5" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-gray-900">PrintReady Admin</h1>
+                <h1 className="text-lg font-semibold text-gray-900">ellio Admin</h1>
                 <div className="flex items-center gap-2">
                   <Badge variant={isOnline ? "default" : "destructive"} className="text-xs">
                     {isOnline ? <Wifi className="w-3 h-3 mr-1" /> : <WifiOff className="w-3 h-3 mr-1" />}

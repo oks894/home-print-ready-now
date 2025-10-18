@@ -1,8 +1,8 @@
 
 {
-  "name": "Print Admin Dashboard",
-  "short_name": "PrintAdmin",
-  "description": "Mobile-optimized admin dashboard for print job management",
+  "name": "ellio Admin Dashboard",
+  "short_name": "ellio",
+  "description": "Mobile-optimized admin dashboard for intelligent print job management",
   "start_url": "/admin",
   "display": "standalone",
   "background_color": "#ffffff",
