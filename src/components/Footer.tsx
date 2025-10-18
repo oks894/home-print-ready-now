@@ -1,10 +1,13 @@
 
 import { Link } from 'react-router-dom';
-import { Printer, Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { Printer, Phone, Mail, MapPin, Clock, ExternalLink as ExternalLinkIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
+import * as Icons from 'lucide-react';
 import Stats from './Stats';
+import { useExternalLinks } from '@/hooks/useExternalLinks';
 
 const Footer = () => {
+  const { links } = useExternalLinks();
   return (
     <>
       <Stats />
@@ -104,6 +107,41 @@ const Footer = () => {
                 ))}
               </ul>
             </motion.div>
+
+            {/* External Links */}
+            {links.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.25 }}
+                viewport={{ once: true }}
+              >
+                <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base text-yellow-300">Our Projects</h3>
+                <ul className="space-y-1 sm:space-y-2">
+                  {links.filter(link => link.is_active).map((link) => {
+                    const IconComponent = link.icon ? (Icons as any)[link.icon] : ExternalLinkIcon;
+                    return (
+                      <motion.li
+                        key={link.id}
+                        whileHover={{ x: 5 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <a 
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-300 hover:text-yellow-400 transition-colors text-sm sm:text-base group relative flex items-center gap-2"
+                        >
+                          {IconComponent && <IconComponent className="w-3 h-3 sm:w-4 sm:h-4" />}
+                          {link.title}
+                          <ExternalLinkIcon className="w-3 h-3 opacity-50" />
+                        </a>
+                      </motion.li>
+                    );
+                  })}
+                </ul>
+              </motion.div>
+            )}
 
             {/* Services */}
             <motion.div

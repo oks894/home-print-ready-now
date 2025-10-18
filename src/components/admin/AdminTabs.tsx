@@ -2,11 +2,12 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { FileText, MessageSquare, Settings, Package } from 'lucide-react';
+import { FileText, MessageSquare, Settings, Package, Link2 } from 'lucide-react';
 import { PrintJobsList } from './PrintJobsList';
 import { JobDetails } from './JobDetails';
 import { FeedbackList } from './FeedbackList';
 import { ServicesManager } from './ServicesManager';
+import { ExternalLinksManager } from './ExternalLinksManager';
 import { MobileJobsList } from './mobile/MobileJobsList';
 import { PrintJob } from '@/types/printJob';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -47,7 +48,7 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2 mb-4' : 'grid-cols-4 mb-6'}`}>
+      <TabsList className={`grid w-full ${isMobile ? 'grid-cols-2 mb-4' : 'grid-cols-5 mb-6'}`}>
         <TabsTrigger value="orders" className="flex items-center gap-2">
           <FileText className="w-4 h-4" />
           {!isMobile && 'Orders'}
@@ -71,6 +72,10 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
             <TabsTrigger value="services" className="flex items-center gap-2">
               <Package className="w-4 h-4" />
               Services
+            </TabsTrigger>
+            <TabsTrigger value="links" className="flex items-center gap-2">
+              <Link2 className="w-4 h-4" />
+              Links
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -128,6 +133,10 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
         <>
           <TabsContent value="services">
             <ServicesManager />
+          </TabsContent>
+
+          <TabsContent value="links">
+            <ExternalLinksManager />
           </TabsContent>
 
           <TabsContent value="settings">

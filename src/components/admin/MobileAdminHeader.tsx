@@ -24,32 +24,41 @@ export const MobileAdminHeader = ({
 
   return (
     <motion.header 
-      className="sticky top-0 z-50 bg-white border-b border-gray-100 shadow-sm"
+      className="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-between px-4 py-3">
+      <div className="flex items-center justify-between px-4 py-4">
         <div className="flex items-center gap-3 min-w-0 flex-1">
+          <motion.div
+            className="p-2 bg-white/20 backdrop-blur-sm rounded-xl"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+              <span className="text-blue-600 font-bold text-sm">A</span>
+            </div>
+          </motion.div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-lg font-bold text-gray-900 truncate">Admin Panel</h1>
-            <p className="text-xs text-gray-500">Print Management</p>
+            <h1 className="text-lg font-bold text-white truncate">ellio Admin</h1>
+            <p className="text-xs text-blue-100">Dashboard</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <TouchButton
             variant="ghost"
             size="sm"
             onClick={onRefresh}
             disabled={isRetrying}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2.5 hover:bg-white/20 rounded-xl text-white"
           >
             <motion.div
               animate={isRetrying ? { rotate: 360 } : {}}
               transition={{ duration: 1, repeat: isRetrying ? Infinity : 0, ease: "linear" }}
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-5 h-5" />
             </motion.div>
           </TouchButton>
 
@@ -57,9 +66,9 @@ export const MobileAdminHeader = ({
             variant="ghost"
             size="sm"
             onClick={onLogout}
-            className="p-2 hover:bg-red-50 text-red-600 rounded-lg"
+            className="p-2.5 hover:bg-red-500/20 text-white rounded-xl"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-5 h-5" />
           </TouchButton>
         </div>
       </div>
