@@ -23,13 +23,13 @@ export const MobileAdminLayout = ({ children, className = '' }: MobileAdminLayou
 
   return (
     <motion.div 
-      className={`min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden ${className}`}
+      className={`min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 overflow-hidden ${className}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex flex-col h-screen">
-        <main className="flex-1 overflow-hidden">
+      <div className="flex flex-col min-h-screen">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>

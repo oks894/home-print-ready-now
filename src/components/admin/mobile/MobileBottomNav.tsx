@@ -35,11 +35,14 @@ export const MobileBottomNav = ({
       badge: feedbackCount,
     },
     {
-      id: 'refresh',
-      label: 'Refresh',
-      icon: RefreshCw,
-      action: onRefresh,
-      isRefreshing,
+      id: 'services',
+      label: 'Services',
+      icon: Settings,
+    },
+    {
+      id: 'links',
+      label: 'Links',
+      icon: Settings,
     },
     {
       id: 'settings',
@@ -61,17 +64,12 @@ export const MobileBottomNav = ({
             key={item.id}
             variant="ghost"
             size="sm"
-            onClick={item.action || (() => onTabChange(item.id))}
+            onClick={() => onTabChange(item.id)}
             className={`flex flex-col items-center gap-1 p-3 min-w-0 flex-1 relative ${
               activeTab === item.id ? 'text-primary' : 'text-gray-500'
             }`}
           >
-            <motion.div
-              animate={item.isRefreshing ? { rotate: 360 } : {}}
-              transition={{ duration: 1, repeat: item.isRefreshing ? Infinity : 0, ease: "linear" }}
-            >
-              <item.icon className="w-5 h-5" />
-            </motion.div>
+            <item.icon className="w-5 h-5" />
             
             <span className="text-xs font-medium truncate">{item.label}</span>
             

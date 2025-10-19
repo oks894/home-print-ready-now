@@ -4,7 +4,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { MobileAdminHeader } from '@/components/admin/MobileAdminHeader';
-import { MobileDrawer } from '@/components/admin/MobileDrawer';
+import { MobileBottomNav } from '@/components/admin/mobile/MobileBottomNav';
 import { AdminTabs } from '@/components/admin/AdminTabs';
 import { OfflineIndicator } from '@/components/admin/OfflineIndicator';
 import { SearchProvider } from '@/components/admin/AdminSearch';
@@ -14,8 +14,7 @@ import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState('orders');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('printJobs');
   const isMobile = useIsMobile();
   
   const {
@@ -61,29 +60,20 @@ const Admin = () => {
       <SearchProvider>
         <OfflineIndicator />
 
-        {isMobile && (
-          <MobileDrawer
-            isOpen={isDrawerOpen}
-            onClose={() => setIsDrawerOpen(false)}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            pendingCount={pendingJobs}
-            feedbackCount={feedback.length}
-          />
-        )}
-
-        {isMobile ? (
-          <MobileAdminHeader
-            onLogout={() => setIsAuthenticated(false)}
-            onRefresh={loadData}
-            isRetrying={isRetrying}
-            onMenuToggle={() => setIsDrawerOpen(true)}
-          />
-        ) : (
+        {!isMobile && (
           <AdminHeader 
             onLogout={() => setIsAuthenticated(false)}
             isRetrying={isRetrying}
             onRefresh={loadData}
+          />
+        )}
+
+        {isMobile && (
+          <MobileAdminHeader
+            onLogout={() => setIsAuthenticated(false)}
+            onRefresh={loadData}
+            isRetrying={isRetrying}
+            onMenuToggle={() => {}}
           />
         )}
 
@@ -93,22 +83,22 @@ const Admin = () => {
         />
 
         <div className={`max-w-7xl mx-auto ${
-          isMobile ? 'px-4 py-4' : 'px-4 sm:px-6 lg:px-8 py-6'
+          isMobile ? 'px-0 pt-2 pb-24' : 'px-4 sm:px-6 lg:px-8 py-6'
         }`}>
-          <div className={isMobile ? 'mb-4' : 'mb-8'}>
-            <h1 className={`font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent ${
-              isMobile ? 'text-xl' : 'text-3xl'
-            }`}>
-              Dashboard Overview
-            </h1>
-            <p className={`text-gray-600 mt-2 ${isMobile ? 'text-sm' : ''}`}>
-              Manage your print services and track customer orders
-              {totalCount > 0 && ` • ${totalCount} total jobs`}
-            </p>
-            {isLoading && (
-              <div className="mt-2 text-sm text-blue-600">Loading data...</div>
-            )}
-          </div>
+          {!isMobile && (
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                Dashboard Overview
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Manage your print services and track customer orders
+                {totalCount > 0 && ` • ${totalCount} total jobs`}
+              </p>
+              {isLoading && (
+                <div className="mt-2 text-sm text-blue-600">Loading data...</div>
+              )}
+            </div>
+          )}
 
           <AdminTabs
             printJobs={printJobs}
@@ -124,8 +114,20 @@ const Admin = () => {
             onDeleteFeedback={deleteFeedback}
             activeTab={activeTab}
             onTabChange={setActiveTab}
+            onLogout={() => setIsAuthenticated(false)}
           />
         </div>
+
+        {isMobile && (
+          <MobileBottomNav
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            pendingCount={pendingJobs}
+            feedbackCount={feedback.length}
+            onRefresh={loadData}
+            isRefreshing={isRetrying}
+          />
+        )}
       </SearchProvider>
     </MobileAdminLayout>
   );
