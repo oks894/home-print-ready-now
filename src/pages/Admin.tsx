@@ -11,6 +11,7 @@ import { SearchProvider } from '@/components/admin/AdminSearch';
 import { MobileAdminLayout } from '@/components/mobile/MobileAdminLayout';
 import { useAdminData } from '@/hooks/useAdminData';
 import OnlineUsersMonitor from '@/components/OnlineUsersMonitor';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -56,9 +57,10 @@ const Admin = () => {
   const pendingJobs = printJobs.filter(job => job.status === 'pending').length;
 
   return (
-    <MobileAdminLayout>
-      <SearchProvider>
-        <OfflineIndicator />
+    <ErrorBoundary>
+      <MobileAdminLayout>
+        <SearchProvider>
+          <OfflineIndicator />
 
         {!isMobile && (
           <AdminHeader 
@@ -128,8 +130,9 @@ const Admin = () => {
             isRefreshing={isRetrying}
           />
         )}
-      </SearchProvider>
-    </MobileAdminLayout>
+        </SearchProvider>
+      </MobileAdminLayout>
+    </ErrorBoundary>
   );
 };
 

@@ -73,15 +73,17 @@ export const AdminTabs = ({
               onLoadMore={onLoadMore}
               totalCount={printJobs.length}
             />
-            <MobileJobDetailsSheet
-              job={selectedJob}
-              isOpen={isJobDetailsOpen}
-              onClose={() => {
-                setIsJobDetailsOpen(false);
-                onJobSelect(null);
-              }}
-              onStatusUpdate={onStatusUpdate}
-            />
+            {selectedJob && (
+              <MobileJobDetailsSheet
+                job={selectedJob}
+                isOpen={isJobDetailsOpen}
+                onClose={() => {
+                  setIsJobDetailsOpen(false);
+                  onJobSelect(null);
+                }}
+                onStatusUpdate={onStatusUpdate}
+              />
+            )}
           </>
         )}
         {activeTab === 'feedback' && (

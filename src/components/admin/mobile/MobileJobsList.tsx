@@ -71,7 +71,7 @@ export const MobileJobsList = ({
   return (
     <div className="flex flex-col h-full">
       {/* Header with Search and Filters */}
-      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 space-y-3">
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-4 space-y-3 safe-area-top">
         {/* Search Toggle and Title */}
         <div className="flex items-center justify-between">
           <div>
@@ -131,8 +131,26 @@ export const MobileJobsList = ({
       </div>
 
       {/* Jobs List */}
-      <div className="flex-1 overflow-y-auto px-4 pb-20">
-        {filteredJobs.length === 0 ? (
+      <div className="flex-1 overflow-y-auto px-4 pb-20 safe-area-bottom">
+        {isLoading && jobs.length === 0 ? (
+          <div className="space-y-3 py-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg border border-gray-200 p-4 animate-pulse">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 flex-1">
+                    <div className="w-8 h-8 bg-gray-200 rounded" />
+                    <div className="space-y-2 flex-1">
+                      <div className="h-4 bg-gray-200 rounded w-3/4" />
+                      <div className="h-3 bg-gray-200 rounded w-1/2" />
+                    </div>
+                  </div>
+                  <div className="w-16 h-6 bg-gray-200 rounded" />
+                </div>
+                <div className="h-3 bg-gray-200 rounded w-1/3" />
+              </div>
+            ))}
+          </div>
+        ) : filteredJobs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <div className="text-4xl mb-4">📄</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No jobs found</h3>

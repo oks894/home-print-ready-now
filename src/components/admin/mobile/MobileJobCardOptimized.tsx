@@ -21,6 +21,11 @@ export const MobileJobCardOptimized = ({
 }: MobileJobCardOptimizedProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Safety check - if job is null or invalid, don't render
+  if (!job || !job.id) {
+    return null;
+  }
+
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -43,12 +48,16 @@ export const MobileJobCardOptimized = ({
 
   const handleCall = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(`tel:${job.phone}`, '_self');
+    if (job?.phone) {
+      window.open(`tel:${job.phone}`, '_self');
+    }
   };
 
   const handleStatusChange = (e: React.MouseEvent, newStatus: string) => {
     e.stopPropagation();
-    onStatusUpdate?.(job.id, newStatus);
+    if (job?.id && onStatusUpdate) {
+      onStatusUpdate(job.id, newStatus);
+    }
   };
 
   return (
@@ -69,19 +78,19 @@ export const MobileJobCardOptimized = ({
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <span className="text-lg">{getStatusEmoji(job.status)}</span>
+              <span className="text-lg">{getStatusEmoji(job.status || 'pending')}</span>
               <div className="min-w-0 flex-1">
                 <h3 className="font-semibold text-gray-900 truncate">
-                  {job.name}
+                  {job.name || 'Unknown'}
                 </h3>
                 <p className="text-sm text-gray-500 truncate">
-                  ID: {job.tracking_id}
+                  ID: {job.tracking_id || 'N/A'}
                 </p>
               </div>
             </div>
             
-            <Badge className={`${getStatusColor(job.status)} text-xs`}>
-              {job.status.replace('_', ' ')}
+            <Badge className={`${getStatusColor(job.status || 'pending')} text-xs`}>
+              {(job.status || 'pending').replace('_', ' ')}
             </Badge>
           </div>
 
