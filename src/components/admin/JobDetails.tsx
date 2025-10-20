@@ -12,7 +12,7 @@ import { AdminStatusManager } from './AdminStatusManager';
 import { StatusHistory } from './StatusHistory';
 
 interface JobDetailsProps {
-  job: PrintJob;
+  job: PrintJob | null;
   onStatusUpdate: (jobId: string, status: PrintJob['status']) => void;
   onDelete: (jobId: string) => void;
 }
@@ -23,6 +23,21 @@ export const JobDetails: React.FC<JobDetailsProps> = ({
   onDelete
 }) => {
   const isMobile = useIsMobile();
+
+  // Show placeholder when no job is selected
+  if (!job) {
+    return (
+      <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${
+        isMobile ? 'mx-2' : ''
+      }`}>
+        <div className="p-8 text-center">
+          <div className="text-6xl mb-4">📋</div>
+          <h3 className="text-lg font-semibold text-gray-700 mb-2">No Job Selected</h3>
+          <p className="text-gray-500">Select a print job from the list to view details</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`bg-white rounded-lg shadow-lg overflow-hidden ${
