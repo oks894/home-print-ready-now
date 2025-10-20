@@ -54,9 +54,12 @@ export const MobileJobsList = ({
   }, [inView, hasMore, isLoading, onLoadMore]);
 
   const filteredJobs = jobs.filter(job => {
-    const matchesSearch = job.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.tracking_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         job.phone.includes(searchTerm);
+    // Safety check - ensure job and required properties exist
+    if (!job || !job.id) return false;
+    
+    const matchesSearch = (job.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (job.tracking_id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (job.phone || '').includes(searchTerm);
     
     const matchesStatus = statusFilter === 'all' || job.status === statusFilter;
     
@@ -64,8 +67,8 @@ export const MobileJobsList = ({
   });
 
   const getStatusCount = (status: string) => {
-    if (status === 'all') return jobs.length;
-    return jobs.filter(job => job.status === status).length;
+    if (status === 'all') return jobs.filter(job => job && job.id).length;
+    return jobs.filter(job => job && job.id && job.status === status).length;
   };
 
   return (
@@ -163,21 +166,26 @@ export const MobileJobsList = ({
           </div>
         ) : (
           <div className="space-y-3 py-4">
-            {filteredJobs.map((job, index) => (
-              <motion.div
-                key={job.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-              >
-                <MobileJobCardOptimized
-                  job={job}
-                  onSelect={onJobSelect}
-                  isSelected={selectedJob?.id === job.id}
-                  onStatusUpdate={onStatusUpdate}
-                />
-              </motion.div>
-            ))}
+            {filteredJobs.map((job, index) => {
+              // Extra safety check before rendering
+              if (!job || !job.id) return null;
+              
+              return (
+                <motion.div
+                  key={job.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <MobileJobCardOptimized
+                    job={job}
+                    onSelect={onJobSelect}
+                    isSelected={selectedJob?.id === job.id}
+                    onStatusUpdate={onStatusUpdate}
+                  />
+                </motion.div>
+              );
+            })}
 
             {/* Load More Trigger */}
             {hasMore && (
