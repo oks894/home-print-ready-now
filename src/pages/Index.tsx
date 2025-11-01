@@ -3,6 +3,7 @@ import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import HomeHero from '@/components/HomeHero';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { SimpleLoader } from '@/components/SimpleLoader';
@@ -12,17 +13,6 @@ import { useLiveTracking } from '@/hooks/useLiveTracking';
 
 // Get adaptive configuration
 const adaptiveConfig = getAdaptiveConfig();
-
-console.log('Index: Adaptive config:', adaptiveConfig);
-
-// Conditional loading based on connection speed
-const AnimatedHeroSection = React.lazy(() => {
-  console.log('Index: Loading hero section - simplified UI:', adaptiveConfig.simplifiedUI);
-  if (adaptiveConfig.simplifiedUI || adaptiveConfig.ultraLightMode) {
-    return import('@/components/SimpleHeroSection');
-  }
-  return import('@/components/AnimatedHeroSection');
-});
 
 const MainContentSections = React.lazy(() => 
   import('@/components/MainContentSections').then(module => ({ 
@@ -39,8 +29,6 @@ const Index = () => {
   
   // Enable live tracking for the home page
   useLiveTracking('home');
-
-  console.log('Index: Rendering with config - ultraLightMode:', ultraLightMode, 'simplifiedUI:', simplifiedUI);
 
   return (
     <ErrorBoundary fallback={<SimpleLoader message="Loading home page..." />}>
@@ -68,9 +56,7 @@ const Index = () => {
             className="overflow-x-hidden"
           >
             <ErrorBoundary fallback={<SimpleLoader message="Loading content..." />}>
-              <Suspense fallback={ultraLightMode ? <SimpleLoader /> : <LoadingSpinner />}>
-                <AnimatedHeroSection />
-              </Suspense>
+              <HomeHero />
             </ErrorBoundary>
             
             {!ultraLightMode && (

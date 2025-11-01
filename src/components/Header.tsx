@@ -44,18 +44,24 @@ const Header = () => {
           
           {/* Desktop Navigation - Hidden on mobile */}
           <nav className="hidden lg:flex items-center space-x-6">
-            {['Home', 'Services', 'Pricing', 'Track', 'Contact'].map((item, index) => (
+            {[
+              { name: 'Home', path: '/' },
+              { name: 'Ellio Prints 🖨️', path: '/ellio-prints' },
+              { name: 'Ellio Notes 📘', path: '/ellio-notes' },
+              { name: 'Track', path: '/track' },
+              { name: 'Contact', path: '/contact' }
+            ].map((item, index) => (
               <motion.div
-                key={item}
+                key={item.name}
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
                 <Link 
-                  to={item === 'Home' ? '/' : `/${item.toLowerCase()}`} 
+                  to={item.path} 
                   className="relative text-gray-600 hover:text-blue-600 transition-colors font-medium group"
                 >
-                  {item}
+                  {item.name}
                   <span className="absolute inset-x-0 w-full h-0.5 bg-blue-600 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                 </Link>
               </motion.div>
@@ -131,9 +137,9 @@ const Header = () => {
               <div className="flex flex-col space-y-1">
                 {[
                   { name: 'Home', path: '/' },
-                  { name: 'Services', path: '/services' },
-                  { name: 'Pricing', path: '/pricing' },
-                  { name: 'Track', path: '/track' },
+                  { name: 'Ellio Prints 🖨️', path: '/ellio-prints' },
+                  { name: 'Ellio Notes 📘', path: '/ellio-notes' },
+                  { name: 'Track Order', path: '/track' },
                   { name: 'Contact', path: '/contact' }
                 ].map((item, index) => (
                   <motion.div

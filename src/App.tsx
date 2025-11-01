@@ -15,6 +15,12 @@ import Track from "./pages/Track";
 import Admin from "./pages/Admin";
 import Printing from "./pages/Printing";
 import NotFound from "./pages/NotFound";
+import EllioPrints from "./pages/EllioPrints";
+import EllioNotes from "./pages/EllioNotes";
+import UploadNotes from "./pages/UploadNotes";
+import BrowseNotes from "./pages/BrowseNotes";
+import RequestNotes from "./pages/RequestNotes";
+import Leaderboard from "./pages/Leaderboard";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,6 +47,12 @@ const App = () => (
               <Route path="/contact" element={<Contact />} />
               <Route path="/track" element={<Track />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/ellio-prints" element={<EllioPrints />} />
+              <Route path="/ellio-notes" element={<EllioNotes />} />
+              <Route path="/ellio-notes/upload" element={<UploadNotes />} />
+              <Route path="/ellio-notes/browse" element={<BrowseNotes />} />
+              <Route path="/ellio-notes/request" element={<RequestNotes />} />
+              <Route path="/ellio-notes/leaderboard" element={<Leaderboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

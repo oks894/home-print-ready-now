@@ -95,6 +95,132 @@ export type Database = {
         }
         Relationships: []
       }
+      note_categories: {
+        Row: {
+          class_level: string
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          subjects: Json
+        }
+        Insert: {
+          class_level: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          subjects?: Json
+        }
+        Update: {
+          class_level?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          subjects?: Json
+        }
+        Relationships: []
+      }
+      note_requests: {
+        Row: {
+          additional_details: string | null
+          class_level: string
+          contact: string | null
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["request_status"]
+          student_name: string
+          subject: string
+          topic: string
+          updated_at: string
+        }
+        Insert: {
+          additional_details?: string | null
+          class_level: string
+          contact?: string | null
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["request_status"]
+          student_name: string
+          subject: string
+          topic: string
+          updated_at?: string
+        }
+        Update: {
+          additional_details?: string | null
+          class_level?: string
+          contact?: string | null
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["request_status"]
+          student_name?: string
+          subject?: string
+          topic?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      notes: {
+        Row: {
+          class_level: string
+          created_at: string
+          description: string | null
+          download_count: number
+          file_size: number
+          file_type: string
+          file_url: string
+          id: string
+          is_approved: boolean
+          status: Database["public"]["Enums"]["note_status"]
+          subject: string
+          title: string
+          updated_at: string
+          upload_date: string
+          uploader_contact: string | null
+          uploader_name: string
+          view_count: number
+        }
+        Insert: {
+          class_level: string
+          created_at?: string
+          description?: string | null
+          download_count?: number
+          file_size: number
+          file_type: string
+          file_url: string
+          id?: string
+          is_approved?: boolean
+          status?: Database["public"]["Enums"]["note_status"]
+          subject: string
+          title: string
+          updated_at?: string
+          upload_date?: string
+          uploader_contact?: string | null
+          uploader_name: string
+          view_count?: number
+        }
+        Update: {
+          class_level?: string
+          created_at?: string
+          description?: string | null
+          download_count?: number
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          id?: string
+          is_approved?: boolean
+          status?: Database["public"]["Enums"]["note_status"]
+          subject?: string
+          title?: string
+          updated_at?: string
+          upload_date?: string
+          uploader_contact?: string | null
+          uploader_name?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       print_jobs: {
         Row: {
           delivery_requested: boolean | null
@@ -222,7 +348,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      note_status: "pending" | "approved" | "rejected"
+      request_status: "pending" | "fulfilled" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -349,6 +476,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      note_status: ["pending", "approved", "rejected"],
+      request_status: ["pending", "fulfilled", "rejected"],
+    },
   },
 } as const
