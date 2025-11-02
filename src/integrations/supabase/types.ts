@@ -14,6 +14,271 @@ export type Database = {
   }
   public: {
     Tables: {
+      assignment_rate_settings: {
+        Row: {
+          base_rate: number
+          dynamic_edu_percentage: number
+          id: string
+          is_active: boolean
+          solver_percentage: number
+          subject: string
+          updated_at: string
+          urgent_fee_high: number
+          urgent_fee_normal: number
+        }
+        Insert: {
+          base_rate?: number
+          dynamic_edu_percentage?: number
+          id?: string
+          is_active?: boolean
+          solver_percentage?: number
+          subject: string
+          updated_at?: string
+          urgent_fee_high?: number
+          urgent_fee_normal?: number
+        }
+        Update: {
+          base_rate?: number
+          dynamic_edu_percentage?: number
+          id?: string
+          is_active?: boolean
+          solver_percentage?: number
+          subject?: string
+          updated_at?: string
+          urgent_fee_high?: number
+          urgent_fee_normal?: number
+        }
+        Relationships: []
+      }
+      assignment_solutions: {
+        Row: {
+          admin_notes: string | null
+          assignment_id: string
+          created_at: string
+          id: string
+          solution_files: Json | null
+          solution_text: string | null
+          solver_contact: string
+          solver_id: string | null
+          solver_name: string
+          status: Database["public"]["Enums"]["solution_status"]
+          submitted_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          assignment_id: string
+          created_at?: string
+          id?: string
+          solution_files?: Json | null
+          solution_text?: string | null
+          solver_contact: string
+          solver_id?: string | null
+          solver_name: string
+          status?: Database["public"]["Enums"]["solution_status"]
+          submitted_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          assignment_id?: string
+          created_at?: string
+          id?: string
+          solution_files?: Json | null
+          solution_text?: string | null
+          solver_contact?: string
+          solver_id?: string | null
+          solver_name?: string
+          status?: Database["public"]["Enums"]["solution_status"]
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_solutions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignment_solvers: {
+        Row: {
+          class_levels: Json
+          contact: string
+          created_at: string
+          email: string | null
+          id: string
+          is_active: boolean
+          is_verified: boolean
+          name: string
+          rating: number | null
+          subjects: Json
+          total_earned: number
+          total_solved: number
+        }
+        Insert: {
+          class_levels?: Json
+          contact: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          name: string
+          rating?: number | null
+          subjects?: Json
+          total_earned?: number
+          total_solved?: number
+        }
+        Update: {
+          class_levels?: Json
+          contact?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          is_verified?: boolean
+          name?: string
+          rating?: number | null
+          subjects?: Json
+          total_earned?: number
+          total_solved?: number
+        }
+        Relationships: []
+      }
+      assignment_transactions: {
+        Row: {
+          assignment_id: string
+          created_at: string
+          dynamic_edu_amount: number
+          id: string
+          paid_at: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          released_at: string | null
+          solver_amount: number
+          solver_name: string | null
+          status: Database["public"]["Enums"]["payment_status"]
+          student_name: string
+          total_amount: number
+        }
+        Insert: {
+          assignment_id: string
+          created_at?: string
+          dynamic_edu_amount: number
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          released_at?: string | null
+          solver_amount: number
+          solver_name?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          student_name: string
+          total_amount: number
+        }
+        Update: {
+          assignment_id?: string
+          created_at?: string
+          dynamic_edu_amount?: number
+          id?: string
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          released_at?: string | null
+          solver_amount?: number
+          solver_name?: string | null
+          status?: Database["public"]["Enums"]["payment_status"]
+          student_name?: string
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assignment_transactions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assignments: {
+        Row: {
+          approved_at: string | null
+          assignment_files: Json | null
+          assignment_text: string | null
+          assignment_type: string
+          base_fee: number
+          class_level: string
+          created_at: string
+          deadline: string | null
+          dynamic_edu_fee: number
+          id: string
+          payment_status: Database["public"]["Enums"]["payment_status"]
+          solver_id: string | null
+          solver_name: string | null
+          solver_payment: number
+          status: Database["public"]["Enums"]["assignment_status"]
+          student_contact: string
+          student_name: string
+          subject: string
+          submitted_at: string | null
+          total_fee: number
+          updated_at: string
+          urgency: string
+          urgent_fee: number
+        }
+        Insert: {
+          approved_at?: string | null
+          assignment_files?: Json | null
+          assignment_text?: string | null
+          assignment_type: string
+          base_fee?: number
+          class_level: string
+          created_at?: string
+          deadline?: string | null
+          dynamic_edu_fee?: number
+          id?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          solver_id?: string | null
+          solver_name?: string | null
+          solver_payment?: number
+          status?: Database["public"]["Enums"]["assignment_status"]
+          student_contact: string
+          student_name: string
+          subject: string
+          submitted_at?: string | null
+          total_fee: number
+          updated_at?: string
+          urgency?: string
+          urgent_fee?: number
+        }
+        Update: {
+          approved_at?: string | null
+          assignment_files?: Json | null
+          assignment_text?: string | null
+          assignment_type?: string
+          base_fee?: number
+          class_level?: string
+          created_at?: string
+          deadline?: string | null
+          dynamic_edu_fee?: number
+          id?: string
+          payment_status?: Database["public"]["Enums"]["payment_status"]
+          solver_id?: string | null
+          solver_name?: string | null
+          solver_payment?: number
+          status?: Database["public"]["Enums"]["assignment_status"]
+          student_contact?: string
+          student_name?: string
+          subject?: string
+          submitted_at?: string | null
+          total_fee?: number
+          updated_at?: string
+          urgency?: string
+          urgent_fee?: number
+        }
+        Relationships: []
+      }
       data: {
         Row: {
           created_at: string
@@ -348,8 +613,18 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      assignment_status:
+        | "pending"
+        | "assigned"
+        | "in_progress"
+        | "submitted"
+        | "approved"
+        | "rejected"
+        | "completed"
       note_status: "pending" | "approved" | "rejected"
+      payment_status: "pending" | "paid" | "released" | "refunded"
       request_status: "pending" | "fulfilled" | "rejected"
+      solution_status: "pending" | "approved" | "rejected" | "revision_needed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -477,8 +752,19 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      assignment_status: [
+        "pending",
+        "assigned",
+        "in_progress",
+        "submitted",
+        "approved",
+        "rejected",
+        "completed",
+      ],
       note_status: ["pending", "approved", "rejected"],
+      payment_status: ["pending", "paid", "released", "refunded"],
       request_status: ["pending", "fulfilled", "rejected"],
+      solution_status: ["pending", "approved", "rejected", "revision_needed"],
     },
   },
 } as const

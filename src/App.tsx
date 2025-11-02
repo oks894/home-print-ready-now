@@ -52,9 +52,15 @@ const App = () => (
               <Route path="/ellio-notes/upload" element={<UploadNotes />} />
               <Route path="/ellio-notes/browse" element={<BrowseNotes />} />
               <Route path="/ellio-notes/request" element={<RequestNotes />} />
-              <Route path="/ellio-notes/leaderboard" element={<Leaderboard />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
+          <Route path="/ellio-notes/leaderboard" element={<Leaderboard />} />
+          <Route path="/ellio-notes/assignment-help" element={<AssignmentHelp />} />
+          <Route path="/ellio-notes/assignment-help/upload" element={<UploadAssignment />} />
+          <Route path="/ellio-notes/assignment-help/type" element={<TypeQuestion />} />
+          <Route path="/ellio-notes/assignment-help/my-requests" element={<MyRequests />} />
+          <Route path="/ellio-notes/assignment-help/solver" element={<SolverDashboard />} />
+          <Route path="/ellio-notes/assignment-help/solver/register" element={<SolverRegistration />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
           </Suspense>
         </BrowserRouter>
       </TooltipProvider>
