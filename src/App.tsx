@@ -21,6 +21,12 @@ import UploadNotes from "./pages/UploadNotes";
 import BrowseNotes from "./pages/BrowseNotes";
 import RequestNotes from "./pages/RequestNotes";
 import Leaderboard from "./pages/Leaderboard";
+import AssignmentHelp from "./pages/AssignmentHelp";
+import UploadAssignment from "./pages/UploadAssignment";
+import TypeQuestion from "./pages/TypeQuestion";
+import MyRequests from "./pages/MyRequests";
+import SolverDashboard from "./pages/SolverDashboard";
+import SolverRegistration from "./pages/SolverRegistration";
 
 const queryClient = new QueryClient({
   defaultOptions: {
