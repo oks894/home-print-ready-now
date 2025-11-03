@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { PrintJob } from '@/types/printJob';
+import { Feedback } from '@/types/admin';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { PrintJobsList } from './PrintJobsList';
 import { JobDetails } from './JobDetails';
 import { FeedbackList } from './FeedbackList';
@@ -12,9 +15,12 @@ import { MobileFeedbackManager } from './mobile/MobileFeedbackManager';
 import { MobileServicesManager } from './mobile/MobileServicesManager';
 import { MobileLinksManager } from './mobile/MobileLinksManager';
 import { MobileSettingsPanel } from './mobile/MobileSettingsPanel';
-import { Badge } from '@/components/ui/badge';
-import { PrintJob } from '@/types/printJob';
-import { Feedback } from '@/types/admin';
+import { AssignmentPendingVerification } from './assignment-help/AssignmentPendingVerification';
+import { AssignmentsOverview } from './assignment-help/AssignmentsOverview';
+import { PaymentManagement } from './assignment-help/PaymentManagement';
+import { RateSettings } from './assignment-help/RateSettings';
+import { SolverManagement } from './assignment-help/SolverManagement';
+import { TransactionHistory } from './assignment-help/TransactionHistory';
 
 interface AdminTabsProps {
   printJobs: PrintJob[];
@@ -102,44 +108,23 @@ export const AdminTabs = ({
     );
   }
 
-  const pendingCount = printJobs.filter(job => job.status === 'pending').length;
-
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-5 mb-6">
-        <TabsTrigger value="printJobs" className="relative">
-          Orders
-          {pendingCount > 0 && (
-            <Badge variant="destructive" className="ml-2 px-1.5 py-0.5 text-xs">
-              {pendingCount}
-            </Badge>
-          )}
-        </TabsTrigger>
+        <TabsTrigger value="printJobs" className="relative">Orders</TabsTrigger>
         <TabsTrigger value="feedback">Feedback</TabsTrigger>
+        <TabsTrigger value="assignments">Assignments</TabsTrigger>
         <TabsTrigger value="services">Services</TabsTrigger>
         <TabsTrigger value="links">Links</TabsTrigger>
-        <TabsTrigger value="settings">Settings</TabsTrigger>
       </TabsList>
 
       <TabsContent value="printJobs">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <PrintJobsList
-              jobs={printJobs}
-              selectedJob={selectedJob}
-              onJobSelect={onJobSelect}
-              isLoading={isLoading}
-              hasMore={hasMore}
-              onLoadMore={onLoadMore}
-              totalCount={printJobs.length}
-            />
+            <PrintJobsList jobs={printJobs} selectedJob={selectedJob} onJobSelect={onJobSelect} isLoading={isLoading} hasMore={hasMore} onLoadMore={onLoadMore} totalCount={printJobs.length} />
           </div>
           <div className="lg:col-span-1 sticky top-6">
-            <JobDetails
-              job={selectedJob}
-              onStatusUpdate={onStatusUpdate}
-              onDelete={onDeleteJob}
-            />
+            <JobDetails job={selectedJob} onStatusUpdate={onStatusUpdate} onDelete={onDeleteJob} />
           </div>
         </div>
       </TabsContent>
@@ -148,17 +133,27 @@ export const AdminTabs = ({
         <FeedbackList feedback={feedback} onDeleteFeedback={onDeleteFeedback} isLoading={isLoading} />
       </TabsContent>
 
-      <TabsContent value="services">
-        <ServicesManager />
+      <TabsContent value="assignments">
+        <Tabs defaultValue="pending" className="w-full">
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="pending">Pending</TabsTrigger>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="payments">Payments</TabsTrigger>
+            <TabsTrigger value="rates">Rates</TabsTrigger>
+            <TabsTrigger value="solvers">Solvers</TabsTrigger>
+            <TabsTrigger value="transactions">Transactions</TabsTrigger>
+          </TabsList>
+          <TabsContent value="pending"><AssignmentPendingVerification /></TabsContent>
+          <TabsContent value="overview"><AssignmentsOverview /></TabsContent>
+          <TabsContent value="payments"><PaymentManagement /></TabsContent>
+          <TabsContent value="rates"><RateSettings /></TabsContent>
+          <TabsContent value="solvers"><SolverManagement /></TabsContent>
+          <TabsContent value="transactions"><TransactionHistory /></TabsContent>
+        </Tabs>
       </TabsContent>
 
-      <TabsContent value="links">
-        <ExternalLinksManager />
-      </TabsContent>
-
-      <TabsContent value="settings">
-        <div className="text-center py-12 text-gray-500">Settings coming soon</div>
-      </TabsContent>
+      <TabsContent value="services"><ServicesManager /></TabsContent>
+      <TabsContent value="links"><ExternalLinksManager /></TabsContent>
     </Tabs>
   );
 };
