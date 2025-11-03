@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Upload, Search, Trophy, TrendingUp, Clock, Users } from 'lucide-react';
+import { BookOpen, Upload, Search, Trophy, TrendingUp, Clock, Users, GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Header from '@/components/Header';
@@ -62,6 +62,13 @@ const EllioNotes = () => {
       description: 'Can\'t find what you need? Request it!',
       color: 'from-orange-500 to-red-500',
       action: () => navigate('/ellio-notes/request')
+    },
+    {
+      icon: GraduationCap,
+      title: 'Assignment Help',
+      description: 'Get expert help with your assignments',
+      color: 'from-indigo-500 to-purple-500',
+      action: () => navigate('/ellio-notes/assignment-help')
     }
   ];
 
