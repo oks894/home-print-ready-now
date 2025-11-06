@@ -1,11 +1,17 @@
 
 import { Link } from 'react-router-dom';
-import { Printer, User, Menu, X } from 'lucide-react';
+import { Printer, User, Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TouchButton } from '@/components/mobile/TouchButton';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -44,28 +50,110 @@ const Header = () => {
           
           {/* Desktop Navigation - Hidden on mobile */}
           <nav className="hidden lg:flex items-center space-x-6">
-            {[
-              { name: 'Home', path: '/' },
-              { name: 'Ellio Prints 🖨️', path: '/ellio-prints' },
-              { name: 'Ellio Notes 📘', path: '/ellio-notes' },
-              { name: 'Track', path: '/track' },
-              { name: 'Contact', path: '/contact' }
-            ].map((item, index) => (
-              <motion.div
-                key={item.name}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Link 
+                to="/" 
+                className="relative text-gray-600 hover:text-blue-600 transition-colors font-medium group"
               >
-                <Link 
-                  to={item.path} 
-                  className="relative text-gray-600 hover:text-blue-600 transition-colors font-medium group"
-                >
-                  {item.name}
-                  <span className="absolute inset-x-0 w-full h-0.5 bg-blue-600 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                </Link>
-              </motion.div>
-            ))}
+                Home
+                <span className="absolute inset-x-0 w-full h-0.5 bg-blue-600 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </Link>
+            </motion.div>
+
+            {/* Ellio Prints Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors font-medium outline-none">
+                Ellio Prints 🖨️ <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white">
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-prints" className="w-full cursor-pointer">📄 Start Printing</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-prints#pricing" className="w-full cursor-pointer">💰 Pricing</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/track" className="w-full cursor-pointer">📦 Track Order</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Ellio Notes Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors font-medium outline-none">
+                Ellio Notes 📘 <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white">
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-notes/browse" className="w-full cursor-pointer">📚 Browse Notes</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-notes/upload" className="w-full cursor-pointer">⬆️ Upload Notes</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-notes/request" className="w-full cursor-pointer">🙋 Request Notes</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-notes/leaderboard" className="w-full cursor-pointer">🏆 Leaderboard</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Assignment Help Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors font-medium outline-none">
+                Assignment Help ✍️ <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-white">
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-notes/assignment-help/upload" className="w-full cursor-pointer">⬆️ Upload Assignment</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-notes/assignment-help/type" className="w-full cursor-pointer">✏️ Type Question</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-notes/assignment-help/my-requests" className="w-full cursor-pointer">📋 My Requests</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-notes/assignment-help/solver/register" className="w-full cursor-pointer">💼 Become a Solver</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/ellio-notes/assignment-help/solver/dashboard" className="w-full cursor-pointer">📊 Solver Dashboard</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+            >
+              <Link 
+                to="/track" 
+                className="relative text-gray-600 hover:text-blue-600 transition-colors font-medium group"
+              >
+                Track
+                <span className="absolute inset-x-0 w-full h-0.5 bg-blue-600 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <Link 
+                to="/contact" 
+                className="relative text-gray-600 hover:text-blue-600 transition-colors font-medium group"
+              >
+                Contact
+                <span className="absolute inset-x-0 w-full h-0.5 bg-blue-600 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </Link>
+            </motion.div>
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">

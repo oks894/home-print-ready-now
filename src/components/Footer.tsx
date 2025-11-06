@@ -75,103 +75,104 @@ const Footer = () => {
             </motion.div>
 
             {/* Quick Links */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
-              <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base text-blue-300">Quick Links</h3>
-              <ul className="space-y-1 sm:space-y-2">
-                {[
-                  { name: 'Home', path: '/' },
-                  { name: 'Track Order', path: '/track' },
-                  { name: 'Contact Us', path: '/contact' },
-                  { name: 'Admin Panel', path: '/admin' },
-                  { name: 'Services', path: '#services' },
-                  { name: 'Pricing', path: '#pricing' }
-                ].map((link, index) => (
-                  <motion.li
-                    key={link.name}
-                    whileHover={{ x: 5 }}
-                    transition={{ duration: 0.2 }}
+          {/* Printing Services */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base text-blue-300">Printing Services</h3>
+            <ul className="space-y-1 sm:space-y-2">
+              {[
+                { name: 'Start Printing', path: '/ellio-prints' },
+                { name: 'Pricing', path: '/ellio-prints#pricing' },
+                { name: 'Track Order', path: '/track' },
+                { name: 'Services', path: '/ellio-prints#services' },
+                { name: 'Resume Templates', path: '/ellio-prints#templates' }
+              ].map((link) => (
+                <motion.li
+                  key={link.name}
+                  whileHover={{ x: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Link 
+                    to={link.path} 
+                    className="text-gray-300 hover:text-blue-400 transition-colors text-sm sm:text-base group relative"
                   >
-                    <Link 
-                      to={link.path} 
-                      className="text-gray-300 hover:text-blue-400 transition-colors text-sm sm:text-base group relative"
-                    >
-                      {link.name}
-                      <span className="absolute inset-x-0 w-full h-0.5 bg-blue-400 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-                    </Link>
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
+                    {link.name}
+                    <span className="absolute inset-x-0 w-full h-0.5 bg-blue-400 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  </Link>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
 
-            {/* External Links */}
-            {links.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.25 }}
-                viewport={{ once: true }}
-              >
-                <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base text-yellow-300">Our Projects</h3>
-                <ul className="space-y-1 sm:space-y-2">
-                  {links.filter(link => link.is_active).map((link) => {
-                    const IconComponent = link.icon ? (Icons as any)[link.icon] : ExternalLinkIcon;
-                    return (
-                      <motion.li
-                        key={link.id}
-                        whileHover={{ x: 5 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <a 
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-300 hover:text-yellow-400 transition-colors text-sm sm:text-base group relative flex items-center gap-2"
-                        >
-                          {IconComponent && <IconComponent className="w-3 h-3 sm:w-4 sm:h-4" />}
-                          {link.title}
-                          <ExternalLinkIcon className="w-3 h-3 opacity-50" />
-                        </a>
-                      </motion.li>
-                    );
-                  })}
-                </ul>
-              </motion.div>
-            )}
-
-            {/* Services */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              viewport={{ once: true }}
-            >
-              <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base text-purple-300">Services</h3>
-              <ul className="space-y-1 sm:space-y-2 text-gray-300">
-                {[
-                  'Document Printing - ₹3.5/page',
-                  'Color Printing - ₹5/page', 
-                  'Bulk Printing - ₹2.5/page (50+)',
-                  'Doorstep Delivery',
-                  'Binding Services'
-                ].map((service, index) => (
-                  <motion.li
-                    key={service}
-                    className="text-xs sm:text-sm"
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    viewport={{ once: true }}
+          {/* Notes Platform */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.25 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base text-green-300">Notes Platform</h3>
+            <ul className="space-y-1 sm:space-y-2">
+              {[
+                { name: 'Browse Notes', path: '/ellio-notes/browse' },
+                { name: 'Upload Notes', path: '/ellio-notes/upload' },
+                { name: 'Request Notes', path: '/ellio-notes/request' },
+                { name: 'Leaderboard', path: '/ellio-notes/leaderboard' },
+                { name: 'Top Contributors', path: '/ellio-notes/leaderboard' }
+              ].map((link) => (
+                <motion.li
+                  key={link.name}
+                  whileHover={{ x: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Link 
+                    to={link.path} 
+                    className="text-gray-300 hover:text-green-400 transition-colors text-sm sm:text-base group relative"
                   >
-                    {service}
-                  </motion.li>
-                ))}
-              </ul>
-            </motion.div>
+                    {link.name}
+                    <span className="absolute inset-x-0 w-full h-0.5 bg-green-400 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  </Link>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Assignment Help */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base text-purple-300">Assignment Help</h3>
+            <ul className="space-y-1 sm:space-y-2">
+              {[
+                { name: 'Upload Assignment', path: '/ellio-notes/assignment-help/upload' },
+                { name: 'Type Question', path: '/ellio-notes/assignment-help/type' },
+                { name: 'My Requests', path: '/ellio-notes/assignment-help/my-requests' },
+                { name: 'Become Solver', path: '/ellio-notes/assignment-help/solver/register' },
+                { name: 'How It Works', path: '/ellio-notes/assignment-help' }
+              ].map((link) => (
+                <motion.li
+                  key={link.name}
+                  whileHover={{ x: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Link 
+                    to={link.path} 
+                    className="text-gray-300 hover:text-purple-400 transition-colors text-sm sm:text-base group relative"
+                  >
+                    {link.name}
+                    <span className="absolute inset-x-0 w-full h-0.5 bg-purple-400 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  </Link>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
 
             {/* Contact Info */}
             <motion.div

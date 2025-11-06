@@ -27,7 +27,24 @@ const HomeHero = () => {
       color: 'from-green-500 to-teal-600',
       bgColor: 'from-green-50 to-teal-50 dark:from-green-950/20 dark:to-teal-950/20',
       path: '/ellio-notes'
+    },
+    {
+      icon: BookOpen,
+      title: 'Assignment Help',
+      emoji: '✍️',
+      description: 'Upload Questions, Get Help, Earn Money',
+      features: ['Upload Assignment', 'Type Question', 'Track Requests', 'Become Solver'],
+      color: 'from-indigo-500 to-purple-600',
+      bgColor: 'from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20',
+      path: '/ellio-notes/assignment-help'
     }
+  ];
+
+  const stats = [
+    { label: 'Total Prints', value: '500+', icon: Printer },
+    { label: 'Notes Available', value: '150+', icon: BookOpen },
+    { label: 'Assignments Solved', value: '25+', icon: BookOpen },
+    { label: 'Happy Students', value: '200+', icon: '🎓' }
   ];
 
   return (
@@ -119,12 +136,35 @@ const HomeHero = () => {
           })}
         </div>
 
+        {/* Statistics Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.9 }}
+          className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-4xl mx-auto"
+        >
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 1 + index * 0.1 }}
+              className="text-center p-6 rounded-xl bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700"
+            >
+              <div className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                {stat.value}
+              </div>
+              <div className="text-sm text-muted-foreground">{stat.label}</div>
+            </motion.div>
+          ))}
+        </motion.div>
+
         {/* Additional Info */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.9 }}
-          className="text-center mt-16"
+          transition={{ duration: 0.6, delay: 1.4 }}
+          className="text-center mt-12"
         >
           <p className="text-sm text-muted-foreground italic">
             "Powered by Ellio — Learn, Print, Progress"
