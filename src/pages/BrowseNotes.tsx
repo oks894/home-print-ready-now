@@ -157,7 +157,6 @@ const BrowseNotes = () => {
                         <SelectValue placeholder="All Classes" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Classes</SelectItem>
                         {categories?.map((cat) => (
                           <SelectItem key={cat.id} value={cat.class_level}>
                             {cat.class_level}
@@ -174,7 +173,6 @@ const BrowseNotes = () => {
                         <SelectValue placeholder="All Subjects" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">All Subjects</SelectItem>
                         {subjects.map((subject) => (
                           <SelectItem key={subject} value={subject}>
                             {subject}
