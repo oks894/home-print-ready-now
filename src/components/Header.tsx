@@ -103,6 +103,21 @@ const Header = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Resume Lab Link */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <Link 
+                to="/resume-lab" 
+                className="relative text-gray-600 hover:text-blue-600 transition-colors font-medium group"
+              >
+                Resume Lab 📄
+                <span className="absolute inset-x-0 w-full h-0.5 bg-blue-600 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+              </Link>
+            </motion.div>
+
             {/* Assignment Help Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-1 text-gray-600 hover:text-blue-600 transition-colors font-medium outline-none">
@@ -227,6 +242,8 @@ const Header = () => {
                   { name: 'Home', path: '/' },
                   { name: 'Ellio Prints 🖨️', path: '/ellio-prints' },
                   { name: 'Ellio Notes 📘', path: '/ellio-notes' },
+                  { name: 'Resume Lab 📄', path: '/resume-lab' },
+                  { name: 'Assignment Help ✍️', path: '/ellio-notes/assignment-help' },
                   { name: 'Track Order', path: '/track' },
                   { name: 'Contact', path: '/contact' }
                 ].map((item, index) => (

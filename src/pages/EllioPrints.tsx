@@ -24,12 +24,6 @@ const EllioPrints = () => {
     },
     {
       icon: FileText,
-      title: 'Resume Templates',
-      description: 'Professional resume and certificate templates',
-      color: 'from-green-500 to-emerald-500'
-    },
-    {
-      icon: FileText,
       title: 'Form Filling & Typing',
       description: 'Expert assistance with form filling and typing services',
       color: 'from-orange-500 to-red-500'
@@ -86,6 +80,15 @@ const EllioPrints = () => {
               >
                 <Printer className="w-5 h-5 mr-2" />
                 Upload & Print
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate('/resume-lab')}
+                className="text-lg px-8"
+              >
+                <FileText className="w-5 h-5 mr-2" />
+                Build Resume
               </Button>
               <Button
                 size="lg"

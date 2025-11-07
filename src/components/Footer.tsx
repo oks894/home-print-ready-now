@@ -41,7 +41,7 @@ const Footer = () => {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8"
+            className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 sm:gap-8"
           >
             {/* Brand */}
             <motion.div 
@@ -88,8 +88,7 @@ const Footer = () => {
                 { name: 'Start Printing', path: '/ellio-prints' },
                 { name: 'Pricing', path: '/ellio-prints#pricing' },
                 { name: 'Track Order', path: '/track' },
-                { name: 'Services', path: '/ellio-prints#services' },
-                { name: 'Resume Templates', path: '/ellio-prints#templates' }
+                { name: 'Services', path: '/ellio-prints#services' }
               ].map((link) => (
                 <motion.li
                   key={link.name}
@@ -102,6 +101,36 @@ const Footer = () => {
                   >
                     {link.name}
                     <span className="absolute inset-x-0 w-full h-0.5 bg-blue-400 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
+                  </Link>
+                </motion.li>
+              ))}
+            </ul>
+          </motion.div>
+
+          {/* Resume Lab */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.23 }}
+            viewport={{ once: true }}
+          >
+            <h3 className="font-semibold mb-3 sm:mb-4 text-sm sm:text-base text-indigo-300">Resume Lab</h3>
+            <ul className="space-y-1 sm:space-y-2">
+              {[
+                { name: 'Browse Templates', path: '/resume-lab' },
+                { name: 'Build Resume', path: '/resume-lab' }
+              ].map((link) => (
+                <motion.li
+                  key={link.name}
+                  whileHover={{ x: 5 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Link 
+                    to={link.path} 
+                    className="text-gray-300 hover:text-indigo-400 transition-colors text-sm sm:text-base group relative"
+                  >
+                    {link.name}
+                    <span className="absolute inset-x-0 w-full h-0.5 bg-indigo-400 bottom-0 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
                   </Link>
                 </motion.li>
               ))}

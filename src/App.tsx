@@ -27,6 +27,8 @@ import TypeQuestion from "./pages/TypeQuestion";
 import MyRequests from "./pages/MyRequests";
 import SolverDashboard from "./pages/SolverDashboard";
 import SolverRegistration from "./pages/SolverRegistration";
+import ResumeLab from "./pages/ResumeLab";
+import ResumeEditor from "./pages/ResumeEditor";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +67,8 @@ const App = () => (
           <Route path="/ellio-notes/assignment-help/my-requests" element={<MyRequests />} />
           <Route path="/ellio-notes/assignment-help/solver" element={<SolverDashboard />} />
           <Route path="/ellio-notes/assignment-help/solver/register" element={<SolverRegistration />} />
+          <Route path="/resume-lab" element={<ResumeLab />} />
+          <Route path="/resume-lab/editor/:templateId" element={<ResumeEditor />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
           </Suspense>

@@ -543,6 +543,121 @@ export type Database = {
         }
         Relationships: []
       }
+      resume_profiles: {
+        Row: {
+          created_at: string
+          customization: Json
+          id: string
+          resume_data: Json
+          template_id: string
+          updated_at: string
+          user_email: string
+        }
+        Insert: {
+          created_at?: string
+          customization?: Json
+          id?: string
+          resume_data?: Json
+          template_id: string
+          updated_at?: string
+          user_email: string
+        }
+        Update: {
+          created_at?: string
+          customization?: Json
+          id?: string
+          resume_data?: Json
+          template_id?: string
+          updated_at?: string
+          user_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_profiles_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "resume_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resume_purchases: {
+        Row: {
+          amount_paid: number
+          id: string
+          payment_reference: string | null
+          purchase_date: string
+          template_id: string
+          user_email: string
+        }
+        Insert: {
+          amount_paid: number
+          id?: string
+          payment_reference?: string | null
+          purchase_date?: string
+          template_id: string
+          user_email: string
+        }
+        Update: {
+          amount_paid?: number
+          id?: string
+          payment_reference?: string | null
+          purchase_date?: string
+          template_id?: string
+          user_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_purchases_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "resume_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resume_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          name: string
+          preview_image: string | null
+          price: number
+          status: Database["public"]["Enums"]["template_status"]
+          template_data: Json
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          name: string
+          preview_image?: string | null
+          price?: number
+          status?: Database["public"]["Enums"]["template_status"]
+          template_data?: Json
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          name?: string
+          preview_image?: string | null
+          price?: number
+          status?: Database["public"]["Enums"]["template_status"]
+          template_data?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string | null
@@ -653,6 +768,7 @@ export type Database = {
       payment_status: "pending" | "paid" | "released" | "refunded"
       request_status: "pending" | "fulfilled" | "rejected"
       solution_status: "pending" | "approved" | "rejected" | "revision_needed"
+      template_status: "active" | "inactive" | "draft"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -794,6 +910,7 @@ export const Constants = {
       payment_status: ["pending", "paid", "released", "refunded"],
       request_status: ["pending", "fulfilled", "rejected"],
       solution_status: ["pending", "approved", "rejected", "revision_needed"],
+      template_status: ["active", "inactive", "draft"],
     },
   },
 } as const
