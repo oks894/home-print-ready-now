@@ -21,6 +21,7 @@ import { PaymentManagement } from './assignment-help/PaymentManagement';
 import { RateSettings } from './assignment-help/RateSettings';
 import { SolverManagement } from './assignment-help/SolverManagement';
 import { TransactionHistory } from './assignment-help/TransactionHistory';
+import ResumeLabAdmin from './resume-lab/ResumeLabAdmin';
 
 interface AdminTabsProps {
   printJobs: PrintJob[];
@@ -110,10 +111,11 @@ export const AdminTabs = ({
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-5 mb-6">
+      <TabsList className="grid w-full grid-cols-6 mb-6">
         <TabsTrigger value="printJobs" className="relative">Orders</TabsTrigger>
         <TabsTrigger value="feedback">Feedback</TabsTrigger>
         <TabsTrigger value="assignments">Assignments</TabsTrigger>
+        <TabsTrigger value="resumeLab">Resume Lab</TabsTrigger>
         <TabsTrigger value="services">Services</TabsTrigger>
         <TabsTrigger value="links">Links</TabsTrigger>
       </TabsList>
@@ -152,6 +154,7 @@ export const AdminTabs = ({
         </Tabs>
       </TabsContent>
 
+      <TabsContent value="resumeLab"><ResumeLabAdmin /></TabsContent>
       <TabsContent value="services"><ServicesManager /></TabsContent>
       <TabsContent value="links"><ExternalLinksManager /></TabsContent>
     </Tabs>
