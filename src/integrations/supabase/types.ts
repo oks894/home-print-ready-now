@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          activity_type: string
+          created_at: string
+          description: string
+          id: string
+          metadata: Json | null
+          user_email: string | null
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string
+          description: string
+          id?: string
+          metadata?: Json | null
+          user_email?: string | null
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string
+          description?: string
+          id?: string
+          metadata?: Json | null
+          user_email?: string | null
+        }
+        Relationships: []
+      }
       assignment_rate_settings: {
         Row: {
           base_rate: number
@@ -213,7 +240,9 @@ export type Database = {
           deadline: string | null
           dynamic_edu_fee: number
           id: string
+          payment_reference: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
+          payment_verified: boolean | null
           solver_id: string | null
           solver_name: string | null
           solver_payment: number
@@ -238,7 +267,9 @@ export type Database = {
           deadline?: string | null
           dynamic_edu_fee?: number
           id?: string
+          payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          payment_verified?: boolean | null
           solver_id?: string | null
           solver_name?: string | null
           solver_payment?: number
@@ -263,7 +294,9 @@ export type Database = {
           deadline?: string | null
           dynamic_edu_fee?: number
           id?: string
+          payment_reference?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
+          payment_verified?: boolean | null
           solver_id?: string | null
           solver_name?: string | null
           solver_payment?: number
@@ -486,6 +519,141 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_settings: {
+        Row: {
+          created_at: string
+          enable_manual_payments: boolean
+          id: string
+          payment_instructions: string | null
+          qr_code_url: string | null
+          updated_at: string
+          upi_id: string
+          whatsapp_number: string
+        }
+        Insert: {
+          created_at?: string
+          enable_manual_payments?: boolean
+          id?: string
+          payment_instructions?: string | null
+          qr_code_url?: string | null
+          updated_at?: string
+          upi_id?: string
+          whatsapp_number?: string
+        }
+        Update: {
+          created_at?: string
+          enable_manual_payments?: boolean
+          id?: string
+          payment_instructions?: string | null
+          qr_code_url?: string | null
+          updated_at?: string
+          upi_id?: string
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
+      pending_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          payment_proof_url: string | null
+          reference_id: string
+          rejection_reason: string | null
+          service_type: string
+          status: string
+          tracking_id: string | null
+          user_email: string
+          user_name: string
+          verified_at: string | null
+          verified_by: string | null
+          whatsapp_message_sent: boolean | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          payment_proof_url?: string | null
+          reference_id: string
+          rejection_reason?: string | null
+          service_type: string
+          status?: string
+          tracking_id?: string | null
+          user_email: string
+          user_name: string
+          verified_at?: string | null
+          verified_by?: string | null
+          whatsapp_message_sent?: boolean | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          payment_proof_url?: string | null
+          reference_id?: string
+          rejection_reason?: string | null
+          service_type?: string
+          status?: string
+          tracking_id?: string | null
+          user_email?: string
+          user_name?: string
+          verified_at?: string | null
+          verified_by?: string | null
+          whatsapp_message_sent?: boolean | null
+        }
+        Relationships: []
+      }
+      platform_settings: {
+        Row: {
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          currency: string
+          id: string
+          logo_url: string | null
+          platform_name: string
+          primary_color: string | null
+          secondary_color: string | null
+          support_hours: string | null
+          support_whatsapp: string | null
+          tagline: string
+          updated_at: string
+          welcome_message: string | null
+        }
+        Insert: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          logo_url?: string | null
+          platform_name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          support_hours?: string | null
+          support_whatsapp?: string | null
+          tagline?: string
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Update: {
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          logo_url?: string | null
+          platform_name?: string
+          primary_color?: string | null
+          secondary_color?: string | null
+          support_hours?: string | null
+          support_whatsapp?: string | null
+          tagline?: string
+          updated_at?: string
+          welcome_message?: string | null
+        }
+        Relationships: []
+      }
       print_jobs: {
         Row: {
           delivery_requested: boolean | null
@@ -496,6 +664,8 @@ export type Database = {
           institute: string | null
           name: string
           notes: string | null
+          payment_reference: string | null
+          payment_verified: boolean | null
           phone: string
           selected_services: Json | null
           sms_notifications: boolean | null
@@ -514,6 +684,8 @@ export type Database = {
           institute?: string | null
           name: string
           notes?: string | null
+          payment_reference?: string | null
+          payment_verified?: boolean | null
           phone: string
           selected_services?: Json | null
           sms_notifications?: boolean | null
@@ -532,6 +704,8 @@ export type Database = {
           institute?: string | null
           name?: string
           notes?: string | null
+          payment_reference?: string | null
+          payment_verified?: boolean | null
           phone?: string
           selected_services?: Json | null
           sms_notifications?: boolean | null
@@ -585,26 +759,35 @@ export type Database = {
         Row: {
           amount_paid: number
           id: string
+          payment_proof_url: string | null
           payment_reference: string | null
+          payment_verified: boolean | null
           purchase_date: string
           template_id: string
           user_email: string
+          verified_at: string | null
         }
         Insert: {
           amount_paid: number
           id?: string
+          payment_proof_url?: string | null
           payment_reference?: string | null
+          payment_verified?: boolean | null
           purchase_date?: string
           template_id: string
           user_email: string
+          verified_at?: string | null
         }
         Update: {
           amount_paid?: number
           id?: string
+          payment_proof_url?: string | null
           payment_reference?: string | null
+          payment_verified?: boolean | null
           purchase_date?: string
           template_id?: string
           user_email?: string
+          verified_at?: string | null
         }
         Relationships: [
           {
