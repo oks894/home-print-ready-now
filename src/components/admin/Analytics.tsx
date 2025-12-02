@@ -37,15 +37,6 @@ export const Analytics = () => {
       setIsLoading(true);
       const dateFilter = getDateFilter();
 
-      // Build queries with optional date filter
-      const buildQuery = (table: string) => {
-        let query = supabase.from(table).select('*', { count: 'exact', head: false });
-        if (dateFilter) {
-          query = query.gte('created_at', dateFilter);
-        }
-        return query;
-      };
-
       let printQuery = supabase.from('print_jobs').select('*');
       let notesQuery = supabase.from('notes').select('*');
       let assignQuery = supabase.from('assignments').select('*');
