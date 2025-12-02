@@ -1,9 +1,8 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
+/* Corporate Design System for Ellio */
 
 @layer base {
   :root {
@@ -16,7 +15,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    /* Ellio Brand Colors */
+    --primary: 221 83% 53%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -25,21 +25,28 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 262 83% 58%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 221 83% 53%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Ellio Corporate Colors */
+    --ellio-blue: 217 91% 60%;
+    --ellio-purple: 262 83% 58%;
+    --ellio-green: 160 84% 39%;
+    --ellio-pink: 330 81% 60%;
+    --ellio-orange: 25 95% 53%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 221 83% 53%;
     --sidebar-primary-foreground: 0 0% 98%;
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
@@ -57,7 +64,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 217 91% 60%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -66,7 +73,7 @@
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 262 83% 58%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
@@ -74,10 +81,11 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 217 91% 60%;
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 217 91% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
@@ -93,7 +101,6 @@
 
   body {
     @apply bg-background text-foreground;
-    /* Optimize for mobile performance and slow connections */
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
     text-rendering: optimizeLegibility;
@@ -101,18 +108,15 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Mobile-first optimizations */
   html {
     touch-action: manipulation;
     scroll-behavior: smooth;
   }
 
-  /* Prevent horizontal scroll on mobile */
   body, html {
     overflow-x: hidden;
   }
 
-  /* Improve touch targets for mobile */
   button, a, input, select, textarea {
     @apply min-h-[44px];
   }
@@ -123,64 +127,28 @@
     }
   }
 
-  /* Mobile typography improvements */
   @media (max-width: 640px) {
     h1 {
       @apply text-2xl leading-tight;
     }
-    
     h2 {
       @apply text-xl leading-tight;
     }
-    
     h3 {
       @apply text-lg leading-tight;
     }
-    
     p {
       @apply text-sm leading-relaxed;
     }
   }
 
-  /* Enhanced mobile form elements */
   @media (max-width: 768px) {
     input, textarea, select {
-      @apply text-base; /* Prevents zoom on iOS */
+      @apply text-base;
       min-height: 48px;
     }
-    
-    .mobile-form-input {
-      @apply w-full px-4 py-3 text-base border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all;
-    }
   }
 
-  /* Optimizations for slow connections (3G and below) */
-  @media (max-width: 768px) and (max-resolution: 150dpi) {
-    .slow-connection * {
-      animation: none !important;
-      transition: none !important;
-      backdrop-filter: none !important;
-      filter: none !important;
-    }
-    
-    .slow-connection .gradient-text {
-      background: none !important;
-      color: #1d4ed8 !important;
-    }
-    
-    .slow-connection .backdrop-blur {
-      backdrop-filter: none !important;
-      background: rgba(255, 255, 255, 0.95) !important;
-    }
-  }
-
-  /* Force basic styles for very slow connections */
-  .connection-3g * {
-    animation-duration: 0.1s !important;
-    transition-duration: 0.1s !important;
-  }
-
-  /* Reduce animations on slow connections */
   @media (prefers-reduced-motion: reduce) {
     * {
       animation-duration: 0.01ms !important;
@@ -189,7 +157,6 @@
     }
   }
 
-  /* Basic spinner for slow connections */
   @keyframes spin {
     to {
       transform: rotate(360deg);
@@ -197,7 +164,7 @@
   }
 }
 
-/* Custom mobile utilities */
+/* Custom utilities */
 @layer utilities {
   .touch-manipulation {
     touch-action: manipulation;
@@ -217,7 +184,7 @@
   }
   
   .mobile-container {
-    @apply px-3 sm:px-4 lg:px-6;
+    @apply px-4 sm:px-6 lg:px-8;
   }
   
   .mobile-text {
@@ -228,26 +195,22 @@
     @apply text-xl sm:text-2xl lg:text-3xl;
   }
 
-  /* Mobile-optimized spacing */
   .mobile-spacing {
     @apply py-4 sm:py-6 lg:py-8;
   }
 
   .mobile-gap {
-    @apply gap-3 sm:gap-4 lg:gap-6;
+    @apply gap-4 sm:gap-6 lg:gap-8;
   }
 
-  /* Touch-friendly buttons */
   .touch-button {
     @apply min-h-[48px] min-w-[48px] touch-manipulation;
   }
 
-  /* Mobile-optimized cards */
   .mobile-card {
-    @apply rounded-lg sm:rounded-xl shadow-md sm:shadow-lg;
+    @apply rounded-xl shadow-lg;
   }
 
-  /* Prevent text selection on mobile UI elements */
   .no-select {
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -255,53 +218,66 @@
     user-select: none;
   }
 
-  /* Mobile swipe indicators */
-  .swipe-indicator {
-    @apply relative;
-  }
-  
-  .swipe-indicator::after {
-    content: '';
-    @apply absolute bottom-2 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gray-300 rounded-full;
+  /* Corporate gradient utilities */
+  .gradient-primary {
+    @apply bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600;
   }
 
-  /* Optimized animations for slow connections */
-  .mobile-fade-in {
-    animation: mobile-fade-in 0.15s ease-out;
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent;
   }
 
-  @keyframes mobile-fade-in {
+  .gradient-card {
+    @apply bg-gradient-to-br from-background to-muted/50;
+  }
+
+  /* Glass effect */
+  .glass {
+    @apply bg-background/80 backdrop-blur-lg border border-border/50;
+  }
+
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-lg border border-border/50 shadow-xl;
+  }
+
+  /* Animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes glow {
     from {
-      opacity: 0;
-      transform: translateY(5px);
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
     }
     to {
-      opacity: 1;
-      transform: translateY(0);
+      box-shadow: 0 0 30px hsl(var(--primary) / 0.5);
     }
   }
 
-  /* High contrast for mobile accessibility */
-  @media (max-width: 768px) {
-    .mobile-high-contrast {
-      @apply contrast-125;
-    }
+  /* Connection optimization classes */
+  .connection-3g * {
+    animation-duration: 0.1s !important;
+    transition-duration: 0.1s !important;
   }
 
-  /* Specific optimizations for 3G */
-  .connection-3g {
-    will-change: auto !important;
-    transform: none !important;
-    filter: none !important;
-    backdrop-filter: none !important;
+  .connection-3g .mobile-card {
+    @apply shadow-sm border border-border;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
   }
 
-  .reduce-motion {
-    animation: none !important;
-    transition: none !important;
-  }
-
-  /* Lightweight mode for extremely slow connections */
   .ultra-light * {
     box-shadow: none !important;
     text-shadow: none !important;
@@ -309,14 +285,14 @@
   }
 }
 
-/* Mobile-specific component styles */
+/* Component styles */
 @layer components {
   .mobile-nav-item {
-    @apply block w-full text-left px-4 py-3 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-colors touch-manipulation;
+    @apply block w-full text-left px-4 py-3 text-base font-medium text-foreground hover:bg-muted transition-colors touch-manipulation;
   }
 
   .mobile-form-section {
-    @apply space-y-4 p-4 bg-white rounded-lg shadow-sm border border-gray-100;
+    @apply space-y-4 p-4 bg-card rounded-xl shadow-sm border border-border;
   }
 
   .mobile-step-indicator {
@@ -324,16 +300,15 @@
   }
 
   .mobile-progress-bar {
-    @apply w-full h-2 bg-gray-200 rounded-full overflow-hidden;
+    @apply w-full h-2 bg-muted rounded-full overflow-hidden;
   }
 
   .mobile-toast {
-    @apply fixed bottom-4 left-4 right-4 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50;
+    @apply fixed bottom-4 left-4 right-4 bg-card border border-border rounded-xl shadow-lg p-4 z-50;
   }
 
-  /* Lightweight button styles for slow connections */
   .lite-button {
-    @apply px-4 py-2 rounded-md font-medium text-center cursor-pointer select-none;
+    @apply px-4 py-2 rounded-lg font-medium text-center cursor-pointer select-none;
     transition: background-color 0.1s ease;
   }
 
@@ -341,13 +316,21 @@
     filter: brightness(0.95);
   }
 
-  /* 3G optimized components */
-  .connection-3g .mobile-card {
-    @apply shadow-sm border border-gray-200;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  /* Corporate button styles */
+  .btn-corporate {
+    @apply px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5;
   }
 
-  .connection-3g .gradient-bg {
-    background: #f8fafc !important;
+  .btn-corporate-outline {
+    @apply px-6 py-3 rounded-xl font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all duration-300;
+  }
+
+  /* Corporate card styles */
+  .card-corporate {
+    @apply bg-card rounded-2xl border border-border shadow-lg hover:shadow-xl transition-all duration-300;
+  }
+
+  .card-corporate-hover {
+    @apply card-corporate hover:-translate-y-1;
   }
 }

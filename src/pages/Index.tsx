@@ -1,24 +1,20 @@
-
 import React, { Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HomeHero from '@/components/HomeHero';
+import HowItWorks from '@/components/HowItWorks';
+import WhyChooseEllio from '@/components/WhyChooseEllio';
+import StatisticsBar from '@/components/StatisticsBar';
+import CTASection from '@/components/CTASection';
+import FloatingActionButton from '@/components/FloatingActionButton';
 import { MobileLayout } from '@/components/mobile/MobileLayout';
-import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { SimpleLoader } from '@/components/SimpleLoader';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { getAdaptiveConfig } from '@/utils/connectionUtils';
 import { useLiveTracking } from '@/hooks/useLiveTracking';
 
-// Get adaptive configuration
 const adaptiveConfig = getAdaptiveConfig();
-
-const MainContentSections = React.lazy(() => 
-  import('@/components/MainContentSections').then(module => ({ 
-    default: module.default 
-  }))
-);
 
 const OnlineUsersMonitor = React.lazy(() => 
   import('@/components/OnlineUsersMonitor')
@@ -27,7 +23,6 @@ const OnlineUsersMonitor = React.lazy(() =>
 const Index = () => {
   const { animationDuration, enableHeavyAnimations, simplifiedUI, ultraLightMode } = adaptiveConfig;
   
-  // Enable live tracking for the home page
   useLiveTracking('home');
 
   return (
@@ -38,11 +33,10 @@ const Index = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: animationDuration }}
         >
-          <ErrorBoundary fallback={<div className="h-16 bg-white" />}>
+          <ErrorBoundary fallback={<div className="h-16 bg-background" />}>
             <Header />
           </ErrorBoundary>
           
-          {/* Always show live monitor on all pages */}
           <ErrorBoundary fallback={null}>
             <Suspense fallback={null}>
               <OnlineUsersMonitor showMilestones={false} />
@@ -60,27 +54,31 @@ const Index = () => {
             </ErrorBoundary>
             
             {!ultraLightMode && (
-              <ErrorBoundary fallback={
-                <div className="h-32 flex items-center justify-center text-sm text-gray-600">
-                  Content temporarily unavailable
-                </div>
-              }>
-                <Suspense fallback={
-                  <div className={`h-32 flex items-center justify-center text-sm text-gray-600 ${
-                    simplifiedUI ? 'animate-none' : 'animate-pulse'
-                  }`}>
-                    Loading content...
-                  </div>
-                }>
-                  <MainContentSections />
-                </Suspense>
-              </ErrorBoundary>
+              <>
+                <ErrorBoundary fallback={null}>
+                  <StatisticsBar />
+                </ErrorBoundary>
+                
+                <ErrorBoundary fallback={null}>
+                  <HowItWorks />
+                </ErrorBoundary>
+                
+                <ErrorBoundary fallback={null}>
+                  <WhyChooseEllio />
+                </ErrorBoundary>
+                
+                <ErrorBoundary fallback={null}>
+                  <CTASection />
+                </ErrorBoundary>
+              </>
             )}
           </motion.main>
           
-          <ErrorBoundary fallback={<div className="h-16 bg-gray-100" />}>
+          <ErrorBoundary fallback={<div className="h-16 bg-muted" />}>
             <Footer />
           </ErrorBoundary>
+
+          <FloatingActionButton />
         </motion.div>
       </MobileLayout>
     </ErrorBoundary>
