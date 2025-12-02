@@ -15,7 +15,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState('printJobs');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const isMobile = useIsMobile();
   
   const {
