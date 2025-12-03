@@ -1,6 +1,7 @@
 
 import { Link } from 'react-router-dom';
 import { Printer, User, Menu, X, ChevronDown } from 'lucide-react';
+import UserMenu from '@/components/UserMenu';
 import { Button } from '@/components/ui/button';
 import { TouchButton } from '@/components/mobile/TouchButton';
 import { useState } from 'react';
@@ -172,24 +173,10 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.3 }}
-            >
-              <Link to="/admin" className="hidden sm:block">
-                <ButtonComponent 
-                  variant="outline" 
-                  size="sm" 
-                  className={`hover:bg-blue-50 border-blue-200 ${
-                    isMobile ? 'text-xs p-2' : 'text-xs sm:text-sm'
-                  }`}
-                >
-                  <User className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  Admin
-                </ButtonComponent>
-              </Link>
-            </motion.div>
+            {/* User Menu */}
+            <div className="hidden sm:block">
+              <UserMenu />
+            </div>
             
             {/* Mobile Menu Button */}
             <motion.div whileTap={{ scale: 0.9 }}>
