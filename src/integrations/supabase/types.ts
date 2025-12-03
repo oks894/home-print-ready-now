@@ -312,6 +312,182 @@ export type Database = {
         }
         Relationships: []
       }
+      coin_packages: {
+        Row: {
+          bonus_coins: number
+          coins: number
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          is_popular: boolean
+          name: string
+          price_inr: number
+        }
+        Insert: {
+          bonus_coins?: number
+          coins: number
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          name: string
+          price_inr: number
+        }
+        Update: {
+          bonus_coins?: number
+          coins?: number
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          is_popular?: boolean
+          name?: string
+          price_inr?: number
+        }
+        Relationships: []
+      }
+      coin_recharge_requests: {
+        Row: {
+          amount_paid: number
+          bonus_coins: number
+          coins_requested: number
+          created_at: string
+          id: string
+          package_id: string
+          payment_proof_url: string | null
+          rejection_reason: string | null
+          status: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          amount_paid: number
+          bonus_coins?: number
+          coins_requested: number
+          created_at?: string
+          id?: string
+          package_id: string
+          payment_proof_url?: string | null
+          rejection_reason?: string | null
+          status?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          amount_paid?: number
+          bonus_coins?: number
+          coins_requested?: number
+          created_at?: string
+          id?: string
+          package_id?: string
+          payment_proof_url?: string | null
+          rejection_reason?: string | null
+          status?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_recharge_requests_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "coin_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coin_recharge_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      coin_settings: {
+        Row: {
+          id: string
+          is_recharge_enabled: boolean
+          min_recharge_amount: number
+          qr_code_url: string | null
+          referral_bonus: number
+          updated_at: string
+          upi_id: string
+          welcome_bonus: number
+          whatsapp_number: string
+        }
+        Insert: {
+          id?: string
+          is_recharge_enabled?: boolean
+          min_recharge_amount?: number
+          qr_code_url?: string | null
+          referral_bonus?: number
+          updated_at?: string
+          upi_id?: string
+          welcome_bonus?: number
+          whatsapp_number?: string
+        }
+        Update: {
+          id?: string
+          is_recharge_enabled?: boolean
+          min_recharge_amount?: number
+          qr_code_url?: string | null
+          referral_bonus?: number
+          updated_at?: string
+          upi_id?: string
+          welcome_bonus?: number
+          whatsapp_number?: string
+        }
+        Relationships: []
+      }
+      coin_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          description: string
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          description: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          description?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coin_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       data: {
         Row: {
           created_at: string
@@ -903,6 +1079,59 @@ export type Database = {
           },
         ]
       }
+      user_profiles: {
+        Row: {
+          avatar_url: string | null
+          coin_balance: number
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          is_suspended: boolean
+          referral_code: string | null
+          referred_by: string | null
+          total_coins_earned: number
+          total_coins_spent: number
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          coin_balance?: number
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id: string
+          is_suspended?: boolean
+          referral_code?: string | null
+          referred_by?: string | null
+          total_coins_earned?: number
+          total_coins_spent?: number
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          coin_balance?: number
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          is_suspended?: boolean
+          referral_code?: string | null
+          referred_by?: string | null
+          total_coins_earned?: number
+          total_coins_spent?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -929,6 +1158,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_referral_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
