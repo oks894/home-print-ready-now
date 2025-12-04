@@ -1,7 +1,7 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { AdminLogin } from '@/components/admin/AdminLogin';
+import { useAdminAuth } from '@/hooks/useAdminAuth';
+import { AdminLoginNew } from '@/components/admin/AdminLoginNew';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { MobileAdminHeader } from '@/components/admin/MobileAdminHeader';
 import { MobileBottomNav } from '@/components/admin/mobile/MobileBottomNav';
@@ -17,6 +17,7 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const isMobile = useIsMobile();
+  const { user, isAdmin, isLoading: authLoading } = useAdminAuth();
   
   const {
     printJobs,
@@ -34,6 +35,13 @@ const Admin = () => {
     setSelectedJob
   } = useAdminData();
 
+  // Auto-authenticate when user is admin
+  useEffect(() => {
+    if (user && isAdmin && !authLoading) {
+      setIsAuthenticated(true);
+    }
+  }, [user, isAdmin, authLoading]);
+
   React.useEffect(() => {
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js')
@@ -46,10 +54,14 @@ const Admin = () => {
     }
   }, []);
 
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+  };
+
   if (!isAuthenticated) {
     return (
       <MobileAdminLayout>
-        <AdminLogin onLogin={() => setIsAuthenticated(true)} />
+        <AdminLoginNew onAuthenticated={() => setIsAuthenticated(true)} />
       </MobileAdminLayout>
     );
   }
@@ -64,7 +76,7 @@ const Admin = () => {
 
         {!isMobile && (
           <AdminHeader 
-            onLogout={() => setIsAuthenticated(false)}
+            onLogout={handleLogout}
             isRetrying={isRetrying}
             onRefresh={loadData}
           />
@@ -72,7 +84,7 @@ const Admin = () => {
 
         {isMobile && (
           <MobileAdminHeader
-            onLogout={() => setIsAuthenticated(false)}
+            onLogout={handleLogout}
             onRefresh={loadData}
             isRetrying={isRetrying}
             onMenuToggle={() => {}}
@@ -116,7 +128,7 @@ const Admin = () => {
             onDeleteFeedback={deleteFeedback}
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            onLogout={() => setIsAuthenticated(false)}
+            onLogout={handleLogout}
           />
         </div>
 

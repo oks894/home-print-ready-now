@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { Printer, User, Menu, X, ChevronDown } from 'lucide-react';
 import UserMenu from '@/components/UserMenu';
@@ -173,10 +172,8 @@ const Header = () => {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* User Menu */}
-            <div className="hidden sm:block">
-              <UserMenu />
-            </div>
+            {/* User Menu - Always visible */}
+            <UserMenu />
             
             {/* Mobile Menu Button */}
             <motion.div whileTap={{ scale: 0.9 }}>
@@ -253,7 +250,7 @@ const Header = () => {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: 0.5 }}
-                  className="sm:hidden mt-2 px-4"
+                  className="mt-2 px-4"
                 >
                   <Link 
                     to="/admin"

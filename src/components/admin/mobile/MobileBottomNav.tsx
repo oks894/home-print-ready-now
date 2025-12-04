@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Printer, Clock, GraduationCap, Settings, BarChart3, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Printer, Clock, GraduationCap, Users, Coins, MoreHorizontal } from 'lucide-react';
 import { TouchButton } from '@/components/mobile/TouchButton';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -40,22 +40,25 @@ export const MobileBottomNav = ({
       badge: pendingCount,
     },
     {
-      id: 'pendingPayments',
-      label: 'Payments',
-      icon: Clock,
+      id: 'users',
+      label: 'Users',
+      icon: Users,
     },
     {
-      id: 'assignments',
-      label: 'Tasks',
-      icon: GraduationCap,
+      id: 'coins',
+      label: 'Coins',
+      icon: Coins,
     },
   ];
 
   const moreNavItems = [
+    { id: 'pendingPayments', label: 'Pending Payments' },
+    { id: 'assignments', label: 'Assignments/Solvers' },
     { id: 'resumeLab', label: 'Resume Lab' },
     { id: 'feedback', label: 'Feedback' },
     { id: 'services', label: 'Services' },
     { id: 'paymentSettings', label: 'Payment Config' },
+    { id: 'adminRoles', label: 'Admin Roles' },
     { id: 'globalSettings', label: 'Settings' },
     { id: 'analytics', label: 'Analytics' },
   ];
