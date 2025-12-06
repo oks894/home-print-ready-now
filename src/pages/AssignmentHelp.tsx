@@ -247,6 +247,29 @@ const AssignmentHelp = () => {
           </div>
         </div>
 
+        {/* Solver Leaderboard CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 cursor-pointer hover:shadow-lg transition-shadow"
+            onClick={() => navigate('/ellio-notes/assignment-help/solver/leaderboard')}>
+            <CardContent className="p-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center">
+                  <GraduationCap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">🏆 Solver Leaderboard</h3>
+                  <p className="text-sm text-gray-600">See top solvers by earnings, assignments solved, and ratings</p>
+                </div>
+              </div>
+              <Button variant="outline">View Leaderboard</Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* CTA Section */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}

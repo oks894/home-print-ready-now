@@ -28,6 +28,8 @@ import MyRequests from "./pages/MyRequests";
 import SolverDashboard from "./pages/SolverDashboard";
 import SolverRegistration from "./pages/SolverRegistration";
 import BrowseAssignments from "./pages/BrowseAssignments";
+import SolverLeaderboard from "./pages/SolverLeaderboard";
+import Transactions from "./pages/Transactions";
 import ResumeLab from "./pages/ResumeLab";
 import ResumeEditor from "./pages/ResumeEditor";
 import Auth from "./pages/Auth";
@@ -56,6 +58,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/transactions" element={<Transactions />} />
                 <Route path="/recharge" element={<Recharge />} />
                 <Route path="/printing" element={<Printing />} />
                 <Route path="/services" element={<Services />} />
@@ -76,6 +79,7 @@ const App = () => (
                 <Route path="/ellio-notes/assignment-help/browse" element={<BrowseAssignments />} />
                 <Route path="/ellio-notes/assignment-help/solver" element={<SolverDashboard />} />
                 <Route path="/ellio-notes/assignment-help/solver/register" element={<SolverRegistration />} />
+                <Route path="/ellio-notes/assignment-help/solver/leaderboard" element={<SolverLeaderboard />} />
                 <Route path="/resume-lab" element={<ResumeLab />} />
                 <Route path="/resume-lab/editor/:templateId" element={<ResumeEditor />} />
                 <Route path="*" element={<NotFound />} />
