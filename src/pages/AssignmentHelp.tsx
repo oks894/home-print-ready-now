@@ -15,7 +15,8 @@ import {
   Shield, 
   Zap,
   DollarSign,
-  GraduationCap
+  GraduationCap,
+  Search
 } from 'lucide-react';
 
 const AssignmentHelp = () => {
@@ -42,6 +43,13 @@ const AssignmentHelp = () => {
       description: 'Track your assignments',
       action: () => navigate('/ellio-notes/assignment-help/my-requests'),
       color: 'from-green-500 to-emerald-500'
+    },
+    {
+      icon: Search,
+      title: 'Browse Questions',
+      description: 'View all available assignments',
+      action: () => navigate('/ellio-notes/assignment-help/browse'),
+      color: 'from-teal-500 to-cyan-500'
     },
     {
       icon: Users,
@@ -157,7 +165,7 @@ const AssignmentHelp = () => {
         </div>
 
         {/* Main Action Cards */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 mb-16">
           {features.map((feature, index) => (
             <motion.div
               key={index}

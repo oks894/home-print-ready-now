@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useAdminAuth } from '@/hooks/useAdminAuth';
-import { AdminLoginNew } from '@/components/admin/AdminLoginNew';
+import { AdminLogin } from '@/components/admin/AdminLogin';
 import { AdminHeader } from '@/components/admin/AdminHeader';
 import { MobileAdminHeader } from '@/components/admin/MobileAdminHeader';
 import { MobileBottomNav } from '@/components/admin/mobile/MobileBottomNav';
@@ -17,7 +16,6 @@ const Admin = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
   const isMobile = useIsMobile();
-  const { user, isAdmin, isLoading: authLoading } = useAdminAuth();
   
   const {
     printJobs,
@@ -34,13 +32,6 @@ const Admin = () => {
     deleteFeedback,
     setSelectedJob
   } = useAdminData();
-
-  // Auto-authenticate when user is admin
-  useEffect(() => {
-    if (user && isAdmin && !authLoading) {
-      setIsAuthenticated(true);
-    }
-  }, [user, isAdmin, authLoading]);
 
   React.useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -61,7 +52,7 @@ const Admin = () => {
   if (!isAuthenticated) {
     return (
       <MobileAdminLayout>
-        <AdminLoginNew onAuthenticated={() => setIsAuthenticated(true)} />
+        <AdminLogin onLogin={() => setIsAuthenticated(true)} />
       </MobileAdminLayout>
     );
   }
