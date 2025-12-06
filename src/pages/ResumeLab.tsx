@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FileText, Lock, CheckCircle, ArrowRight, Sparkles } from 'lucide-react';
+import { FileText, Lock, CheckCircle, ArrowRight, Sparkles, Coins } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,9 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCoinBalance } from '@/hooks/useCoinBalance';
+import { CoinPaymentConfirmation } from '@/components/payment/CoinPaymentConfirmation';
 
 interface Template {
   id: string;
@@ -21,14 +24,22 @@ interface Template {
 
 const ResumeLab = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { coinBalance, deductCoins } = useCoinBalance();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
-  const [userEmail, setUserEmail] = useState('');
   const [purchasedTemplates, setPurchasedTemplates] = useState<Set<string>>(new Set());
+  const [paymentDialog, setPaymentDialog] = useState<{
+    open: boolean;
+    template: Template | null;
+  }>({ open: false, template: null });
 
   useEffect(() => {
     fetchTemplates();
-  }, []);
+    if (user?.email) {
+      fetchPurchasedTemplates(user.email);
+    }
+  }, [user]);
 
   const fetchTemplates = async () => {
     try {
@@ -48,68 +59,67 @@ const ResumeLab = () => {
     }
   };
 
-  const checkPurchase = async (templateId: string, email: string) => {
+  const fetchPurchasedTemplates = async (email: string) => {
     const { data } = await supabase
       .from('resume_purchases')
-      .select('id')
-      .eq('template_id', templateId)
+      .select('template_id')
       .eq('user_email', email)
-      .single();
+      .eq('payment_verified', true);
     
-    return !!data;
+    if (data) {
+      setPurchasedTemplates(new Set(data.map(p => p.template_id)));
+    }
   };
 
   const handleUnlock = async (template: Template) => {
-    const email = prompt('Enter your email to unlock this template:');
-    if (!email) return;
-
-    // Validate email
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      toast.error('Please enter a valid email address');
+    if (!user) {
+      toast.error('Please sign in to unlock templates');
+      navigate('/auth');
       return;
     }
-
-    setUserEmail(email);
 
     // Check if already purchased
-    const alreadyPurchased = await checkPurchase(template.id, email);
-    if (alreadyPurchased) {
-      toast.success('You already own this template!');
-      setPurchasedTemplates(prev => new Set(prev).add(template.id));
-      navigate(`/resume-lab/editor/${template.id}?email=${email}`);
+    if (purchasedTemplates.has(template.id)) {
+      navigate(`/resume-lab/editor/${template.id}?email=${user.email}`);
       return;
     }
 
-    // For now, simulate payment (in production, integrate with payment gateway)
-    const confirmPurchase = confirm(
-      `Unlock "${template.name}" for ₹${template.price}?\n\n` +
-      `This will give you lifetime access to edit and export this template.`
+    // Open payment confirmation dialog
+    setPaymentDialog({ open: true, template });
+  };
+
+  const handleConfirmPayment = async () => {
+    if (!paymentDialog.template || !user) return { success: false, error: 'Invalid state' };
+
+    const template = paymentDialog.template;
+    
+    const result = await deductCoins(
+      template.price,
+      `Unlocked Resume Template: ${template.name}`,
+      'resume_template',
+      template.id
     );
 
-    if (!confirmPurchase) return;
+    if (result.success) {
+      // Record the purchase
+      await supabase.from('resume_purchases').insert({
+        user_email: user.email!,
+        template_id: template.id,
+        amount_paid: template.price,
+        payment_verified: true,
+        payment_reference: `COIN-${Date.now()}`
+      });
 
-    try {
-      const { error } = await supabase
-        .from('resume_purchases')
-        .insert({
-          user_email: email,
-          template_id: template.id,
-          amount_paid: template.price,
-          payment_reference: `REF-${Date.now()}`
-        });
-
-      if (error) throw error;
-
-      toast.success('Template unlocked successfully!');
       setPurchasedTemplates(prev => new Set(prev).add(template.id));
-      navigate(`/resume-lab/editor/${template.id}?email=${email}`);
-    } catch (error: any) {
-      console.error('Error purchasing template:', error);
-      if (error.code === '23505') {
-        toast.error('You already own this template!');
-      } else {
-        toast.error('Failed to unlock template');
-      }
+      toast.success('Template unlocked successfully!');
+    }
+
+    return result;
+  };
+
+  const handlePaymentSuccess = () => {
+    if (paymentDialog.template && user) {
+      navigate(`/resume-lab/editor/${paymentDialog.template.id}?email=${user.email}`);
     }
   };
 
@@ -217,16 +227,28 @@ const ResumeLab = () => {
 
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <span className="text-2xl font-bold text-purple-600">₹{template.price}</span>
-                            <span className="text-sm text-gray-500">one-time</span>
+                            <span className="text-2xl font-bold text-purple-600 flex items-center">
+                              <Coins className="h-5 w-5 mr-1" />
+                              {template.price}
+                            </span>
+                            <span className="text-sm text-gray-500">coins</span>
                           </div>
 
                           <Button
                             onClick={() => handleUnlock(template)}
                             className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                           >
-                            <Lock className="w-4 h-4 mr-2" />
-                            Unlock
+                            {purchasedTemplates.has(template.id) ? (
+                              <>
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Open
+                              </>
+                            ) : (
+                              <>
+                                <Lock className="w-4 h-4 mr-2" />
+                                Unlock
+                              </>
+                            )}
                             <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         </div>
@@ -283,6 +305,20 @@ const ResumeLab = () => {
       </main>
 
       <Footer />
+
+      {/* Payment Confirmation Dialog */}
+      {paymentDialog.template && (
+        <CoinPaymentConfirmation
+          open={paymentDialog.open}
+          onOpenChange={(open) => setPaymentDialog({ ...paymentDialog, open })}
+          serviceName={`Resume Template: ${paymentDialog.template.name}`}
+          description="Lifetime access to edit and export this professional resume template"
+          coinCost={paymentDialog.template.price}
+          currentBalance={coinBalance}
+          onConfirm={handleConfirmPayment}
+          onSuccess={handlePaymentSuccess}
+        />
+      )}
     </div>
   );
 };
