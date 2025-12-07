@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCoinBalance } from '@/hooks/useCoinBalance';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -11,19 +13,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CoinPaymentConfirmation } from '@/components/payment/CoinPaymentConfirmation';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Upload, FileText, CalendarIcon, DollarSign } from 'lucide-react';
+import { Upload, FileText, CalendarIcon, Coins, AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 
 const UploadAssignment = () => {
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
+  const { coinBalance, deductCoins, hasEnoughCoins } = useCoinBalance();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [assignmentType, setAssignmentType] = useState<'file_upload' | 'text'>('file_upload');
   const [urgency, setUrgency] = useState<'normal' | 'urgent'>('normal');
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [deadline, setDeadline] = useState<Date>();
+  const [showPaymentConfirm, setShowPaymentConfirm] = useState(false);
   
   const [formData, setFormData] = useState({
     studentName: '',
@@ -76,24 +82,44 @@ const UploadAssignment = () => {
     return uploadedFiles;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const validateForm = () => {
     if (!formData.studentName || !formData.studentContact || !formData.classLevel || !formData.subject) {
       toast.error('Please fill in all required fields');
-      return;
+      return false;
     }
 
     if (assignmentType === 'file_upload' && selectedFiles.length === 0) {
       toast.error('Please upload at least one file');
-      return;
+      return false;
     }
 
     if (assignmentType === 'text' && !formData.assignmentText) {
       toast.error('Please enter your question');
-      return;
+      return false;
     }
 
+    if (!user) {
+      toast.error('Please sign in to submit an assignment');
+      navigate('/auth');
+      return false;
+    }
+
+    if (!hasEnoughCoins(totalFee)) {
+      toast.error('Insufficient coin balance. Please recharge.');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmitClick = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (validateForm()) {
+      setShowPaymentConfirm(true);
+    }
+  };
+
+  const processSubmission = async () => {
     setIsSubmitting(true);
 
     try {
@@ -118,7 +144,7 @@ const UploadAssignment = () => {
           urgent_fee: urgentFee,
           total_fee: totalFee,
           status: 'pending',
-          payment_status: 'pending'
+          payment_status: 'paid'
         })
         .select()
         .single();
@@ -132,17 +158,26 @@ const UploadAssignment = () => {
         total_amount: totalFee,
         dynamic_edu_amount: 6,
         solver_amount: 9,
-        status: 'pending'
+        status: 'paid'
       });
+
+      // Deduct coins
+      const result = await deductCoins(totalFee, `Assignment Help - ${formData.subject}`, 'assignment', data.id);
+      
+      if (!result.success) {
+        throw new Error('Failed to deduct coins');
+      }
 
       toast.success('Assignment submitted successfully!', {
         description: 'You will be notified once a solver is assigned.'
       });
       
       navigate('/ellio-notes/assignment-help/my-requests');
+      return { success: true };
     } catch (error) {
       console.error('Error submitting assignment:', error);
       toast.error('Failed to submit assignment');
+      return { success: false, error: 'Submission failed' };
     } finally {
       setIsSubmitting(false);
     }
@@ -168,7 +203,7 @@ const UploadAssignment = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
+              <form onSubmit={handleSubmitClick} className="space-y-6">
                 {/* Student Details */}
                 <div className="space-y-4">
                   <div>
@@ -285,14 +320,18 @@ const UploadAssignment = () => {
                       <RadioGroupItem value="normal" id="normal" />
                       <Label htmlFor="normal" className="cursor-pointer flex-1">
                         <span className="font-medium">Normal (2-3 days)</span>
-                        <span className="ml-2 text-blue-600">₹15</span>
+                        <span className="ml-2 text-primary flex items-center gap-1 inline-flex">
+                          <Coins className="w-4 h-4" /> 15 coins
+                        </span>
                       </Label>
                     </div>
                     <div className="flex items-center space-x-2 p-3 border rounded-lg hover:bg-orange-50 transition-colors">
                       <RadioGroupItem value="urgent" id="urgent" />
                       <Label htmlFor="urgent" className="cursor-pointer flex-1">
                         <span className="font-medium">Urgent (24 hours)</span>
-                        <span className="ml-2 text-orange-600">₹20</span>
+                        <span className="ml-2 text-orange-600 flex items-center gap-1 inline-flex">
+                          <Coins className="w-4 h-4" /> 20 coins
+                        </span>
                       </Label>
                     </div>
                   </RadioGroup>
@@ -323,42 +362,74 @@ const UploadAssignment = () => {
                 <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2">
-                      <DollarSign className="w-5 h-5" />
+                      <Coins className="w-5 h-5" />
                       Price Summary
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Base Fee:</span>
-                      <span>₹{baseFee}</span>
+                      <span>{baseFee} coins</span>
                     </div>
                     {urgency === 'urgent' && (
                       <div className="flex justify-between text-sm text-orange-600">
                         <span>Urgent Fee:</span>
-                        <span>₹{urgentFee}</span>
+                        <span>{urgentFee} coins</span>
                       </div>
                     )}
                     <div className="border-t pt-2 flex justify-between font-bold text-lg">
                       <span>Total:</span>
-                      <span className="text-blue-600">₹{totalFee}</span>
+                      <span className="text-primary flex items-center gap-1">
+                        <Coins className="w-5 h-5" /> {totalFee} coins
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>Your Balance:</span>
+                      <span className={coinBalance < totalFee ? 'text-destructive' : ''}>
+                        {coinBalance} coins
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* Low Balance Warning */}
+                {!hasEnoughCoins(totalFee) && (
+                  <div className="flex items-center gap-2 text-destructive bg-destructive/10 p-3 rounded-lg">
+                    <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">Insufficient balance</p>
+                      <p className="text-xs">You need {totalFee - coinBalance} more coins.</p>
+                    </div>
+                    <Button size="sm" variant="outline" onClick={() => navigate('/recharge')}>
+                      Recharge
+                    </Button>
+                  </div>
+                )}
 
                 {/* Submit Button */}
                 <Button 
                   type="submit" 
                   className="w-full" 
                   size="lg"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !hasEnoughCoins(totalFee)}
                 >
-                  {isSubmitting ? 'Submitting...' : 'Submit Assignment'}
+                  {isSubmitting ? 'Submitting...' : `Submit Assignment (${totalFee} coins)`}
                 </Button>
               </form>
             </CardContent>
           </Card>
         </motion.div>
       </div>
+
+      <CoinPaymentConfirmation
+        open={showPaymentConfirm}
+        onOpenChange={setShowPaymentConfirm}
+        serviceName="Assignment Help"
+        description={`${formData.subject} - ${formData.classLevel}${urgency === 'urgent' ? ' (Urgent)' : ''}`}
+        coinCost={totalFee}
+        currentBalance={coinBalance}
+        onConfirm={processSubmission}
+      />
 
       <Footer />
     </div>

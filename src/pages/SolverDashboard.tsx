@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -10,17 +11,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Users, TrendingUp, DollarSign, Clock, Upload, FileText, Eye } from 'lucide-react';
+import { Users, TrendingUp, DollarSign, Clock, Upload, FileText, Eye, Star, Trophy, ExternalLink, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { format } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const SolverDashboard = () => {
+  const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [searchContact, setSearchContact] = useState('');
   const [solverData, setSolverData] = useState<any>(null);
   const [selectedAssignment, setSelectedAssignment] = useState<any>(null);
   const [solution, setSolution] = useState({ text: '', files: [] as File[] });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleSearch = async () => {
     if (!searchContact.trim()) {
@@ -48,14 +55,14 @@ const SolverDashboard = () => {
       }
 
       setSolverData(solver);
-      toast.success('Solver account found!');
+      toast.success('Welcome back!');
     } catch (error) {
       console.error('Error finding solver:', error);
       toast.error('Solver account not found');
     }
   };
 
-  const { data: availableAssignments = [] } = useQuery({
+  const { data: availableAssignments = [], refetch: refetchAvailable } = useQuery({
     queryKey: ['available-assignments', solverData?.subjects],
     queryFn: async () => {
       if (!solverData) return [];
@@ -74,7 +81,7 @@ const SolverDashboard = () => {
     enabled: !!solverData
   });
 
-  const { data: myAssignments = [] } = useQuery({
+  const { data: myAssignments = [], refetch: refetchMy } = useQuery({
     queryKey: ['my-assignments', solverData?.id],
     queryFn: async () => {
       if (!solverData) return [];
@@ -90,6 +97,13 @@ const SolverDashboard = () => {
     },
     enabled: !!solverData
   });
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([refetchAvailable(), refetchMy()]);
+    setIsRefreshing(false);
+    toast.success('Data refreshed');
+  };
 
   const handleAcceptAssignment = async (assignmentId: string) => {
     if (!solverData) return;
@@ -107,7 +121,8 @@ const SolverDashboard = () => {
       if (error) throw error;
 
       toast.success('Assignment accepted! Start working on it.');
-      window.location.reload();
+      refetchAvailable();
+      refetchMy();
     } catch (error) {
       console.error('Error accepting assignment:', error);
       toast.error('Failed to accept assignment');
@@ -120,6 +135,7 @@ const SolverDashboard = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       // Upload files if any
       const uploadedFiles = [];
@@ -175,52 +191,96 @@ const SolverDashboard = () => {
       toast.success('Solution submitted for review!');
       setSelectedAssignment(null);
       setSolution({ text: '', files: [] });
-      window.location.reload();
+      refetchMy();
     } catch (error) {
       console.error('Error submitting solution:', error);
       toast.error('Failed to submit solution');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    const variants: Record<string, string> = {
+      'pending': 'bg-yellow-100 text-yellow-800',
+      'assigned': 'bg-blue-100 text-blue-800',
+      'in_progress': 'bg-purple-100 text-purple-800',
+      'submitted': 'bg-orange-100 text-orange-800',
+      'approved': 'bg-green-100 text-green-800',
+      'completed': 'bg-green-100 text-green-800',
+      'rejected': 'bg-red-100 text-red-800'
+    };
+    return variants[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Login Screen
   if (!solverData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
         <Header />
         
-        <div className="container mx-auto px-4 py-12 max-w-2xl">
+        <div className="container mx-auto px-4 py-8 md:py-12 max-w-md">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-3xl flex items-center gap-2">
-                  <Users className="w-8 h-8 text-orange-600" />
-                  Solver Dashboard
-                </CardTitle>
-                <CardDescription>Enter your registered contact to access the dashboard</CardDescription>
+            <Card className="shadow-xl">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl">Solver Dashboard</CardTitle>
+                <CardDescription>Enter your registered contact to access</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="contact">Phone Number or Email</Label>
-                    <Input
-                      id="contact"
-                      placeholder="Enter your registered contact"
-                      value={searchContact}
-                      onChange={(e) => setSearchContact(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    />
+              <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="contact">Phone Number or Email</Label>
+                  <Input
+                    id="contact"
+                    placeholder="Enter your registered contact"
+                    value={searchContact}
+                    onChange={(e) => setSearchContact(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    className="mt-1"
+                  />
+                </div>
+                <Button onClick={handleSearch} className="w-full" size="lg">
+                  Access Dashboard
+                </Button>
+                
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t" />
                   </div>
-                  <Button onClick={handleSearch} className="w-full">
-                    Access Dashboard
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-background px-2 text-muted-foreground">or</span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => navigate('/ellio-notes/assignment-help/solver/register')}
+                  >
+                    Register as a Solver
                   </Button>
-                  <p className="text-sm text-center text-gray-600">
-                    Don't have an account?{' '}
-                    <a href="/ellio-notes/assignment-help/solver/register" className="text-blue-600 hover:underline">
-                      Register as a Solver
-                    </a>
-                  </p>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full"
+                    onClick={() => navigate('/ellio-notes/assignment-help/browse')}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Browse Public Assignments
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    className="w-full"
+                    onClick={() => navigate('/ellio-notes/assignment-help/solver/leaderboard')}
+                  >
+                    <Trophy className="w-4 h-4 mr-2" />
+                    View Leaderboard
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -232,125 +292,206 @@ const SolverDashboard = () => {
     );
   }
 
+  // Main Dashboard
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-amber-50 to-yellow-50">
       <Header />
       
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-6 md:py-12 pb-24 md:pb-12">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           {/* Welcome Section */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold mb-2">Welcome, {solverData.name}!</h1>
-            <p className="text-gray-600">Manage your assignments and earnings</p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold">Welcome, {solverData.name}!</h1>
+              <p className="text-muted-foreground text-sm md:text-base">Manage your assignments and earnings</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size={isMobile ? "icon" : "default"}
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''} ${isMobile ? '' : 'mr-2'}`} />
+              {!isMobile && 'Refresh'}
+            </Button>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Solved</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{solverData.total_solved}</div>
-                <p className="text-xs text-muted-foreground">assignments completed</p>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-6">
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <DollarSign className="w-4 h-4 text-green-600" />
+                  <span className="text-xs text-muted-foreground">Total Earned</span>
+                </div>
+                <p className="text-xl md:text-2xl font-bold text-green-600">₹{solverData.total_earned}</p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Earned</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">₹{solverData.total_earned}</div>
-                <p className="text-xs text-muted-foreground">from completed assignments</p>
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs text-muted-foreground">Solved</span>
+                </div>
+                <p className="text-xl md:text-2xl font-bold text-blue-600">{solverData.total_solved}</p>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Available</CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-orange-600">{availableAssignments.length}</div>
-                <p className="text-xs text-muted-foreground">new assignments</p>
+            <Card className="bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Clock className="w-4 h-4 text-orange-600" />
+                  <span className="text-xs text-muted-foreground">Available</span>
+                </div>
+                <p className="text-xl md:text-2xl font-bold text-orange-600">{availableAssignments.length}</p>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
+              <CardContent className="p-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <Star className="w-4 h-4 text-purple-600" />
+                  <span className="text-xs text-muted-foreground">Rating</span>
+                </div>
+                <p className="text-xl md:text-2xl font-bold text-purple-600">{solverData.rating || 'N/A'}</p>
               </CardContent>
             </Card>
           </div>
+
+          {/* Quick Links - Mobile */}
+          {isMobile && (
+            <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/ellio-notes/assignment-help/browse')}
+              >
+                <ExternalLink className="w-4 h-4 mr-1" />
+                Browse All
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/ellio-notes/assignment-help/solver/leaderboard')}
+              >
+                <Trophy className="w-4 h-4 mr-1" />
+                Leaderboard
+              </Button>
+            </div>
+          )}
 
           {/* Tabs */}
           <Tabs defaultValue="available" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="available">
-                Available Assignments ({availableAssignments.length})
+            <TabsList className="grid w-full grid-cols-2 mb-4">
+              <TabsTrigger value="available" className="text-sm">
+                Available ({availableAssignments.length})
               </TabsTrigger>
-              <TabsTrigger value="my-assignments">
-                My Assignments ({myAssignments.length})
+              <TabsTrigger value="my-assignments" className="text-sm">
+                My Work ({myAssignments.length})
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="available" className="space-y-4 mt-6">
+            <TabsContent value="available" className="space-y-3 mt-4">
               {availableAssignments.map((assignment: any) => (
-                <Card key={assignment.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
+                <Card key={assignment.id} className="overflow-hidden">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-3">
                       <div>
-                        <CardTitle>{assignment.subject} - {assignment.class_level}</CardTitle>
-                        <CardDescription>
-                          Posted {format(new Date(assignment.created_at), 'MMM dd, HH:mm')}
-                          {assignment.urgency === 'urgent' && (
-                            <Badge variant="destructive" className="ml-2">Urgent</Badge>
-                          )}
-                        </CardDescription>
+                        <h3 className="font-semibold">{assignment.subject}</h3>
+                        <p className="text-sm text-muted-foreground">{assignment.class_level}</p>
                       </div>
-                      <Badge className="bg-green-100 text-green-800">
-                        Earn ₹{assignment.solver_payment}
-                      </Badge>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge className="bg-green-100 text-green-800">
+                          Earn ₹{assignment.solver_payment}
+                        </Badge>
+                        {assignment.urgency === 'urgent' && (
+                          <Badge variant="destructive" className="text-xs">Urgent</Badge>
+                        )}
+                      </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
+                    
                     {assignment.assignment_text && (
-                      <p className="text-sm text-gray-700 mb-4 bg-gray-50 p-3 rounded">
-                        {assignment.assignment_text.substring(0, 200)}...
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2 bg-accent p-2 rounded">
+                        {assignment.assignment_text}
                       </p>
                     )}
-                    <div className="flex gap-2">
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-2" />
-                            View Details
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>{assignment.subject}</DialogTitle>
-                            <DialogDescription>{assignment.class_level}</DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            {assignment.assignment_text && (
-                              <div>
-                                <p className="font-medium mb-2">Question:</p>
-                                <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded whitespace-pre-wrap">
-                                  {assignment.assignment_text}
-                                </p>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(assignment.created_at), 'MMM dd, HH:mm')}
+                      </span>
+                      <div className="flex gap-2">
+                        {isMobile ? (
+                          <Sheet>
+                            <SheetTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </SheetTrigger>
+                            <SheetContent side="bottom" className="h-[80vh]">
+                              <SheetHeader>
+                                <SheetTitle>{assignment.subject} - {assignment.class_level}</SheetTitle>
+                              </SheetHeader>
+                              <div className="space-y-4 mt-4">
+                                {assignment.assignment_text && (
+                                  <div>
+                                    <p className="font-medium mb-2">Question:</p>
+                                    <p className="text-sm bg-accent p-3 rounded whitespace-pre-wrap">
+                                      {assignment.assignment_text}
+                                    </p>
+                                  </div>
+                                )}
+                                <div className="space-y-2">
+                                  <p><span className="font-medium">Student:</span> {assignment.student_name}</p>
+                                  <p><span className="font-medium">Deadline:</span> {assignment.deadline ? format(new Date(assignment.deadline), 'PPP') : 'No deadline'}</p>
+                                  <p><span className="font-medium">Payment:</span> ₹{assignment.solver_payment}</p>
+                                </div>
+                                <Button className="w-full" onClick={() => handleAcceptAssignment(assignment.id)}>
+                                  Accept Assignment
+                                </Button>
                               </div>
-                            )}
-                            <div>
-                              <p className="font-medium">Student: {assignment.student_name}</p>
-                              <p className="text-sm text-gray-600">Deadline: {assignment.deadline ? format(new Date(assignment.deadline), 'PPP') : 'No deadline'}</p>
-                            </div>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                      <Button size="sm" onClick={() => handleAcceptAssignment(assignment.id)}>
-                        Accept Assignment
-                      </Button>
+                            </SheetContent>
+                          </Sheet>
+                        ) : (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm">
+                                <Eye className="w-4 h-4 mr-1" />
+                                View
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>{assignment.subject}</DialogTitle>
+                                <DialogDescription>{assignment.class_level}</DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                {assignment.assignment_text && (
+                                  <div>
+                                    <p className="font-medium mb-2">Question:</p>
+                                    <p className="text-sm bg-accent p-3 rounded whitespace-pre-wrap">
+                                      {assignment.assignment_text}
+                                    </p>
+                                  </div>
+                                )}
+                                <div>
+                                  <p><span className="font-medium">Student:</span> {assignment.student_name}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    Deadline: {assignment.deadline ? format(new Date(assignment.deadline), 'PPP') : 'No deadline'}
+                                  </p>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        )}
+                        <Button size="sm" onClick={() => handleAcceptAssignment(assignment.id)}>
+                          Accept
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -358,86 +499,155 @@ const SolverDashboard = () => {
               
               {availableAssignments.length === 0 && (
                 <Card className="text-center py-12">
-                  <p className="text-gray-500">No available assignments at the moment</p>
+                  <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">No available assignments</p>
+                  <Button 
+                    variant="link" 
+                    onClick={() => navigate('/ellio-notes/assignment-help/browse')}
+                    className="mt-2"
+                  >
+                    Browse all public assignments
+                  </Button>
                 </Card>
               )}
             </TabsContent>
 
-            <TabsContent value="my-assignments" className="space-y-4 mt-6">
+            <TabsContent value="my-assignments" className="space-y-3 mt-4">
               {myAssignments.map((assignment: any) => (
                 <Card key={assignment.id}>
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-3">
                       <div>
-                        <CardTitle>{assignment.subject} - {assignment.class_level}</CardTitle>
-                        <CardDescription>
-                          Student: {assignment.student_name}
-                        </CardDescription>
+                        <h3 className="font-semibold">{assignment.subject}</h3>
+                        <p className="text-sm text-muted-foreground">{assignment.student_name}</p>
                       </div>
-                      <Badge>{assignment.status.replace('_', ' ')}</Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {assignment.status === 'assigned' && (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button>
-                            <Upload className="w-4 h-4 mr-2" />
-                            Submit Solution
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl">
-                          <DialogHeader>
-                            <DialogTitle>Submit Solution</DialogTitle>
-                            <DialogDescription>Upload your solution for admin review</DialogDescription>
-                          </DialogHeader>
-                          <div className="space-y-4">
-                            <div>
-                              <Label>Solution Text *</Label>
-                              <Textarea
-                                value={solution.text}
-                                onChange={(e) => setSolution({ ...solution, text: e.target.value })}
-                                placeholder="Type your detailed solution here..."
-                                rows={8}
-                              />
-                            </div>
-                            <div>
-                              <Label>Upload Files (Optional)</Label>
-                              <Input
-                                type="file"
-                                multiple
-                                onChange={(e) => {
-                                  if (e.target.files) {
-                                    setSolution({ ...solution, files: Array.from(e.target.files) });
-                                  }
-                                }}
-                              />
-                            </div>
-                            <Button onClick={() => {
-                              setSelectedAssignment(assignment);
-                              handleSubmitSolution();
-                            }}>
-                              Submit Solution
-                            </Button>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
-                    )}
-                    {assignment.status === 'submitted' && (
-                      <Badge variant="outline">Pending admin review</Badge>
-                    )}
-                    {assignment.status === 'approved' && (
-                      <Badge className="bg-green-100 text-green-800">
-                        Payment Released: ₹{assignment.solver_payment}
+                      <Badge className={getStatusBadge(assignment.status)}>
+                        {assignment.status.replace('_', ' ')}
                       </Badge>
-                    )}
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-green-600">
+                        ₹{assignment.solver_payment}
+                      </span>
+                      
+                      {assignment.status === 'assigned' && (
+                        isMobile ? (
+                          <Sheet>
+                            <SheetTrigger asChild>
+                              <Button size="sm">
+                                <Upload className="w-4 h-4 mr-1" />
+                                Submit
+                              </Button>
+                            </SheetTrigger>
+                            <SheetContent side="bottom" className="h-[85vh]">
+                              <SheetHeader>
+                                <SheetTitle>Submit Solution</SheetTitle>
+                              </SheetHeader>
+                              <div className="space-y-4 mt-4 overflow-y-auto">
+                                <div>
+                                  <Label>Solution Text *</Label>
+                                  <Textarea
+                                    value={solution.text}
+                                    onChange={(e) => setSolution({ ...solution, text: e.target.value })}
+                                    placeholder="Type your detailed solution here..."
+                                    rows={8}
+                                    className="mt-1"
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Upload Files (Optional)</Label>
+                                  <Input
+                                    type="file"
+                                    multiple
+                                    className="mt-1"
+                                    onChange={(e) => {
+                                      if (e.target.files) {
+                                        setSolution({ ...solution, files: Array.from(e.target.files) });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <Button 
+                                  className="w-full"
+                                  disabled={isSubmitting}
+                                  onClick={() => {
+                                    setSelectedAssignment(assignment);
+                                    handleSubmitSolution();
+                                  }}
+                                >
+                                  {isSubmitting ? 'Submitting...' : 'Submit Solution'}
+                                </Button>
+                              </div>
+                            </SheetContent>
+                          </Sheet>
+                        ) : (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button size="sm">
+                                <Upload className="w-4 h-4 mr-2" />
+                                Submit Solution
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>Submit Solution</DialogTitle>
+                                <DialogDescription>Upload your solution for admin review</DialogDescription>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <div>
+                                  <Label>Solution Text *</Label>
+                                  <Textarea
+                                    value={solution.text}
+                                    onChange={(e) => setSolution({ ...solution, text: e.target.value })}
+                                    placeholder="Type your detailed solution here..."
+                                    rows={8}
+                                  />
+                                </div>
+                                <div>
+                                  <Label>Upload Files (Optional)</Label>
+                                  <Input
+                                    type="file"
+                                    multiple
+                                    onChange={(e) => {
+                                      if (e.target.files) {
+                                        setSolution({ ...solution, files: Array.from(e.target.files) });
+                                      }
+                                    }}
+                                  />
+                                </div>
+                                <Button 
+                                  disabled={isSubmitting}
+                                  onClick={() => {
+                                    setSelectedAssignment(assignment);
+                                    handleSubmitSolution();
+                                  }}
+                                >
+                                  {isSubmitting ? 'Submitting...' : 'Submit Solution'}
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
+                        )
+                      )}
+                      {assignment.status === 'submitted' && (
+                        <Badge variant="outline">Pending review</Badge>
+                      )}
+                      {assignment.status === 'approved' && (
+                        <Badge className="bg-green-100 text-green-800">
+                          Payment: ₹{assignment.solver_payment}
+                        </Badge>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
               
               {myAssignments.length === 0 && (
                 <Card className="text-center py-12">
-                  <p className="text-gray-500">You haven't accepted any assignments yet</p>
+                  <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">No assignments accepted yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">Browse available assignments to get started</p>
                 </Card>
               )}
             </TabsContent>
