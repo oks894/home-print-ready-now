@@ -101,7 +101,7 @@ const Recharge = () => {
       }
 
       // Create recharge request
-      const { error } = await supabase
+      const { data: requestData, error } = await supabase
         .from('coin_recharge_requests')
         .insert({
           user_id: user.id,
@@ -110,9 +110,14 @@ const Recharge = () => {
           coins_requested: selectedPackage.coins,
           bonus_coins: selectedPackage.bonus_coins,
           payment_proof_url: proofUrl
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+
+      // Admin notification will be visible via the pending recharge requests
+      // The admin will see new requests in the Coins management tab
 
       // Open WhatsApp with message
       const message = `Hi Ellio Team,\n\nI've made a coin recharge payment.\n\nName: ${profile.full_name}\nEmail: ${profile.email}\nPackage: ${selectedPackage.name}\nAmount: ₹${selectedPackage.price_inr}\nCoins: ${selectedPackage.coins + selectedPackage.bonus_coins}\n\nPlease verify my payment. Thank you!`;
