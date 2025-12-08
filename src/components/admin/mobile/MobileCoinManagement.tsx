@@ -31,6 +31,20 @@ const MobileCoinManagement = () => {
 
   useEffect(() => {
     fetchRequests();
+
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('coin-recharge-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'coin_recharge_requests' },
+        () => fetchRequests()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchRequests = async () => {

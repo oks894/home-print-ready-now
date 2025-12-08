@@ -1,5 +1,4 @@
-
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -13,50 +12,51 @@ export const useOnlineUsers = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [peakCount, setPeakCount] = useState(0);
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const isInitializedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent double initialization
+    if (isInitializedRef.current) return;
+    isInitializedRef.current = true;
+
     console.log('useOnlineUsers: Initializing...');
-    let channel: RealtimeChannel | null = null;
 
     const initializeChannel = async () => {
       try {
-        channel = supabase.channel('online_users_global');
+        // Remove any existing channel first
+        if (channelRef.current) {
+          await channelRef.current.untrack();
+          supabase.removeChannel(channelRef.current);
+          channelRef.current = null;
+        }
+
+        const uniqueChannelName = `online_users_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        channelRef.current = supabase.channel(uniqueChannelName);
 
         const userStatus = {
-          user_id: Math.random().toString(36).substring(7), // Generate unique session ID
+          user_id: Math.random().toString(36).substring(7),
           online_at: new Date().toISOString(),
           page: window.location.pathname,
         };
 
-        console.log('useOnlineUsers: Setting up channel with status:', userStatus);
-
-        channel
+        channelRef.current
           .on('presence', { event: 'sync' }, () => {
-            if (channel) {
-              const newState = channel.presenceState();
+            if (channelRef.current) {
+              const newState = channelRef.current.presenceState();
               const count = Object.keys(newState).length;
-              console.log('useOnlineUsers: Presence sync - count:', count, 'state:', newState);
               
               setOnlineCount(count);
               setIsConnected(true);
               
-              // Update peak count
-              setPeakCount(prev => {
-                const newPeak = Math.max(prev, count);
-                if (newPeak > prev) {
-                  console.log('useOnlineUsers: New peak count:', newPeak);
-                }
-                return newPeak;
-              });
+              setPeakCount(prev => Math.max(prev, count));
 
-              // Check for milestones
               const milestoneThresholds = [100, 200, 500, 1000, 2000, 5000];
               milestoneThresholds.forEach(threshold => {
                 if (count >= threshold) {
                   setMilestones(prev => {
                     const exists = prev.some(m => m.count === threshold);
                     if (!exists) {
-                      console.log('useOnlineUsers: Milestone reached:', threshold);
                       return [...prev, { count: threshold, timestamp: Date.now() }];
                     }
                     return prev;
@@ -65,17 +65,11 @@ export const useOnlineUsers = () => {
               });
             }
           })
-          .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-            console.log('useOnlineUsers: User joined:', key, newPresences);
-          })
-          .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-            console.log('useOnlineUsers: User left:', key, leftPresences);
-          })
+          .on('presence', { event: 'join' }, () => {})
+          .on('presence', { event: 'leave' }, () => {})
           .subscribe(async (status) => {
-            console.log('useOnlineUsers: Channel subscription status:', status);
-            if (status === 'SUBSCRIBED' && channel) {
-              const trackResult = await channel.track(userStatus);
-              console.log('useOnlineUsers: Track result:', trackResult);
+            if (status === 'SUBSCRIBED' && channelRef.current) {
+              await channelRef.current.track(userStatus);
             }
           });
 
@@ -103,17 +97,17 @@ export const useOnlineUsers = () => {
 
     initializeChannel();
 
-    // Cleanup function
     return () => {
       console.log('useOnlineUsers: Cleaning up...');
-      if (channel) {
-        channel.untrack();
-        supabase.removeChannel(channel);
+      if (channelRef.current) {
+        channelRef.current.untrack();
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
       }
+      isInitializedRef.current = false;
     };
   }, []);
 
-  // Persist peak count and milestones to localStorage
   useEffect(() => {
     if (peakCount > 0) {
       localStorage.setItem('online_users_peak', peakCount.toString());
