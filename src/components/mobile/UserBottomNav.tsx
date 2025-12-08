@@ -1,18 +1,19 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Home, Printer, BookOpen, HelpCircle, User } from 'lucide-react';
+import { Home, Printer, BookOpen, HelpCircle, User, Coins } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Badge } from '@/components/ui/badge';
 
 export const UserBottomNav = () => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home, path: '/' },
-    { id: 'prints', label: 'Prints', icon: Printer, path: '/ellio-prints' },
+    { id: 'prints', label: 'Print', icon: Printer, path: '/printing' },
     { id: 'notes', label: 'Notes', icon: BookOpen, path: '/ellio-notes' },
-    { id: 'help', label: 'Help', icon: HelpCircle, path: '/ellio-notes/assignment-help' },
+    { id: 'help', label: 'Help', icon: HelpCircle, path: '/assignment-help' },
     { id: 'profile', label: 'Profile', icon: User, path: user ? '/dashboard' : '/auth' },
   ];
 
@@ -35,7 +36,7 @@ export const UserBottomNav = () => {
             <Link
               key={item.id}
               to={item.path}
-              className={`flex flex-col items-center gap-1 p-2 min-w-0 flex-1 rounded-xl transition-all ${
+              className={`flex flex-col items-center gap-1 p-2 min-w-0 flex-1 rounded-xl transition-all relative ${
                 active 
                   ? 'text-primary bg-primary/10' 
                   : 'text-muted-foreground hover:text-foreground'
@@ -48,9 +49,19 @@ export const UserBottomNav = () => {
                 <item.icon className={`w-5 h-5 ${active ? 'stroke-[2.5]' : ''}`} />
                 {active && (
                   <motion.div
-                    layoutId="activeIndicator"
+                    layoutId="userActiveIndicator"
                     className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary"
                   />
+                )}
+                {/* Show coin balance badge on profile */}
+                {item.id === 'profile' && user && profile && (
+                  <Badge 
+                    variant="secondary" 
+                    className="absolute -top-2 -right-4 text-[9px] px-1 py-0 h-4 bg-ellio-blue text-white"
+                  >
+                    <Coins className="w-2 h-2 mr-0.5" />
+                    {profile.coin_balance}
+                  </Badge>
                 )}
               </motion.div>
               <span className={`text-[10px] font-medium ${active ? 'font-semibold' : ''}`}>

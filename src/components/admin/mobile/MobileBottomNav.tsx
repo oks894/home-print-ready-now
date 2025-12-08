@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Printer, Clock, GraduationCap, Users, Coins, MoreHorizontal } from 'lucide-react';
+import { LayoutDashboard, Printer, Users, Coins, MoreHorizontal } from 'lucide-react';
 import { TouchButton } from '@/components/mobile/TouchButton';
 import { Badge } from '@/components/ui/badge';
+import { usePendingRechargeCount } from '@/hooks/usePendingRechargeCount';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,9 +25,9 @@ export const MobileBottomNav = ({
   onTabChange,
   pendingCount,
   feedbackCount,
-  onRefresh,
-  isRefreshing
 }: MobileBottomNavProps) => {
+  const { pendingCount: pendingRechargeCount } = usePendingRechargeCount();
+
   const mainNavItems = [
     {
       id: 'dashboard',
@@ -48,6 +49,7 @@ export const MobileBottomNav = ({
       id: 'coins',
       label: 'Coins',
       icon: Coins,
+      badge: pendingRechargeCount,
     },
   ];
 
@@ -55,7 +57,7 @@ export const MobileBottomNav = ({
     { id: 'pendingPayments', label: 'Pending Payments' },
     { id: 'assignments', label: 'Assignments/Solvers' },
     { id: 'resumeLab', label: 'Resume Lab' },
-    { id: 'feedback', label: 'Feedback' },
+    { id: 'feedback', label: `Feedback (${feedbackCount})` },
     { id: 'services', label: 'Services' },
     { id: 'paymentSettings', label: 'Payment Config' },
     { id: 'adminRoles', label: 'Admin Roles' },
@@ -70,29 +72,31 @@ export const MobileBottomNav = ({
       animate={{ y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-around px-2 py-2">
+      <div className="flex items-center justify-around px-1 py-1">
         {mainNavItems.map((item) => (
           <TouchButton
             key={item.id}
             variant="ghost"
             size="sm"
             onClick={() => onTabChange(item.id)}
-            className={`flex flex-col items-center gap-1 p-3 min-w-0 flex-1 relative ${
-              activeTab === item.id ? 'text-primary' : 'text-muted-foreground'
+            className={`flex flex-col items-center gap-0.5 p-2 min-w-0 flex-1 relative rounded-xl ${
+              activeTab === item.id 
+                ? 'text-primary bg-primary/10' 
+                : 'text-muted-foreground'
             }`}
           >
-            <item.icon className="w-5 h-5" />
-            
-            <span className="text-xs font-medium truncate">{item.label}</span>
-            
-            {item.badge && item.badge > 0 && (
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 w-5 h-5 text-xs p-0 flex items-center justify-center"
-              >
-                {item.badge > 99 ? '99+' : item.badge}
-              </Badge>
-            )}
+            <div className="relative">
+              <item.icon className="w-5 h-5" />
+              {item.badge && item.badge > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-2 -right-3 w-5 h-5 text-[10px] p-0 flex items-center justify-center"
+                >
+                  {item.badge > 99 ? '99+' : item.badge}
+                </Badge>
+              )}
+            </div>
+            <span className="text-[10px] font-medium">{item.label}</span>
           </TouchButton>
         ))}
 
@@ -101,20 +105,22 @@ export const MobileBottomNav = ({
             <TouchButton
               variant="ghost"
               size="sm"
-              className={`flex flex-col items-center gap-1 p-3 min-w-0 flex-1 ${
-                moreNavItems.some(item => item.id === activeTab) ? 'text-primary' : 'text-muted-foreground'
+              className={`flex flex-col items-center gap-0.5 p-2 min-w-0 flex-1 rounded-xl ${
+                moreNavItems.some(item => item.id === activeTab) 
+                  ? 'text-primary bg-primary/10' 
+                  : 'text-muted-foreground'
               }`}
             >
               <MoreHorizontal className="w-5 h-5" />
-              <span className="text-xs font-medium">More</span>
+              <span className="text-[10px] font-medium">More</span>
             </TouchButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuContent align="end" className="w-52" sideOffset={8}>
             {moreNavItems.map((item) => (
               <DropdownMenuItem 
                 key={item.id}
                 onClick={() => onTabChange(item.id)}
-                className={activeTab === item.id ? 'bg-accent' : ''}
+                className={`py-3 ${activeTab === item.id ? 'bg-accent font-medium' : ''}`}
               >
                 {item.label}
               </DropdownMenuItem>
