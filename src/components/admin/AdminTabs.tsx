@@ -25,6 +25,7 @@ import { RateSettings } from './assignment-help/RateSettings';
 import { SolverManagement } from './assignment-help/SolverManagement';
 import { TransactionHistory } from './assignment-help/TransactionHistory';
 import ResumeLabAdmin from './resume-lab/ResumeLabAdmin';
+import LegalPagesEditor from './LegalPagesEditor';
 import { DashboardOverview } from './DashboardOverview';
 import { PaymentSettings } from './PaymentSettings';
 import { PendingPayments } from './PendingPayments';
@@ -33,7 +34,7 @@ import { Analytics } from './Analytics';
 import UsersManagement from './UsersManagement';
 import CoinManagement from './CoinManagement';
 import AdminRolesManager from './AdminRolesManager';
-import { LayoutDashboard, CreditCard, Clock, Settings, BarChart3, Printer, MessageSquare, GraduationCap, FileText, Cog, Link, Users, Coins, Shield } from 'lucide-react';
+import { LayoutDashboard, CreditCard, Clock, Settings, BarChart3, Printer, MessageSquare, GraduationCap, FileText, Cog, Link, Users, Coins, Shield, Scale } from 'lucide-react';
 
 interface AdminTabsProps {
   printJobs: PrintJob[];
@@ -123,6 +124,7 @@ export const AdminTabs = ({
         {activeTab === 'coins' && <MobileCoinManagement />}
         {activeTab === 'assignments' && <MobileSolverManagement />}
         {activeTab === 'adminRoles' && <AdminRolesManager />}
+        {activeTab === 'legalPages' && <LegalPagesEditor />}
         {activeTab === 'settings' && onLogout && (
           <MobileSettingsPanel onLogout={onLogout} />
         )}
@@ -132,7 +134,7 @@ export const AdminTabs = ({
 
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12 mb-6 h-auto gap-1">
+      <TabsList className="grid w-full grid-cols-7 lg:grid-cols-13 mb-6 h-auto gap-1 overflow-x-auto">
         <TabsTrigger value="dashboard" className="flex items-center gap-1 text-xs lg:text-sm py-2">
           <LayoutDashboard className="w-3 h-3 lg:w-4 lg:h-4" />
           <span className="hidden lg:inline">Dashboard</span>
@@ -172,6 +174,10 @@ export const AdminTabs = ({
         <TabsTrigger value="paymentSettings" className="flex items-center gap-1 text-xs lg:text-sm py-2">
           <CreditCard className="w-3 h-3 lg:w-4 lg:h-4" />
           <span className="hidden lg:inline">Pay Config</span>
+        </TabsTrigger>
+        <TabsTrigger value="legalPages" className="flex items-center gap-1 text-xs lg:text-sm py-2">
+          <Scale className="w-3 h-3 lg:w-4 lg:h-4" />
+          <span className="hidden lg:inline">Legal</span>
         </TabsTrigger>
         <TabsTrigger value="adminRoles" className="flex items-center gap-1 text-xs lg:text-sm py-2">
           <Shield className="w-3 h-3 lg:w-4 lg:h-4" />
@@ -238,6 +244,7 @@ export const AdminTabs = ({
       <TabsContent value="links"><ExternalLinksManager /></TabsContent>
       <TabsContent value="paymentSettings"><PaymentSettings /></TabsContent>
       <TabsContent value="globalSettings"><GlobalSettings /></TabsContent>
+      <TabsContent value="legalPages"><LegalPagesEditor /></TabsContent>
       <TabsContent value="adminRoles"><AdminRolesManager /></TabsContent>
       <TabsContent value="analytics"><Analytics /></TabsContent>
     </Tabs>

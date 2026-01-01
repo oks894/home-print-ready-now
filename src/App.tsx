@@ -7,6 +7,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { SimpleLoader } from "@/components/SimpleLoader";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { Suspense } from "react";
+import InstallPrompt from "@/components/InstallPrompt";
 import Index from "./pages/Index";
 import Services from "./pages/Services";
 import Pricing from "./pages/Pricing";
@@ -35,6 +36,9 @@ import ResumeEditor from "./pages/ResumeEditor";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Recharge from "./pages/Recharge";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import InstallApp from "./pages/InstallApp";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,8 +86,12 @@ const App = () => (
                 <Route path="/ellio-notes/assignment-help/solver/leaderboard" element={<SolverLeaderboard />} />
                 <Route path="/resume-lab" element={<ResumeLab />} />
                 <Route path="/resume-lab/editor/:templateId" element={<ResumeEditor />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/install" element={<InstallApp />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <InstallPrompt />
             </Suspense>
           </BrowserRouter>
         </TooltipProvider>

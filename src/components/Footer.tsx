@@ -126,12 +126,23 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="mt-12 pt-8 border-t border-slate-700/50">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-slate-500 text-sm text-center md:text-left">
-              &copy; {currentYear} Ellio. All rights reserved.
-            </p>
+            <div className="flex items-center gap-4 text-sm">
+              <p className="text-slate-500">
+                &copy; {currentYear} Ellio
+              </p>
+              <Link to="/terms" className="text-slate-400 hover:text-slate-300 transition-colors">
+                Terms
+              </Link>
+              <Link to="/privacy" className="text-slate-400 hover:text-slate-300 transition-colors">
+                Privacy
+              </Link>
+              <Link to="/install" className="text-slate-400 hover:text-slate-300 transition-colors">
+                Install App
+              </Link>
+            </div>
             
             <p className="text-slate-400 text-sm font-medium text-center">
-              Powered by <span className="text-blue-400">Dynamic Edu</span> — Learn, Print, Progress.
+              Powered by <span className="text-blue-400">Dynamic Edu</span>
             </p>
 
             <p className="text-slate-500 text-xs text-center md:text-right">
