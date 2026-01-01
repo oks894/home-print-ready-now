@@ -34,6 +34,22 @@ const MobileUsersManagement = () => {
 
   useEffect(() => {
     fetchUsers();
+
+    // Set up realtime subscription
+    const channel = supabase
+      .channel('mobile-users-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user_profiles' },
+        () => {
+          fetchUsers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   useEffect(() => {

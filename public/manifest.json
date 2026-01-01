@@ -1,27 +1,69 @@
 
 {
-  "name": "ellio Admin Dashboard",
-  "short_name": "ellio",
-  "description": "Mobile-optimized admin dashboard for intelligent print job management",
-  "start_url": "/admin",
+  "name": "Ellio - Student Services",
+  "short_name": "Ellio",
+  "description": "Your complete student services platform - Print, learn, and succeed with Ellio",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2563eb",
-  "orientation": "portrait-primary",
+  "theme_color": "#3B82F6",
+  "orientation": "any",
+  "scope": "/",
+  "id": "ellio-pwa",
   "icons": [
     {
       "src": "/favicon.ico",
       "sizes": "32x32",
       "type": "image/x-icon"
+    },
+    {
+      "src": "/lovable-uploads/ce4e9864-2bc2-4ca6-9123-fb22d1139ff6.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/lovable-uploads/ce4e9864-2bc2-4ca6-9123-fb22d1139ff6.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["productivity", "business"],
+  "categories": ["education", "productivity", "utilities"],
   "screenshots": [
     {
       "src": "/placeholder.svg",
       "sizes": "390x844",
       "type": "image/svg+xml",
       "form_factor": "narrow"
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "Print Documents",
+      "short_name": "Print",
+      "url": "/ellio-prints",
+      "icons": [{"src": "/favicon.ico", "sizes": "32x32"}]
+    },
+    {
+      "name": "Browse Notes",
+      "short_name": "Notes",
+      "url": "/ellio-notes/browse",
+      "icons": [{"src": "/favicon.ico", "sizes": "32x32"}]
+    },
+    {
+      "name": "Assignment Help",
+      "short_name": "Assignments",
+      "url": "/assignment-help",
+      "icons": [{"src": "/favicon.ico", "sizes": "32x32"}]
+    },
+    {
+      "name": "Resume Lab",
+      "short_name": "Resume",
+      "url": "/resume-lab",
+      "icons": [{"src": "/favicon.ico", "sizes": "32x32"}]
     }
   ]
 }
