@@ -1,14 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useReferral } from '@/hooks/useReferral';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Coins, Gift, Zap, Shield } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Coins, Gift, Zap, Shield, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 const Auth = () => {
   const { user, isLoading, signInWithGoogle } = useAuth();
+  const { saveReferralCode } = useReferral();
   const navigate = useNavigate();
+  const [referralCode, setReferralCode] = useState('');
 
   useEffect(() => {
     if (user && !isLoading) {
@@ -17,6 +21,11 @@ const Auth = () => {
   }, [user, isLoading, navigate]);
 
   const handleGoogleSignIn = async () => {
+    // Save referral code before OAuth redirect
+    if (referralCode.trim()) {
+      saveReferralCode(referralCode.trim());
+    }
+    
     const { error } = await signInWithGoogle();
     if (error) {
       toast.error('Failed to sign in with Google');
@@ -60,6 +69,22 @@ const Auth = () => {
                   <p className="text-sm text-muted-foreground">Sign up now and start using services</p>
                 </div>
               </div>
+            </div>
+
+            {/* Referral Code Input */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Have a referral code?</span>
+              </div>
+              <Input
+                type="text"
+                placeholder="Enter referral code (optional)"
+                value={referralCode}
+                onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
+                className="uppercase text-center tracking-wider"
+                maxLength={8}
+              />
             </div>
 
             {/* Google Sign In Button */}
