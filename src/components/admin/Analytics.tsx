@@ -41,32 +41,45 @@ export const Analytics = () => {
       let notesQuery = supabase.from('notes').select('*');
       let assignQuery = supabase.from('assignments').select('*');
       let paymentQuery = supabase.from('pending_payments').select('*').eq('status', 'approved');
+      let coinTxQuery = supabase.from('coin_transactions').select('*');
+      let rechargeQuery = supabase.from('coin_recharge_requests').select('*').eq('status', 'approved');
 
       if (dateFilter) {
         printQuery = printQuery.gte('created_at', dateFilter);
         notesQuery = notesQuery.gte('created_at', dateFilter);
         assignQuery = assignQuery.gte('created_at', dateFilter);
         paymentQuery = paymentQuery.gte('created_at', dateFilter);
+        coinTxQuery = coinTxQuery.gte('created_at', dateFilter);
+        rechargeQuery = rechargeQuery.gte('created_at', dateFilter);
       }
 
-      const [printJobs, notes, assignments, paymentsRes] = await Promise.all([
+      const [printJobs, notes, assignments, paymentsRes, coinTxRes, rechargeRes] = await Promise.all([
         printQuery,
         notesQuery,
         assignQuery,
         paymentQuery,
+        coinTxQuery,
+        rechargeQuery,
       ]);
 
       // Calculate metrics
       const totalRevenue = paymentsRes.data?.reduce((sum: number, p: any) => sum + Number(p.amount || 0), 0) || 0;
+      const totalRechargeRevenue = rechargeRes.data?.reduce((sum: number, r: any) => sum + Number(r.amount_paid || 0), 0) || 0;
       const avgOrderValue = printJobs.data?.length
         ? (printJobs.data.reduce((sum: number, j: any) => sum + (Number(j.total_amount) || 0), 0) / printJobs.data.length)
         : 0;
+
+      // Coin transaction breakdown
+      const coinSpent = coinTxRes.data?.filter((t: any) => t.transaction_type === 'spend').reduce((sum: number, t: any) => sum + Math.abs(t.amount), 0) || 0;
+      const coinRecharged = coinTxRes.data?.filter((t: any) => t.transaction_type === 'recharge').reduce((sum: number, t: any) => sum + t.amount, 0) || 0;
+      const coinBonus = coinTxRes.data?.filter((t: any) => ['welcome_bonus', 'referral_bonus', 'admin_adjustment'].includes(t.transaction_type)).reduce((sum: number, t: any) => sum + t.amount, 0) || 0;
 
       // Group by service type
       const serviceBreakdown = {
         prints: printJobs.data?.length || 0,
         notes: notes.data?.length || 0,
         assignments: assignments.data?.length || 0,
+        coinTransactions: coinTxRes.data?.length || 0,
       };
 
       const mostPopular = Object.entries(serviceBreakdown).sort(([, a], [, b]) => b - a)[0];
@@ -75,11 +88,18 @@ export const Analytics = () => {
         totalOrders: printJobs.data?.length || 0,
         totalNotes: notes.data?.length || 0,
         totalAssignments: assignments.data?.length || 0,
-        totalRevenue,
+        totalCoinTransactions: coinTxRes.data?.length || 0,
+        totalRevenue: totalRevenue + totalRechargeRevenue,
         avgOrderValue,
         serviceBreakdown,
         mostPopularService: mostPopular ? mostPopular[0] : 'prints',
         recentOrders: printJobs.data?.slice(0, 5) || [],
+        coinStats: {
+          spent: coinSpent,
+          recharged: coinRecharged,
+          bonus: coinBonus,
+          rechargeCount: rechargeRes.data?.length || 0,
+        },
       });
     } catch (error) {
       console.error('Error loading analytics:', error);
@@ -248,7 +268,7 @@ export const Analytics = () => {
               <p className="text-3xl font-bold">₹{stats?.totalRevenue?.toFixed(0) || 0}</p>
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 <DollarSign className="w-3 h-3" />
-                Verified payments
+                Payments + Recharges
               </p>
             </div>
           </CardContent>
@@ -257,9 +277,9 @@ export const Analytics = () => {
         <Card>
           <CardContent className="p-6">
             <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Avg Order Value</p>
-              <p className="text-3xl font-bold">₹{stats?.avgOrderValue?.toFixed(0) || 0}</p>
-              <p className="text-xs text-muted-foreground">Per order</p>
+              <p className="text-sm text-muted-foreground">Coin Transactions</p>
+              <p className="text-3xl font-bold">{stats?.totalCoinTransactions || 0}</p>
+              <p className="text-xs text-muted-foreground">All coin activity</p>
             </div>
           </CardContent>
         </Card>
@@ -268,12 +288,40 @@ export const Analytics = () => {
           <CardContent className="p-6">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Most Popular</p>
-              <p className="text-3xl font-bold capitalize">{stats?.mostPopularService || '-'}</p>
+              <p className="text-3xl font-bold capitalize">{stats?.mostPopularService === 'coinTransactions' ? 'Coins' : stats?.mostPopularService || '-'}</p>
               <p className="text-xs text-muted-foreground">Top service</p>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {/* Coin Economy Stats */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Coin Economy</CardTitle>
+          <CardDescription>Coin flow overview</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-muted/50 rounded-lg">
+              <p className="text-2xl font-bold text-green-600">{stats?.coinStats?.recharged || 0}</p>
+              <p className="text-xs text-muted-foreground">Coins Recharged</p>
+            </div>
+            <div className="text-center p-4 bg-muted/50 rounded-lg">
+              <p className="text-2xl font-bold text-red-600">{stats?.coinStats?.spent || 0}</p>
+              <p className="text-xs text-muted-foreground">Coins Spent</p>
+            </div>
+            <div className="text-center p-4 bg-muted/50 rounded-lg">
+              <p className="text-2xl font-bold text-purple-600">{stats?.coinStats?.bonus || 0}</p>
+              <p className="text-xs text-muted-foreground">Bonus Coins</p>
+            </div>
+            <div className="text-center p-4 bg-muted/50 rounded-lg">
+              <p className="text-2xl font-bold text-blue-600">{stats?.coinStats?.rechargeCount || 0}</p>
+              <p className="text-xs text-muted-foreground">Recharges</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Service Breakdown */}
       <Card>
@@ -296,7 +344,8 @@ export const Analytics = () => {
                       ((stats?.serviceBreakdown?.prints || 0) /
                         ((stats?.serviceBreakdown?.prints || 0) +
                           (stats?.serviceBreakdown?.notes || 0) +
-                          (stats?.serviceBreakdown?.assignments || 0) || 1)) *
+                          (stats?.serviceBreakdown?.assignments || 0) +
+                          (stats?.serviceBreakdown?.coinTransactions || 0) || 1)) *
                       100
                     }%`,
                   }}
@@ -317,7 +366,8 @@ export const Analytics = () => {
                       ((stats?.serviceBreakdown?.notes || 0) /
                         ((stats?.serviceBreakdown?.prints || 0) +
                           (stats?.serviceBreakdown?.notes || 0) +
-                          (stats?.serviceBreakdown?.assignments || 0) || 1)) *
+                          (stats?.serviceBreakdown?.assignments || 0) +
+                          (stats?.serviceBreakdown?.coinTransactions || 0) || 1)) *
                       100
                     }%`,
                   }}
@@ -338,7 +388,30 @@ export const Analytics = () => {
                       ((stats?.serviceBreakdown?.assignments || 0) /
                         ((stats?.serviceBreakdown?.prints || 0) +
                           (stats?.serviceBreakdown?.notes || 0) +
-                          (stats?.serviceBreakdown?.assignments || 0) || 1)) *
+                          (stats?.serviceBreakdown?.assignments || 0) +
+                          (stats?.serviceBreakdown?.coinTransactions || 0) || 1)) *
+                      100
+                    }%`,
+                  }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between mb-1">
+                <span className="text-sm">Coin Transactions</span>
+                <span className="text-sm font-semibold">{stats?.serviceBreakdown?.coinTransactions || 0}</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-orange-500"
+                  style={{
+                    width: `${
+                      ((stats?.serviceBreakdown?.coinTransactions || 0) /
+                        ((stats?.serviceBreakdown?.prints || 0) +
+                          (stats?.serviceBreakdown?.notes || 0) +
+                          (stats?.serviceBreakdown?.assignments || 0) +
+                          (stats?.serviceBreakdown?.coinTransactions || 0) || 1)) *
                       100
                     }%`,
                   }}
