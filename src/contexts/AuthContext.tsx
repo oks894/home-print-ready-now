@@ -1,6 +1,70 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+
+const REFERRAL_CODE_KEY = 'ellio_referral_code';
+
+const processReferralBonus = async (newUserId: string): Promise<void> => {
+  const referralCode = localStorage.getItem(REFERRAL_CODE_KEY);
+  if (!referralCode) return;
+
+  try {
+    // Get referral bonus from settings
+    const { data: settings } = await supabase
+      .from('coin_settings')
+      .select('referral_bonus')
+      .single();
+
+    const referralBonus = settings?.referral_bonus || 10;
+
+    // Find referrer by code
+    const { data: referrer, error: referrerError } = await supabase
+      .from('user_profiles')
+      .select('id, coin_balance, total_coins_earned')
+      .eq('referral_code', referralCode)
+      .neq('id', newUserId)
+      .single();
+
+    if (referrerError || !referrer) {
+      console.log('Referral code not found or invalid');
+      localStorage.removeItem(REFERRAL_CODE_KEY);
+      return;
+    }
+
+    // Update new user's referred_by field
+    await supabase
+      .from('user_profiles')
+      .update({ referred_by: referrer.id })
+      .eq('id', newUserId);
+
+    // Credit referrer with bonus coins
+    const newBalance = (referrer.coin_balance || 0) + referralBonus;
+    const newTotalEarned = (referrer.total_coins_earned || 0) + referralBonus;
+
+    await supabase
+      .from('user_profiles')
+      .update({
+        coin_balance: newBalance,
+        total_coins_earned: newTotalEarned
+      })
+      .eq('id', referrer.id);
+
+    // Log transaction for referrer
+    await supabase.from('coin_transactions').insert({
+      user_id: referrer.id,
+      amount: referralBonus,
+      transaction_type: 'referral_bonus',
+      description: `Referral bonus - new user joined`,
+      balance_after: newBalance
+    });
+
+    console.log('Referral bonus credited successfully');
+  } catch (error) {
+    console.error('Error processing referral:', error);
+  } finally {
+    localStorage.removeItem(REFERRAL_CODE_KEY);
+  }
+};
 
 interface UserProfile {
   id: string;
@@ -32,6 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const referralProcessedRef = useRef<Set<string>>(new Set());
 
   const fetchProfile = async (userId: string) => {
     try {
@@ -68,8 +133,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         // Defer profile fetch with setTimeout to avoid deadlock
         if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user.id).then(setProfile);
+          setTimeout(async () => {
+            const profileData = await fetchProfile(session.user.id);
+            setProfile(profileData);
+            
+            // Process referral for new users (SIGNED_IN event after signup)
+            if (event === 'SIGNED_IN' && profileData && !referralProcessedRef.current.has(session.user.id)) {
+              referralProcessedRef.current.add(session.user.id);
+              await processReferralBonus(session.user.id);
+            }
           }, 0);
         } else {
           setProfile(null);
