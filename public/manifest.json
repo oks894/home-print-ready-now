@@ -1,8 +1,8 @@
 
 {
-  "name": "Ellio - Student Services",
+  "name": "Ellio - Powered by Dynamic Edu",
   "short_name": "Ellio",
-  "description": "Your complete student services platform - Print, learn, and succeed with Ellio",
+  "description": "Your complete student services platform - Print, learn, and succeed with Ellio. Powered by Dynamic Edu.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -12,18 +12,13 @@
   "id": "ellio-pwa",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "32x32",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "/lovable-uploads/ce4e9864-2bc2-4ca6-9123-fb22d1139ff6.png",
+      "src": "/app-icon.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/lovable-uploads/ce4e9864-2bc2-4ca6-9123-fb22d1139ff6.png",
+      "src": "/app-icon.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
